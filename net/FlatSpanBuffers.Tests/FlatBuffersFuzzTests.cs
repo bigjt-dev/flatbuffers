@@ -16,11 +16,11 @@
 
 using System;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
 
     // Copied from: tests/FlatBuffers.Test/FlatBuffersFuzzTests.cs
-    // Adapted for Google.FlatSpanBuffers namespace and API
+    // Adapted for FlatSpanBuffers namespace and API
     [FlatBuffersTestClass]
     public class FlatBuffersFuzzTests
     {

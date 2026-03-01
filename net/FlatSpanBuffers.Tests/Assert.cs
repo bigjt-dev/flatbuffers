@@ -20,7 +20,7 @@ using System.IO.Pipelines;
 using System.Linq;
 using System.Text;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
 
     public class AssertFailedException : Exception

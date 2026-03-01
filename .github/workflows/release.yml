@@ -1,152 +1,225 @@
 name: Release
-permissions: read-all
+
+permissions:
+  contents: write
 
 on:
-  # For manual tests.
-  workflow_dispatch:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  publish-npm:
-    name: Publish NPM
-    runs-on: ubuntu-latest
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        cxx: [g++-13, clang++-18]
+      fail-fast: false
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
+    - uses: actions/checkout@v6
+    - name: cmake
+      run: >
+        CXX=${{ matrix.cxx }} cmake -G "Unix Makefiles"
+        -DCMAKE_BUILD_TYPE=Release
+        -DFLATBUFFERS_BUILD_FLATLIB=OFF
+        -DFLATBUFFERS_STATIC_FLATC=ON
+        -DFLATBUFFERS_STRICT_MODE=ON .
+    - name: build
+      run: make -j
+    - name: make flatspan executable
+      run: |
+        chmod +x flatspan
+        ./flatspan --version
+    - name: package
+      run: zip Linux.flatspan.binary.${{ matrix.cxx }}.zip flatspan
+    - name: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: Linux flatspan binary ${{ matrix.cxx }}
+        path: Linux.flatspan.binary.${{ matrix.cxx }}.zip
 
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  publish-pypi:
-    name: Publish PyPi
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./python
+  build-mac-intel:
+    name: Build Mac (for Intel)
+    runs-on: macos-15-intel
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    - uses: actions/checkout@v6
+    - name: cmake
+      run: >
+        cmake -G "Xcode"
+        -DCMAKE_OSX_ARCHITECTURES="x86_64"
+        -DCMAKE_BUILD_TYPE=Release
+        -DFLATBUFFERS_BUILD_FLATLIB=OFF
+        -DFLATBUFFERS_STRICT_MODE=ON .
+    - name: build
+      run: xcodebuild -toolchain clang -configuration Release -target flatspan
+    - name: check that the binary is x86_64
+      run: |
+        info=$(file Release/flatspan)
+        echo $info
+        echo $info | grep "Mach-O 64-bit executable x86_64"
+    - name: make flatspan executable
+      run: |
+        chmod +x Release/flatspan
+        Release/flatspan --version
+    - name: package
+      run: zip MacIntel.flatspan.binary.zip Release/flatspan
+    - name: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: Mac flatspan binary Intel
+        path: MacIntel.flatspan.binary.zip
 
-      - name: Install Dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install build twine
-
-      - name: Build
-        run: |
-          python3 -m build .
-
-      - name: Upload to PyPi
-        run: |
-          python3 -m twine upload dist/*
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.TWINE_TOKEN }}
-
-  publish-nuget:
-    name: Publish NuGet
-    runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: ./net/flatbuffers
+  build-mac-universal:
+    name: Build Mac (universal build)
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '8.0.x'
-      - name: Build
-        run: |
-          dotnet build Google.FlatBuffers.csproj -c Release
+    - uses: actions/checkout@v6
+    - name: cmake
+      run: >
+        cmake -G "Xcode"
+        -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+        -DCMAKE_BUILD_TYPE=Release
+        -DFLATBUFFERS_BUILD_FLATLIB=OFF
+        -DFLATBUFFERS_STRICT_MODE=ON .
+    - name: build
+      run: xcodebuild -toolchain clang -configuration Release -target flatspan
+    - name: check that the binary is universal
+      run: |
+        info=$(file Release/flatspan)
+        echo $info
+        echo $info | grep "Mach-O universal binary with 2 architectures"
+    - name: make flatspan executable
+      run: |
+        chmod +x Release/flatspan
+        Release/flatspan --version
+    - name: package
+      run: zip Mac.flatspan.binary.zip Release/flatspan
+    - name: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: Mac flatspan binary Universal
+        path: Mac.flatspan.binary.zip
 
-      - name: Pack
-        run: |
-          dotnet pack Google.FlatBuffers.csproj -c Release
-
-      - name: Upload to NuGet
-        run: |
-          dotnet nuget push .\bin\Release\Google.FlatBuffers.*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
-
-  publish-maven:
-    name: Publish Maven
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./java
+  build-windows:
+    name: Build Windows
+    runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v6
+    - uses: actions/checkout@v6
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+    - name: cmake
+      run: >
+        cmake -G "Visual Studio 17 2022" -A x64
+        -DCMAKE_BUILD_TYPE=Release
+        -DFLATBUFFERS_BUILD_FLATLIB=OFF
+        -DFLATBUFFERS_STRICT_MODE=ON .
+    - name: build
+      run: msbuild.exe FlatBuffers.sln /p:Configuration=Release /p:Platform=x64 /t:flatspan
+    - name: verify flatspan binary
+      run: Release\flatspan.exe --version
+    - name: package
+      run: Compress-Archive -Path Release\flatspan.exe -DestinationPath Windows.flatspan.binary.zip
+    - name: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: Windows flatspan binary
+        path: Windows.flatspan.binary.zip
 
-      - name: Set up Maven Central Repository
-        uses: actions/setup-java@v5
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-          cache: 'maven'
-          server-id: ossrh
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_PASSWORD
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE # this needs to be an env var
-
-      - name: Publish Maven
-        run: mvn --batch-mode clean deploy
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USER_V2 }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_TOKEN_V2 }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-          
-  publish-maven-kotlin:
-    name: Publish Maven - Kotlin
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./kotlin
+  test:
+    name: Run tests
+    runs-on: ubuntu-24.04
+    needs: build-linux
     steps:
-      - uses: actions/checkout@v6
-      - name: Set up Maven Central Repository
-        uses: actions/setup-java@v5
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-          cache: 'maven'
-          server-id: ossrh
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_PASSWORD
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE # this needs to be an env var
+    - uses: actions/checkout@v6
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4.2.0
+      with:
+        dotnet-version: '10.0.x'
+    - name: Build and test
+      run: |
+        cd net/FlatSpanBuffers.Tests
+        dotnet new sln --force --name FlatSpanBuffers.Test --format sln
+        dotnet sln FlatSpanBuffers.Test.sln add FlatSpanBuffers.Tests.csproj
+        dotnet sln FlatSpanBuffers.Test.sln add ../FlatSpanBuffers/FlatSpanBuffers.csproj
+        dotnet sln FlatSpanBuffers.Test.sln add ../FlatSpanBuffers.GeneratedCode/FlatSpanBuffers.GeneratedCode.csproj
+        dotnet build -c Release FlatSpanBuffers.Test.sln
+    - name: Run tests
+      run: |
+        cd net/FlatSpanBuffers.Tests/bin/Release/net10.0
+        ./FlatSpanBuffers.Tests
 
-      - name: Publish Kotlin Library on Maven
-        run: ./gradlew publishAllPublicationsToSonatypeRepository
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USER_V2 }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_TOKEN_V2 }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-
-
-  publish-crates:
-    name: Publish crates.io
-    runs-on: ubuntu-latest
+  pack-and-publish:
+    name: Pack and publish NuGet
+    runs-on: ubuntu-24.04
+    needs:
+      - test
+      - build-linux
+      - build-mac-intel
+      - build-mac-universal
+      - build-windows
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          
-      - name: Publish Flatbuffers
-        uses: katyo/publish-crates@v2
-        with:
-          path: ./rust/flatbuffers
-          registry-token: ${{ secrets.CARGO_TOKEN }}
+    - uses: actions/checkout@v6
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4.2.0
+      with:
+        dotnet-version: '10.0.x'
 
-      - name: Publish Flexbuffers
-        uses: katyo/publish-crates@v2
-        with:
-          path: ./rust/flexbuffers
-          registry-token: ${{ secrets.CARGO_TOKEN }}
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+    - name: Validate version consistency
+      run: |
+        TAG_VERSION="${{ steps.version.outputs.VERSION }}"
+        # Check Directory.Build.props version matches the tag
+        PROPS_VERSION=$(grep -oP '<FlatSpanBuffersVersion>\K[^<]+' net/Directory.Build.props)
+        if [ "$TAG_VERSION" != "$PROPS_VERSION" ]; then
+          echo "ERROR: Tag version ($TAG_VERSION) does not match Directory.Build.props ($PROPS_VERSION)"
+          exit 1
+        fi
+        # Check .csproj PackageVersion matches the tag
+        PKG_VERSION=$(grep -oP '<PackageVersion>\K[^<]+' net/FlatSpanBuffers/FlatSpanBuffers.csproj)
+        if [ -n "$PKG_VERSION" ] && [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+          echo "ERROR: Tag version ($TAG_VERSION) does not match FlatSpanBuffers.csproj PackageVersion ($PKG_VERSION)"
+          exit 1
+        fi
+        echo "Version validated: $TAG_VERSION"
+
+    - name: Pack
+      run: >
+        dotnet pack net/FlatSpanBuffers/FlatSpanBuffers.csproj
+        -c Release
+        -o ./artifacts
+        /p:Version=${{ steps.version.outputs.VERSION }}
+
+    - name: Publish to NuGet
+      if: env.HAS_NUGET_KEY == 'true'
+      env:
+        HAS_NUGET_KEY: ${{ secrets.NUGET_API_KEY != '' }}
+      run: >
+        dotnet nuget push ./artifacts/*.nupkg
+        --api-key ${{ secrets.NUGET_API_KEY }}
+        --source https://api.nuget.org/v3/index.json
+        --skip-duplicate
+
+    # Download all platform binaries for the GitHub Release
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./release-assets
+        pattern: '*flatspan binary*'
+
+    - name: Collect release files
+      run: |
+        mkdir -p ./release-files
+        find ./release-assets -name '*.zip' -exec cp {} ./release-files/ \;
+        cp ./artifacts/*.nupkg ./release-files/ 2>/dev/null || true
+        cp ./artifacts/*.snupkg ./release-files/ 2>/dev/null || true
+        ls -la ./release-files/
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        generate_release_notes: true
+        files: ./release-files/*

@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 Google Inc. All rights reserved.
+ * Copyright 2025-2026 bigjt-dev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +13,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This file is part of FlatSpanBuffers, derived from the Google FlatBuffers
+ * project (https://github.com/google/flatbuffers).
  */
-
 // independent from idl_parser, since this code is not needed for most clients
 
 #include "idl_gen_csharp_spanbufs.h"
@@ -364,10 +367,10 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       code += "using global::System.Buffers;\n";
       code += "using global::System.Collections.Generic;\n";
       code += "using global::System.Runtime.InteropServices;\n";
-      code += "using global::Google.FlatSpanBuffers;\n";
-      code += "using global::Google.FlatSpanBuffers.Operations;\n";
-      code += "using global::Google.FlatSpanBuffers.Utils;\n";
-      code += "using global::Google.FlatSpanBuffers.Vectors;\n";
+      code += "using global::FlatSpanBuffers;\n";
+      code += "using global::FlatSpanBuffers.Operations;\n";
+      code += "using global::FlatSpanBuffers.Utils;\n";
+      code += "using global::FlatSpanBuffers.Vectors;\n";
     }
     code += classcode;
     if (!complete_namespace.empty()) {
@@ -822,7 +825,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     code += "static public class " + struct_def.name + "Verify\n";
     code += "{\n";
     code += "  static public bool Verify";
-    code += "(ref Google.FlatSpanBuffers.Verifier verifier, uint tablePos)\n";
+    code += "(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)\n";
     code += "  {\n";
     code += "    return verifier.VerifyTableStart(tablePos)\n";
   }
@@ -1040,8 +1043,10 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       // Generate version check method.
       // Force compile time error if not using the same version runtime.
       code += "  public static void ValidateVersion() {";
-      code += " FlatBufferConstants.";
-      code += "FLATBUFFERS_25_2_10(); ";
+      code += " FlatBufferConstants.FLATSPANBUFFERS_";
+      code += std::to_string(FLATSPANBUFFERS_VERSION_MAJOR) + "_";
+      code += std::to_string(FLATSPANBUFFERS_VERSION_MINOR) + "_";
+      code += std::to_string(FLATSPANBUFFERS_VERSION_REVISION) + "(); ";
       code += "}\n";
 
       // Generate a special accessor for the table that when used as the root
@@ -1077,8 +1082,8 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         code += "  public static ";
         code += "bool Verify" + struct_def.name + "(" + BufferTypeName() +
                 " _bb) {";
-        code += "Google.FlatSpanBuffers.Verifier verifier = new ";
-        code += "Google.FlatSpanBuffers.Verifier(_bb); ";
+        code += "global::FlatSpanBuffers.Verifier verifier = new ";
+        code += "global::FlatSpanBuffers.Verifier(_bb); ";
         // For SpanBuf mode, we reference the base namespace's Verify class
         // since verifiers operate on the buffer
         std::string verify_class_ns =
@@ -2165,7 +2170,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       auto ret = "\n\nstatic public class " + enum_def.name + "Verify\n";
       ret += "{\n";
       ret +=
-          "  static public bool Verify(ref Google.FlatSpanBuffers.Verifier "
+          "  static public bool Verify(ref global::FlatSpanBuffers.Verifier "
           "verifier, "
           "byte typeId, uint tablePos)\n";
       ret += "  {\n";
@@ -2283,7 +2288,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     code += "\n";
     // Pack()
     code +=
-        "  public static int Pack(Google.FlatSpanBuffers.FlatBufferBuilder "
+        "  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder "
         "builder, " +
         union_name + " _o) {\n";
     code += "    switch (_o.Type) {\n";
@@ -2306,7 +2311,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     // Pack() for SpanBuf mode - uses ref parameter for ref struct builder
     code +=
         "  public static int Pack(ref "
-        "Google.FlatSpanBuffers.FlatSpanBufferBuilder "
+        "global::FlatSpanBuffers.FlatSpanBufferBuilder "
         "builder, " +
         union_name + " _o) {\n";
     code += "    switch (_o.Type) {\n";

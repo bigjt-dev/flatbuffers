@@ -16,12 +16,12 @@
 
 using System;
 using System.Text;
-using Google.FlatSpanBuffers.Utils;
+using FlatSpanBuffers.Utils;
 using MyGame.Example;
 
 using SpanMonster = MyGame.Example.StackBuffer.Monster;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     [FlatBuffersTestClass]
     public class StackBufferExampleTests

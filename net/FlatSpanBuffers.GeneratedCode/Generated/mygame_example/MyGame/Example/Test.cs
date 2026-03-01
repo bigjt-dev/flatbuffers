@@ -9,10 +9,10 @@ using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
 using global::System.Runtime.InteropServices;
-using global::Google.FlatSpanBuffers;
-using global::Google.FlatSpanBuffers.Operations;
-using global::Google.FlatSpanBuffers.Utils;
-using global::Google.FlatSpanBuffers.Vectors;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
 public struct Test : IFlatbufferObject
 {
   private Struct __p;

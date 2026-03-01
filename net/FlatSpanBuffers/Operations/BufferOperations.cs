@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Google Inc. All rights reserved.
+ * Copyright 2025-2026 bigjt-dev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,13 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This file is part of FlatSpanBuffers
+ * (https://github.com/bigjt-dev/flatbuffers).
  */
-
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Google.FlatSpanBuffers.Operations
+namespace FlatSpanBuffers.Operations
 {
     // This class consolidates valid type checks and buffer read/write operations w/ big endian handling.
     // Unsafe calls are used carefully here. WriteUnaligned and ReadUnaligned are 'ok' because we do bounds checks with span slices. 

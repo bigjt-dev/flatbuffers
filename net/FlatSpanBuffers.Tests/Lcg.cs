@@ -16,7 +16,7 @@
 
 // Mirrored from: tests/FlatBuffers.Test/Lcg.cs
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     /// <summary>
     /// Lcg Pseudo RNG

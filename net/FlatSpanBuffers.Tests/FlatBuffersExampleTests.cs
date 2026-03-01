@@ -18,15 +18,15 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Google.FlatSpanBuffers.Utils;
+using FlatSpanBuffers.Utils;
 using MyGame.Example;
 using optional_scalars;
 using KeywordTest;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     // Copied from: tests/FlatBuffers.Test/FlatBuffersExampleTests.cs
-    // Adapted for Google.FlatSpanBuffers namespace and API
+    // Adapted for FlatSpanBuffers namespace and API
     [FlatBuffersTestClass]
     public class FlatBuffersExampleTests
     {

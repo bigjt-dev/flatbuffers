@@ -1,4 +1,5 @@
 # Copyright 2022 Google Inc. All rights reserved.
+# Copyright 2025-2026 bigjt-dev. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,19 +20,13 @@ import subprocess
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--flatc",
-    help="path of the Flat C compiler relative to the root directory",
+    "--flatspan",
+    help="path of the FlatSpan compiler relative to the root directory",
 )
-parser.add_argument("--cpp-0x", action="store_true", help="use --cpp-std c++ox")
 parser.add_argument(
     "--skip-monster-extra",
     action="store_true",
     help="skip generating tests involving monster_extra.fbs",
-)
-parser.add_argument(
-    "--skip-gen-reflection",
-    action="store_true",
-    help="skip generating the reflection.fbs files",
 )
 args = parser.parse_args()
 
@@ -41,26 +36,25 @@ script_path = Path(__file__).parent.resolve()
 
 # Get the root path as an absolute path, so all derived paths are absolute.
 root_path = script_path.parent.absolute()
-tests_path = Path(root_path, "tests")
 
-# Get the location of the flatc executable, reading from the first command line
+# Get the location of the flatspan executable, reading from the first command line
 # argument or defaulting to default names.
 flatc_exe = Path(
-    ("flatc" if not platform.system() == "Windows" else "flatc.exe")
-    if not args.flatc
-    else args.flatc
+    ("flatspan" if not platform.system() == "Windows" else "flatspan.exe")
+    if not args.flatspan
+    else args.flatspan
 )
 
-# Find and assert flatc compiler is present.
+# Find and assert flatspan compiler is present.
 if root_path in flatc_exe.parents:
   flatc_exe = flatc_exe.relative_to(root_path)
 flatc_path = Path(root_path, flatc_exe)
-assert flatc_path.exists(), "Cannot find the flatc compiler " + str(flatc_path)
+assert flatc_path.exists(), "Cannot find the flatspan compiler " + str(flatc_path)
 
 
-# Execute the flatc compiler with the specified parameters
+# Execute the flatspan compiler with the specified parameters
 def flatc(
-    options, schema, prefix=None, include=None, data=None, cwd=tests_path
+    options, schema, prefix=None, include=None, data=None, cwd=root_path
 ):
   cmd = [str(flatc_path)] + options
   if prefix:

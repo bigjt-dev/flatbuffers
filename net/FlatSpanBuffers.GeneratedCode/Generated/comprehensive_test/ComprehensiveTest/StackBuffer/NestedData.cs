@@ -9,15 +9,15 @@ using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
 using global::System.Runtime.InteropServices;
-using global::Google.FlatSpanBuffers;
-using global::Google.FlatSpanBuffers.Operations;
-using global::Google.FlatSpanBuffers.Utils;
-using global::Google.FlatSpanBuffers.Vectors;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
 public ref struct NestedData : IFlatbufferSpanObject
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_25_2_10(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
   public static NestedData GetRootAsNestedData(ByteSpanBuffer _bb) { return GetRootAsNestedData(_bb, new NestedData()); }
   public static NestedData GetRootAsNestedData(ByteSpanBuffer _bb, NestedData obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }

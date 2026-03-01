@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class FlatBuffersTestClassAttribute : Attribute

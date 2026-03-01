@@ -18,7 +18,7 @@ using System;
 using MonsterTest;
 using ComprehensiveTest;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     /// <summary>
     /// Verifier coverage for valid, corrupted, and constrained buffers.

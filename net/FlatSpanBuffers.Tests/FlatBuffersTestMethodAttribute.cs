@@ -16,7 +16,7 @@
 
  using System;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class FlatBuffersTestMethodAttribute : Attribute

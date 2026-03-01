@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using ComprehensiveTest;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     [FlatBuffersTestClass]
     public class ObjectApiTests

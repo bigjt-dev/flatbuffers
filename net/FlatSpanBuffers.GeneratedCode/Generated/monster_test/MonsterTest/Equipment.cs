@@ -24,13 +24,13 @@ public class EquipmentUnion {
   public MonsterTest.WeaponT AsWeapon() { return this.As<MonsterTest.WeaponT>(); }
   public static EquipmentUnion FromWeapon(MonsterTest.WeaponT _weapon) { return new EquipmentUnion{ Type = Equipment.Weapon, Value = _weapon }; }
 
-  public static int Pack(Google.FlatSpanBuffers.FlatBufferBuilder builder, EquipmentUnion _o) {
+  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, EquipmentUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Equipment.Weapon: return MonsterTest.Weapon.Pack(builder, _o.AsWeapon()).Value;
     }
   }
-  public static int Pack(ref Google.FlatSpanBuffers.FlatSpanBufferBuilder builder, EquipmentUnion _o) {
+  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, EquipmentUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Equipment.Weapon: return MonsterTest.StackBuffer.Weapon.Pack(ref builder, _o.AsWeapon()).Value;
@@ -42,7 +42,7 @@ public class EquipmentUnion {
 
 static public class EquipmentVerify
 {
-  static public bool Verify(ref Google.FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Equipment)typeId)

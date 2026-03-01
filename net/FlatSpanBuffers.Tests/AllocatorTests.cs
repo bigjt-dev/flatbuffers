@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using MonsterTest;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     [FlatBuffersTestClass]
     public class AllocatorTests

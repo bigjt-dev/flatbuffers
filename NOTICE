@@ -1,0 +1,19 @@
+FlatSpanBuffers
+Copyright 2025-2026 bigjt-dev (https://github.com/bigjt-dev)
+
+This project is a derivative work of FlatBuffers, originally created by Google.
+
+Original FlatBuffers:
+  Copyright 2014-2025 Google Inc.
+  https://github.com/google/flatbuffers
+  Licensed under the Apache License, Version 2.0
+
+The C# runtime (net/FlatSpanBuffers/) and the C# span-buf code generator
+(src/idl_gen_csharp_spanbufs.cpp) were written by bigjt-dev, derived from
+files in the original FlatBuffers project (net/FlatBuffers/,
+tests/FlatBuffers.Test/, src/idl_gen_csharp.cpp).
+
+The FlatBuffers schema compiler (flatc / flatspan), wire format, core C++
+parser, and associated tooling are the work of Google and the FlatBuffers
+contributors. Modifications to those files for this fork are noted in the
+source headers.

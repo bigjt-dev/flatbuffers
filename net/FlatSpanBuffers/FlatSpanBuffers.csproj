@@ -1,8 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <PackageVersion>25.2.10</PackageVersion>
-    <!-- TODO: All the other nuget stuff. -->
     <IsAotCompatible>true</IsAotCompatible>
+
+    <!-- NuGet package metadata -->
+    <PackageId>FlatSpanBuffers</PackageId>
+    <Description>A high-performance, minimal-allocation FlatBuffers serialization library built on Span&lt;T&gt;. Derived from Google FlatBuffers, shares similiar API but enables stack-allocated serialization.</Description>
+    <PackageTags>flatbuffers;serialization;span;stackalloc;binary;ref-struct</PackageTags>
+    <PackageVersion>1.0.0</PackageVersion>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/bigjt-dev/flatbuffers</PackageProjectUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Generate XML docs for IntelliSense in consuming projects -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
 </Project>
+

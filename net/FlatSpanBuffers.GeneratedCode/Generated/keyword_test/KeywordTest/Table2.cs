@@ -9,15 +9,15 @@ using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
 using global::System.Runtime.InteropServices;
-using global::Google.FlatSpanBuffers;
-using global::Google.FlatSpanBuffers.Operations;
-using global::Google.FlatSpanBuffers.Utils;
-using global::Google.FlatSpanBuffers.Vectors;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
 public struct Table2 : IFlatbufferObject
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_25_2_10(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
   public static Table2 GetRootAsTable2(ByteBuffer _bb) { return GetRootAsTable2(_bb, new Table2()); }
   public static Table2 GetRootAsTable2(ByteBuffer _bb, Table2 obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
@@ -106,7 +106,7 @@ public class Table2T
 
 static public class Table2Verify
 {
-  static public bool Verify(ref Google.FlatSpanBuffers.Verifier verifier, uint tablePos)
+  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*TypeType*/, 1 /*KeywordTest.KeywordsInUnion*/, 1, false)

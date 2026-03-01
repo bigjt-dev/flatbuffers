@@ -41,7 +41,7 @@ public class CharacterUnion {
   public string AsUnused() { return this.As<string>(); }
   public static CharacterUnion FromUnused(string _unused) { return new CharacterUnion{ Type = Character.Unused, Value = _unused }; }
 
-  public static int Pack(Google.FlatSpanBuffers.FlatBufferBuilder builder, CharacterUnion _o) {
+  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, CharacterUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Character.MuLan: return MyGame.Example.Attacker.Pack(builder, _o.AsMuLan()).Value;
@@ -52,7 +52,7 @@ public class CharacterUnion {
       case Character.Unused: return builder.CreateString(_o.AsUnused()).Value;
     }
   }
-  public static int Pack(ref Google.FlatSpanBuffers.FlatSpanBufferBuilder builder, CharacterUnion _o) {
+  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, CharacterUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Character.MuLan: return MyGame.Example.StackBuffer.Attacker.Pack(ref builder, _o.AsMuLan()).Value;
@@ -121,7 +121,7 @@ public class CharacterUnion_JsonConverter : System.Text.Json.Serialization.JsonC
 
 static public class CharacterVerify
 {
-  static public bool Verify(ref Google.FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Character)typeId)

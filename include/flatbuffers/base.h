@@ -139,14 +139,16 @@
   #endif
 #endif // !defined(FLATBUFFERS_LITTLEENDIAN)
 
-#define FLATBUFFERS_VERSION_MAJOR 25
-#define FLATBUFFERS_VERSION_MINOR 12
-#define FLATBUFFERS_VERSION_REVISION 19
+// FlatSpanBuffers version - used by the C++ compiler and the C# runtime.
+#define FLATSPANBUFFERS_VERSION_MAJOR 1
+#define FLATSPANBUFFERS_VERSION_MINOR 0
+#define FLATSPANBUFFERS_VERSION_REVISION 0
+
 #define FLATBUFFERS_STRING_EXPAND(X) #X
 #define FLATBUFFERS_STRING(X) FLATBUFFERS_STRING_EXPAND(X)
 namespace flatbuffers {
-  // Returns version as string  "MAJOR.MINOR.REVISION".
-  const char* FLATBUFFERS_VERSION();
+  // Returns version as string "MAJOR.MINOR.REVISION".
+  const char* FLATSPANBUFFERS_VERSION();
 }
 
 #if (!defined(_MSC_VER) || _MSC_VER > 1600) && \

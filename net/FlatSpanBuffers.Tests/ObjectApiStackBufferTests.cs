@@ -22,7 +22,7 @@ using ExampleColor = MyGame.Example.Color;
 using ExampleMonster = MyGame.Example.Monster;
 using StackExampleMonster = MyGame.Example.StackBuffer.Monster;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     [FlatBuffersTestClass]
     public class ObjectApiStackBufferTests

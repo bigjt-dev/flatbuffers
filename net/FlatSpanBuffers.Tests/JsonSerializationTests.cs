@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using JsonTest;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     [FlatBuffersTestClass]
     public class JsonSerializationTests

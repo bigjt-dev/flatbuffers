@@ -2,8 +2,8 @@ from golden_utils import flatc_golden
 
 
 def flatc(options, schema):
-  # Wrap the golden flatc generator with C# specifics
-  flatc_golden(options=["--csharp"] + options, schema=schema, prefix="csharp")
+  # Wrap the golden flatc generator with C# spanbufs specifics
+  flatc_golden(options=["--csharp-spanbufs"] + options, schema=schema, prefix="csharp")
 
 
 def GenerateCSharp():

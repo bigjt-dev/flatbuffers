@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     // Mirrored from: tests/FlatBuffers.Test/TestTable.cs
     /// <summary>

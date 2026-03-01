@@ -19,10 +19,10 @@ using BenchmarkDotNet.Jobs;
 // Aliases for the compared implementations.
 using OriginalFlatBufferBuilder = Google.FlatBuffers.FlatBufferBuilder;
 using OriginalByteBuffer = Google.FlatBuffers.ByteBuffer;
-using FlatBufferBuilder = Google.FlatSpanBuffers.FlatBufferBuilder;
-using ByteBuffer = Google.FlatSpanBuffers.ByteBuffer;
+using FlatBufferBuilder = FlatSpanBuffers.FlatBufferBuilder;
+using ByteBuffer = FlatSpanBuffers.ByteBuffer;
 
-using Google.FlatSpanBuffers;
+using FlatSpanBuffers;
 
 // Generated types for Google.FlatBuffers (original)
 using OriginalFooBarContainer = Benchmarks.OriginalFlatBuffers.FooBarContainer;
@@ -117,7 +117,7 @@ public class EncodeBenchmarks
         var builder = _fbb;
         builder.Clear();
 
-        Span<Google.FlatSpanBuffers.Offset<FlatSpanFooBar>> fooBarOffsets = stackalloc Google.FlatSpanBuffers.Offset<FlatSpanFooBar>[3];
+        Span<FlatSpanBuffers.Offset<FlatSpanFooBar>> fooBarOffsets = stackalloc FlatSpanBuffers.Offset<FlatSpanFooBar>[3];
         for (int j = 0; j < _encodeStrings.Length; j++)
         {
             var nameOffset = builder.CreateString(_encodeStrings[j]);
@@ -152,7 +152,7 @@ public class EncodeBenchmarks
         var byteSpanBuffer = new ByteSpanBuffer(buffer);
         var builder = new FlatSpanBufferBuilder(byteSpanBuffer, vtableSpace, vtableOffsetSpace);
 
-        Span<Google.FlatSpanBuffers.Offset<StackFooBar>> fooBarOffsets = stackalloc Google.FlatSpanBuffers.Offset<StackFooBar>[3];
+        Span<FlatSpanBuffers.Offset<StackFooBar>> fooBarOffsets = stackalloc FlatSpanBuffers.Offset<StackFooBar>[3];
         for (int j = 0; j < _encodeStrings.Length; j++)
         {
             var nameOffset = builder.CreateString(_encodeStrings[j]);

@@ -31,7 +31,7 @@
 
 namespace flatbuffers {
 
-static const char* FLATC_VERSION() { return FLATBUFFERS_VERSION(); }
+static const char* FLATC_VERSION() { return FLATSPANBUFFERS_VERSION(); }
 
 void FlatCompiler::ParseFile(
     flatbuffers::Parser& parser, const std::string& filename,
@@ -244,7 +244,7 @@ const static FlatCOption flatc_options[] = {
      "structs."},
     {"", "csharp-spanbufs", "",
      "Generate a span friendly variant of the C# code using the "
-     "Google.FlatSpanBuffers library."},
+     "FlatSpanBuffers library."},
     {"", "cs-gen-json-serializer", "",
      "Allows (de)serialization of JSON text in the Object API. (requires "
      "--gen-object-api)."},

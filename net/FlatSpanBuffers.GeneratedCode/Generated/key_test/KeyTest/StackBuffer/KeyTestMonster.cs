@@ -9,18 +9,18 @@ using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
 using global::System.Runtime.InteropServices;
-using global::Google.FlatSpanBuffers;
-using global::Google.FlatSpanBuffers.Operations;
-using global::Google.FlatSpanBuffers.Utils;
-using global::Google.FlatSpanBuffers.Vectors;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
 public ref struct KeyTestMonster : IFlatbufferSpanObject
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_25_2_10(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteSpanBuffer _bb) { return GetRootAsKeyTestMonster(_bb, new KeyTestMonster()); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteSpanBuffer _bb, KeyTestMonster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
-  public static bool VerifyKeyTestMonster(ByteSpanBuffer _bb) {Google.FlatSpanBuffers.Verifier verifier = new Google.FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, KeyTest.KeyTestMonsterVerify.Verify); }
+  public static bool VerifyKeyTestMonster(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, KeyTest.KeyTestMonsterVerify.Verify); }
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public KeyTestMonster __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 

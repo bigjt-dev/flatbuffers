@@ -17,10 +17,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Google.FlatSpanBuffers.Operations;
-using Google.FlatSpanBuffers.Utils;
+using FlatSpanBuffers.Operations;
+using FlatSpanBuffers.Utils;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     [FlatBuffersTestClass]
     public class SortedVectorTests

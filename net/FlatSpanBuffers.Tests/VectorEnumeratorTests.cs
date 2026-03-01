@@ -18,7 +18,7 @@ using System;
 using MyGame.Example;
 using SpanMonster = MyGame.Example.StackBuffer.Monster;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     [FlatBuffersTestClass]
     public class VectorEnumeratorTests

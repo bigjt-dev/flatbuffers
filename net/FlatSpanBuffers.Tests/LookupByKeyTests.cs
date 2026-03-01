@@ -15,11 +15,11 @@
  */
 
 using System;
-using Google.FlatSpanBuffers;
+using FlatSpanBuffers;
 using KeyTest;
 using SpanKeyTest = KeyTest.StackBuffer;
 
-namespace Google.FlatSpanBuffers.Tests
+namespace FlatSpanBuffers.Tests
 {
     [FlatBuffersTestClass]
     public class LookupByKeyTests

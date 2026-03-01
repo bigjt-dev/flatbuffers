@@ -9,18 +9,18 @@ using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
 using global::System.Runtime.InteropServices;
-using global::Google.FlatSpanBuffers;
-using global::Google.FlatSpanBuffers.Operations;
-using global::Google.FlatSpanBuffers.Utils;
-using global::Google.FlatSpanBuffers.Vectors;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
 public struct FooBarContainer : IFlatbufferObject
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_25_2_10(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
   public static FooBarContainer GetRootAsFooBarContainer(ByteBuffer _bb) { return GetRootAsFooBarContainer(_bb, new FooBarContainer()); }
   public static FooBarContainer GetRootAsFooBarContainer(ByteBuffer _bb, FooBarContainer obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
-  public static bool VerifyFooBarContainer(ByteBuffer _bb) {Google.FlatSpanBuffers.Verifier verifier = new Google.FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, Benchmarks.FlatSpanBuffers.FooBarContainerVerify.Verify); }
+  public static bool VerifyFooBarContainer(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, Benchmarks.FlatSpanBuffers.FooBarContainerVerify.Verify); }
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public FooBarContainer __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -136,7 +136,7 @@ public class FooBarContainerT
 
 static public class FooBarContainerVerify
 {
-  static public bool Verify(ref Google.FlatSpanBuffers.Verifier verifier, uint tablePos)
+  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyVectorOfTables(tablePos, 4 /*List*/, Benchmarks.FlatSpanBuffers.FooBarVerify.Verify, false)

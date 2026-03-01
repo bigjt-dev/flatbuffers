@@ -239,11 +239,11 @@ struct TypeTable {
   const char* const* names;  // Only set if compiled with --reflect-names.
 };
 
-// String which identifies the current version of FlatBuffers.
+// String which identifies the current version of FlatSpanBuffers.
 inline const char* flatbuffers_version_string() {
-  return "FlatBuffers " FLATBUFFERS_STRING(FLATBUFFERS_VERSION_MAJOR) "."
-      FLATBUFFERS_STRING(FLATBUFFERS_VERSION_MINOR) "."
-      FLATBUFFERS_STRING(FLATBUFFERS_VERSION_REVISION);
+  return "FlatSpanBuffers " FLATBUFFERS_STRING(FLATSPANBUFFERS_VERSION_MAJOR) "."
+      FLATBUFFERS_STRING(FLATSPANBUFFERS_VERSION_MINOR) "."
+      FLATBUFFERS_STRING(FLATSPANBUFFERS_VERSION_REVISION);
 }
 
 // clang-format off
