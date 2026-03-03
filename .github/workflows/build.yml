@@ -158,3 +158,17 @@ jobs:
         -DFLATBUFFERS_STRICT_MODE=ON . && make -j
     - name: Generate
       run: scripts/check_generate_code.py
+
+  build-generator-windows:
+    name: Check Generated Code on Windows
+    runs-on: windows-2022
+    steps:
+    - uses: actions/checkout@v6
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+    - name: cmake
+      run: cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DFLATBUFFERS_BUILD_CPP17=ON -DFLATBUFFERS_STRICT_MODE=ON .
+    - name: build
+      run: msbuild.exe FlatBuffers.sln /p:Configuration=Release /p:Platform=x64
+    - name: Generate
+      run: python3 scripts/check_generate_code.py --flatc Release\flatc.exe

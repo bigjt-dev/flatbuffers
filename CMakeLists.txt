@@ -102,13 +102,10 @@ set(FlatBuffers_Library_SRCS
   include/flatbuffers/flatbuffer_builder.h
   include/flatbuffers/flatbuffers.h
   include/flatbuffers/flexbuffers.h
-  include/flatbuffers/flex_flat_util.h
   include/flatbuffers/hash.h
   include/flatbuffers/idl.h
-  include/flatbuffers/minireflect.h
   include/flatbuffers/reflection.h
   include/flatbuffers/reflection_generated.h
-  include/flatbuffers/registry.h
   include/flatbuffers/stl_emulation.h
   include/flatbuffers/string.h
   include/flatbuffers/struct.h
@@ -131,18 +128,9 @@ set(FlatBuffers_Compiler_SRCS
   src/idl_gen_text.cpp
   src/idl_gen_csharp_spanbufs.h
   src/idl_gen_csharp_spanbufs.cpp
-  src/idl_namer.h
-  src/namer.h
   src/flatc.cpp
   src/flatc_main.cpp
-  src/bfbs_gen.h
-  include/codegen/idl_namer.h
-  include/codegen/namer.h
   include/flatbuffers/code_generators.h
-  src/binary_annotator.h
-  src/binary_annotator.cpp
-  src/annotated_binary_text_gen.h
-  src/annotated_binary_text_gen.cpp
   src/code_generators.cpp
 )
 
