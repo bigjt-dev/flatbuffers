@@ -5,15 +5,10 @@
 
     <!-- NuGet package metadata -->
     <PackageId>FlatSpanBuffers</PackageId>
-    <Description>A high-performance, minimal-allocation FlatBuffers serialization library built on Span&lt;T&gt;. Derived from Google FlatBuffers, shares similiar API but enables stack-allocated serialization.</Description>
-    <PackageTags>flatbuffers;serialization;span;stackalloc;binary;ref-struct</PackageTags>
-    <PackageVersion>1.0.0</PackageVersion>
+    <Description>A high-performance, zero-allocation FlatBuffers serialization library built on Span&lt;T&gt;. Derived from Google FlatBuffers, shares similar API but enables stack-allocated serialization with AOT compatibility.</Description>
+    <PackageTags>flatbuffers;flatbuffer;fbs;span;serialization;zero-allocation;stackalloc;aot;</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageProjectUrl>https://github.com/bigjt-dev/flatbuffers</PackageProjectUrl>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageProjectUrl>https://github.com/bigjt-dev/flatbuffers/tree/flatspan</PackageProjectUrl>
 
     <!-- Generate XML docs for IntelliSense in consuming projects -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -22,6 +17,8 @@
 
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../NOTICE" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/" />
   </ItemGroup>
 </Project>
 

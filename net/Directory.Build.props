@@ -11,10 +11,15 @@
   <!-- Shared metadata -->
   <PropertyGroup>
     <Authors>bigjt-dev</Authors>
-    <Copyright>Copyright 2025-2026 bigjt-dev. All rights reserved.</Copyright>
+    <Copyright>Copyright 2014 Google Inc., 2025 bigjt-dev</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/bigjt-dev/flatbuffers</RepositoryUrl>
+    <RepositoryBranch>flatspan</RepositoryBranch>
     <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
 </Project>

@@ -17,11 +17,10 @@
 """
 Bump the FlatSpanBuffers version across all required files.
 
-Updates the version in all 4 locations that must stay in sync:
+Updates the version in all 3 locations that must stay in sync:
   1. include/flatbuffers/base.h        (C++ preprocessor defines)
   2. net/FlatSpanBuffers/FlatBufferConstants.cs  (C# runtime method name)
   3. net/Directory.Build.props          (.NET assembly/package version)
-  4. net/FlatSpanBuffers/FlatSpanBuffers.csproj  (NuGet PackageVersion)
 
 Usage:
   python3 scripts/bump_version.py 1.2.3
@@ -41,7 +40,6 @@ ROOT = Path(__file__).parent.parent.resolve()
 BASE_H = ROOT / "include" / "flatbuffers" / "base.h"
 CONSTANTS_CS = ROOT / "net" / "FlatSpanBuffers" / "FlatBufferConstants.cs"
 DIR_BUILD_PROPS = ROOT / "net" / "Directory.Build.props"
-CSPROJ = ROOT / "net" / "FlatSpanBuffers" / "FlatSpanBuffers.csproj"
 
 # --- Patterns ---
 # base.h: #define FLATSPANBUFFERS_VERSION_MAJOR 1
@@ -63,11 +61,6 @@ RE_CS_METHOD = re.compile(
 # Directory.Build.props: <FlatSpanBuffersVersion>1.0.0</FlatSpanBuffersVersion>
 RE_PROPS_VERSION = re.compile(
     r"(<FlatSpanBuffersVersion>)[^<]+(</FlatSpanBuffersVersion>)"
-)
-
-# FlatSpanBuffers.csproj: <PackageVersion>1.0.0</PackageVersion>
-RE_PKG_VERSION = re.compile(
-    r"(<PackageVersion>)[^<]+(</PackageVersion>)"
 )
 
 
@@ -105,14 +98,14 @@ def update_file(path, replacements, dry_run=False):
 
 
 def bump(major, minor, revision, dry_run=False):
-    """Update all 4 files to the specified version."""
+    """Update all 3 files to the specified version."""
     version_str = f"{major}.{minor}.{revision}"
     version_underscore = f"{major}_{minor}_{revision}"
 
     files_changed = 0
 
     # 1. base.h
-    print(f"  [1/4] {BASE_H.relative_to(ROOT)}")
+    print(f"  [1/3] {BASE_H.relative_to(ROOT)}")
     changed = update_file(BASE_H, [
         (RE_BASE_MAJOR, rf"\g<1>{major}"),
         (RE_BASE_MINOR, rf"\g<1>{minor}"),
@@ -122,7 +115,7 @@ def bump(major, minor, revision, dry_run=False):
         files_changed += 1
 
     # 2. FlatBufferConstants.cs
-    print(f"  [2/4] {CONSTANTS_CS.relative_to(ROOT)}")
+    print(f"  [2/3] {CONSTANTS_CS.relative_to(ROOT)}")
     changed = update_file(CONSTANTS_CS, [
         (RE_CS_METHOD, rf"\g<1>{version_underscore}\2"),
     ], dry_run)
@@ -130,17 +123,9 @@ def bump(major, minor, revision, dry_run=False):
         files_changed += 1
 
     # 3. Directory.Build.props
-    print(f"  [3/4] {DIR_BUILD_PROPS.relative_to(ROOT)}")
+    print(f"  [3/3] {DIR_BUILD_PROPS.relative_to(ROOT)}")
     changed = update_file(DIR_BUILD_PROPS, [
         (RE_PROPS_VERSION, rf"\g<1>{version_str}\2"),
-    ], dry_run)
-    if changed:
-        files_changed += 1
-
-    # 4. FlatSpanBuffers.csproj
-    print(f"  [4/4] {CSPROJ.relative_to(ROOT)}")
-    changed = update_file(CSPROJ, [
-        (RE_PKG_VERSION, rf"\g<1>{version_str}\2"),
     ], dry_run)
     if changed:
         files_changed += 1

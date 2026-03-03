@@ -194,9 +194,7 @@ jobs:
         /p:Version=${{ steps.version.outputs.VERSION }}
 
     - name: Publish to NuGet
-      if: env.HAS_NUGET_KEY == 'true'
-      env:
-        HAS_NUGET_KEY: ${{ secrets.NUGET_API_KEY != '' }}
+      if: ${{ secrets.NUGET_API_KEY != '' }}
       run: >
         dotnet nuget push ./artifacts/*.nupkg
         --api-key ${{ secrets.NUGET_API_KEY }}
