@@ -1,0 +1,136 @@
+name: Build All Platforms
+
+on:
+  workflow_call:
+
+jobs:
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        cxx: [g++-13, clang++-18]
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v6
+    - name: cmake
+      run: >
+        CXX=${{ matrix.cxx }} cmake -G "Unix Makefiles"
+        -DCMAKE_BUILD_TYPE=Release
+        -DFLATBUFFERS_BUILD_FLATLIB=OFF
+        -DFLATBUFFERS_STATIC_FLATC=ON
+        -DFLATBUFFERS_STRICT_MODE=ON .
+    - name: build
+      run: make -j
+    - name: make flatspan executable
+      run: |
+        chmod +x flatspan
+        ./flatspan --version
+    - name: upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Linux flatspan binary ${{ matrix.cxx }}
+        path: flatspan
+
+  build-mac-intel:
+    name: Build Mac (for Intel)
+    runs-on: macos-15-intel
+    steps:
+    - uses: actions/checkout@v6
+    - name: cmake
+      run: >
+        cmake -G "Xcode"
+        -DCMAKE_OSX_ARCHITECTURES="x86_64"
+        -DCMAKE_BUILD_TYPE=Release
+        -DFLATBUFFERS_BUILD_FLATLIB=OFF
+        -DFLATBUFFERS_STRICT_MODE=ON .
+    - name: build
+      run: xcodebuild -toolchain clang -configuration Release -target flatspan
+    - name: check that the binary is x86_64
+      run: |
+        info=$(file Release/flatspan)
+        echo $info
+        echo $info | grep "Mach-O 64-bit executable x86_64"
+    - name: make flatspan executable
+      run: |
+        chmod +x Release/flatspan
+        Release/flatspan --version
+    - name: upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Mac flatspan binary Intel
+        path: Release/flatspan
+
+  build-mac-universal:
+    name: Build Mac (universal build)
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: cmake
+      run: >
+        cmake -G "Xcode"
+        -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+        -DCMAKE_BUILD_TYPE=Release
+        -DFLATBUFFERS_BUILD_FLATLIB=OFF
+        -DFLATBUFFERS_STRICT_MODE=ON .
+    - name: build
+      run: xcodebuild -toolchain clang -configuration Release -target flatspan
+    - name: check that the binary is universal
+      run: |
+        info=$(file Release/flatspan)
+        echo $info
+        echo $info | grep "Mach-O universal binary with 2 architectures"
+    - name: make flatspan executable
+      run: |
+        chmod +x Release/flatspan
+        Release/flatspan --version
+    - name: upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Mac flatspan binary Universal
+        path: Release/flatspan
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-2022
+    steps:
+    - uses: actions/checkout@v6
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+    - name: cmake
+      run: >
+        cmake -G "Visual Studio 17 2022" -A x64
+        -DCMAKE_BUILD_TYPE=Release
+        -DFLATBUFFERS_BUILD_FLATLIB=OFF
+        -DFLATBUFFERS_STRICT_MODE=ON .
+    - name: build
+      run: msbuild.exe FlatBuffers.sln /p:Configuration=Release /p:Platform=x64 /t:flatspan
+    - name: verify flatspan binary
+      run: Release\flatspan.exe --version
+    - name: upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Windows flatspan binary
+        path: Release\flatspan.exe
+
+  build-dotnet-linux:
+    name: Build .NET Linux
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v6
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4.2.0
+      with:
+        dotnet-version: '10.0.x'
+    - name: Build
+      run: |
+        cd net/FlatSpanBuffers.Tests
+        dotnet new sln --force --name FlatSpanBuffers.Test --format sln
+        dotnet sln FlatSpanBuffers.Test.sln add FlatSpanBuffers.Tests.csproj
+        dotnet sln FlatSpanBuffers.Test.sln add ../FlatSpanBuffers/FlatSpanBuffers.csproj
+        dotnet sln FlatSpanBuffers.Test.sln add ../FlatSpanBuffers.GeneratedCode/FlatSpanBuffers.GeneratedCode.csproj
+        dotnet build -c Release FlatSpanBuffers.Test.sln
+    - name: Run net10.0
+      run: |
+        cd net/FlatSpanBuffers.Tests/bin/Release/net10.0
+        ./FlatSpanBuffers.Tests

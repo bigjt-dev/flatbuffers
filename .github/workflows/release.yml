@@ -4,220 +4,61 @@ permissions:
   contents: write
 
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+  # For manual tests.
+  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
-  build-linux:
-    name: Build Linux
+  build:
+    name: Build
+    uses: ./.github/workflows/build-shared.yml
+
+  publish-nuget:
+    name: Publish NuGet
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        cxx: [g++-13, clang++-18]
-      fail-fast: false
+    needs: build
+    defaults:
+      run:
+        working-directory: ./net/FlatSpanBuffers
     steps:
     - uses: actions/checkout@v6
-    - name: cmake
-      run: >
-        CXX=${{ matrix.cxx }} cmake -G "Unix Makefiles"
-        -DCMAKE_BUILD_TYPE=Release
-        -DFLATBUFFERS_BUILD_FLATLIB=OFF
-        -DFLATBUFFERS_STATIC_FLATC=ON
-        -DFLATBUFFERS_STRICT_MODE=ON .
-    - name: build
-      run: make -j
-    - name: make flatspan executable
-      run: |
-        chmod +x flatspan
-        ./flatspan --version
-    - name: package
-      run: zip Linux.flatspan.binary.${{ matrix.cxx }}.zip flatspan
-    - name: upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: Linux flatspan binary ${{ matrix.cxx }}
-        path: Linux.flatspan.binary.${{ matrix.cxx }}.zip
-
-  build-mac-intel:
-    name: Build Mac (for Intel)
-    runs-on: macos-15-intel
-    steps:
-    - uses: actions/checkout@v6
-    - name: cmake
-      run: >
-        cmake -G "Xcode"
-        -DCMAKE_OSX_ARCHITECTURES="x86_64"
-        -DCMAKE_BUILD_TYPE=Release
-        -DFLATBUFFERS_BUILD_FLATLIB=OFF
-        -DFLATBUFFERS_STRICT_MODE=ON .
-    - name: build
-      run: xcodebuild -toolchain clang -configuration Release -target flatspan
-    - name: check that the binary is x86_64
-      run: |
-        info=$(file Release/flatspan)
-        echo $info
-        echo $info | grep "Mach-O 64-bit executable x86_64"
-    - name: make flatspan executable
-      run: |
-        chmod +x Release/flatspan
-        Release/flatspan --version
-    - name: package
-      run: zip MacIntel.flatspan.binary.zip Release/flatspan
-    - name: upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: Mac flatspan binary Intel
-        path: MacIntel.flatspan.binary.zip
-
-  build-mac-universal:
-    name: Build Mac (universal build)
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v6
-    - name: cmake
-      run: >
-        cmake -G "Xcode"
-        -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
-        -DCMAKE_BUILD_TYPE=Release
-        -DFLATBUFFERS_BUILD_FLATLIB=OFF
-        -DFLATBUFFERS_STRICT_MODE=ON .
-    - name: build
-      run: xcodebuild -toolchain clang -configuration Release -target flatspan
-    - name: check that the binary is universal
-      run: |
-        info=$(file Release/flatspan)
-        echo $info
-        echo $info | grep "Mach-O universal binary with 2 architectures"
-    - name: make flatspan executable
-      run: |
-        chmod +x Release/flatspan
-        Release/flatspan --version
-    - name: package
-      run: zip Mac.flatspan.binary.zip Release/flatspan
-    - name: upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: Mac flatspan binary Universal
-        path: Mac.flatspan.binary.zip
-
-  build-windows:
-    name: Build Windows
-    runs-on: windows-2022
-    steps:
-    - uses: actions/checkout@v6
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v2
-    - name: cmake
-      run: >
-        cmake -G "Visual Studio 17 2022" -A x64
-        -DCMAKE_BUILD_TYPE=Release
-        -DFLATBUFFERS_BUILD_FLATLIB=OFF
-        -DFLATBUFFERS_STRICT_MODE=ON .
-    - name: build
-      run: msbuild.exe FlatBuffers.sln /p:Configuration=Release /p:Platform=x64 /t:flatspan
-    - name: verify flatspan binary
-      run: Release\flatspan.exe --version
-    - name: package
-      run: Compress-Archive -Path Release\flatspan.exe -DestinationPath Windows.flatspan.binary.zip
-    - name: upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: Windows flatspan binary
-        path: Windows.flatspan.binary.zip
-
-  test:
-    name: Run tests
-    runs-on: ubuntu-24.04
-    needs: build-linux
-    steps:
-    - uses: actions/checkout@v6
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4.2.0
+    - uses: actions/setup-dotnet@v4.2.0
       with:
         dotnet-version: '10.0.x'
-    - name: Build and test
-      run: |
-        cd net/FlatSpanBuffers.Tests
-        dotnet new sln --force --name FlatSpanBuffers.Test --format sln
-        dotnet sln FlatSpanBuffers.Test.sln add FlatSpanBuffers.Tests.csproj
-        dotnet sln FlatSpanBuffers.Test.sln add ../FlatSpanBuffers/FlatSpanBuffers.csproj
-        dotnet sln FlatSpanBuffers.Test.sln add ../FlatSpanBuffers.GeneratedCode/FlatSpanBuffers.GeneratedCode.csproj
-        dotnet build -c Release FlatSpanBuffers.Test.sln
-    - name: Run tests
-      run: |
-        cd net/FlatSpanBuffers.Tests/bin/Release/net10.0
-        ./FlatSpanBuffers.Tests
-
-  pack-and-publish:
-    name: Pack and publish NuGet
-    runs-on: ubuntu-24.04
-    needs:
-      - test
-      - build-linux
-      - build-mac-intel
-      - build-mac-universal
-      - build-windows
-    steps:
-    - uses: actions/checkout@v6
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4.2.0
-      with:
-        dotnet-version: '10.0.x'
-
-    - name: Extract version from tag
-      id: version
-      run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
-
-    - name: Validate version consistency
-      run: |
-        TAG_VERSION="${{ steps.version.outputs.VERSION }}"
-        # Check Directory.Build.props version matches the tag
-        PROPS_VERSION=$(grep -oP '<FlatSpanBuffersVersion>\K[^<]+' net/Directory.Build.props)
-        if [ "$TAG_VERSION" != "$PROPS_VERSION" ]; then
-          echo "ERROR: Tag version ($TAG_VERSION) does not match Directory.Build.props ($PROPS_VERSION)"
-          exit 1
-        fi
-        # Check .csproj PackageVersion matches the tag
-        PKG_VERSION=$(grep -oP '<PackageVersion>\K[^<]+' net/FlatSpanBuffers/FlatSpanBuffers.csproj)
-        if [ -n "$PKG_VERSION" ] && [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
-          echo "ERROR: Tag version ($TAG_VERSION) does not match FlatSpanBuffers.csproj PackageVersion ($PKG_VERSION)"
-          exit 1
-        fi
-        echo "Version validated: $TAG_VERSION"
-
+    - name: Build
+      run: dotnet build FlatSpanBuffers.csproj -c Release
     - name: Pack
-      run: >
-        dotnet pack net/FlatSpanBuffers/FlatSpanBuffers.csproj
-        -c Release
-        -o ./artifacts
-        /p:Version=${{ steps.version.outputs.VERSION }}
+      run: dotnet pack FlatSpanBuffers.csproj -c Release
+    - name: Upload to NuGet
+      run: dotnet nuget push ./bin/Release/FlatSpanBuffers.*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
-    - name: Publish to NuGet
-      if: ${{ secrets.NUGET_API_KEY != '' }}
-      run: >
-        dotnet nuget push ./artifacts/*.nupkg
-        --api-key ${{ secrets.NUGET_API_KEY }}
-        --source https://api.nuget.org/v3/index.json
-        --skip-duplicate
-
-    # Download all platform binaries for the GitHub Release
+  upload-release-assets:
+    name: Upload Release Assets
+    runs-on: ubuntu-24.04
+    needs: build
+    if: github.event_name == 'release'
+    steps:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
-        path: ./release-assets
+        path: ./artifacts
         pattern: '*flatspan binary*'
 
-    - name: Collect release files
+    - name: Package release binaries
       run: |
-        mkdir -p ./release-files
-        find ./release-assets -name '*.zip' -exec cp {} ./release-files/ \;
-        cp ./artifacts/*.nupkg ./release-files/ 2>/dev/null || true
-        cp ./artifacts/*.snupkg ./release-files/ 2>/dev/null || true
-        ls -la ./release-files/
+        mkdir -p release-files
+        zip -j "release-files/Linux.flatspan.binary.g++-13.zip"      "./artifacts/Linux flatspan binary g++-13/"*
+        zip -j "release-files/Linux.flatspan.binary.clang++-18.zip"  "./artifacts/Linux flatspan binary clang++-18/"*
+        zip -j "release-files/MacIntel.flatspan.binary.zip"          "./artifacts/Mac flatspan binary Intel/"*
+        zip -j "release-files/Mac.flatspan.binary.zip"               "./artifacts/Mac flatspan binary Universal/"*
+        zip -j "release-files/Windows.flatspan.binary.zip"           "./artifacts/Windows flatspan binary/"*
+        ls -la release-files/
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        generate_release_notes: true
-        files: ./release-files/*
+    - name: Upload to GitHub Release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        for f in release-files/*.zip; do
+          gh release upload "${{ github.event.release.tag_name }}" "$f" --repo "${{ github.repository }}"
+        done
