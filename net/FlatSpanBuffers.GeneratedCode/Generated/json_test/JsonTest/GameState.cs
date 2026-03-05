@@ -4,7 +4,6 @@
 
 namespace JsonTest
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct GameState : IFlatbufferObject
 {
   private Table __p;
@@ -145,9 +145,9 @@ public class GameStateT
 }
 
 
-static public class GameStateVerify
+public static class GameStateVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyString(tablePos, 4 /*Version*/, false)

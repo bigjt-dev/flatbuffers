@@ -4,7 +4,6 @@
 
 namespace KeywordTest
 {
-
 public enum @public : int
 {
   NONE = 0,

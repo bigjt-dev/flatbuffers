@@ -4,7 +4,6 @@
 
 namespace MyGame.Example.StackBuffer
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public ref struct TypeAliases : IFlatbufferSpanObject
 {
   private TableSpan __p;

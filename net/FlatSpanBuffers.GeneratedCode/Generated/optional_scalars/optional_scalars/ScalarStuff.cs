@@ -4,7 +4,6 @@
 
 namespace optional_scalars
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct ScalarStuff : IFlatbufferObject
 {
   private Table __p;
@@ -356,9 +356,9 @@ public class ScalarStuffT
 }
 
 
-static public class ScalarStuffVerify
+public static class ScalarStuffVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*JustI8*/, 1 /*sbyte*/, 1, false)

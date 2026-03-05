@@ -4,7 +4,6 @@
 
 namespace MyGame.Example
 {
-
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 public enum AnyAmbiguousAliases : byte
 {
@@ -98,9 +97,9 @@ public class AnyAmbiguousAliasesUnion_JsonConverter : System.Text.Json.Serializa
 
 
 
-static public class AnyAmbiguousAliasesVerify
+public static class AnyAmbiguousAliasesVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((AnyAmbiguousAliases)typeId)

@@ -4,7 +4,6 @@
 
 namespace optional_scalars
 {
-
 public enum OptionalByte : sbyte
 {
   None = 0,

@@ -4,7 +4,6 @@
 
 namespace Benchmarks.FlatSpanBuffers
 {
-
 public enum Fruit : short
 {
   Apples = 0,

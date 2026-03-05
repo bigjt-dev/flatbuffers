@@ -4,7 +4,6 @@
 
 namespace MyGame.Example
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct Attacker : IFlatbufferObject
 {
   private Table __p;
@@ -65,9 +65,9 @@ public class AttackerT
 }
 
 
-static public class AttackerVerify
+public static class AttackerVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*SwordAttackDamage*/, 4 /*int*/, 4, false)

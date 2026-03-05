@@ -4,7 +4,6 @@
 
 namespace MyGame.Example
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct Movie : IFlatbufferObject
 {
   private Table __p;
@@ -293,9 +293,9 @@ public class MovieT
 }
 
 
-static public class MovieVerify
+public static class MovieVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*MainCharacterType*/, 1 /*MyGame.Example.Character*/, 1, false)

@@ -4,7 +4,6 @@
 
 namespace KeywordTest
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct KeywordsInTable : IFlatbufferObject
 {
   private Table __p;
@@ -88,9 +88,9 @@ public class KeywordsInTableT
 }
 
 
-static public class KeywordsInTableVerify
+public static class KeywordsInTableVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Is*/, 4 /*KeywordTest.ABC*/, 4, false)

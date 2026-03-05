@@ -4,7 +4,6 @@
 
 namespace ComprehensiveTest
 {
-
 public enum Status : int
 {
   Unknown = -1,

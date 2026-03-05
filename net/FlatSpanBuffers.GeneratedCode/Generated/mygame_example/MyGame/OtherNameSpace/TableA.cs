@@ -4,7 +4,6 @@
 
 namespace MyGame.OtherNameSpace
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct TableA : IFlatbufferObject
 {
   private Table __p;
@@ -71,9 +71,9 @@ public class TableAT
 }
 
 
-static public class TableAVerify
+public static class TableAVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyTable(tablePos, 4 /*B*/, MyGame.OtherNameSpace.TableBVerify.Verify, false)

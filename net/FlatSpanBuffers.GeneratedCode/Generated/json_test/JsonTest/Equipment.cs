@@ -4,7 +4,6 @@
 
 namespace JsonTest
 {
-
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 public enum Equipment : byte
 {
@@ -91,9 +90,9 @@ public class EquipmentUnion_JsonConverter : System.Text.Json.Serialization.JsonC
 
 
 
-static public class EquipmentVerify
+public static class EquipmentVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Equipment)typeId)

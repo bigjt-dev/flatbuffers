@@ -4,7 +4,6 @@
 
 namespace ComprehensiveTest
 {
-
 public enum Color : sbyte
 {
   Red = 0,

@@ -355,11 +355,11 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     std::string complete_namespace = "";
     if (!namespace_name.empty() && !namespace_suffix.empty()) {
       complete_namespace =
-          "namespace " + namespace_name + "." + namespace_suffix + "\n{\n\n";
+          "namespace " + namespace_name + "." + namespace_suffix + "\n{\n";
     } else if (!namespace_name.empty()) {
-      complete_namespace = "namespace " + namespace_name + "\n{\n\n";
+      complete_namespace = "namespace " + namespace_name + "\n{\n";
     } else if (!namespace_suffix.empty()) {
-      complete_namespace = "namespace " + namespace_suffix + "\n{\n\n";
+      complete_namespace = "namespace " + namespace_suffix + "\n{\n";
     }
     code += complete_namespace;
     if (needs_includes) {
@@ -371,6 +371,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       code += "using global::FlatSpanBuffers.Operations;\n";
       code += "using global::FlatSpanBuffers.Utils;\n";
       code += "using global::FlatSpanBuffers.Vectors;\n";
+      code += "\n";
     }
     code += classcode;
     if (!complete_namespace.empty()) {
@@ -822,9 +823,9 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
                                std::string *code_ptr) {
     std::string &code = *code_ptr;
     code += "\n";
-    code += "static public class " + struct_def.name + "Verify\n";
+    code += "public static class " + struct_def.name + "Verify\n";
     code += "{\n";
-    code += "  static public bool Verify";
+    code += "  public static bool Verify";
     code += "(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)\n";
     code += "  {\n";
     code += "    return verifier.VerifyTableStart(tablePos)\n";
@@ -2167,10 +2168,10 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     if (union_type.enum_def) {
       const auto &enum_def = *union_type.enum_def;
 
-      auto ret = "\n\nstatic public class " + enum_def.name + "Verify\n";
+      auto ret = "\n\npublic static class " + enum_def.name + "Verify\n";
       ret += "{\n";
       ret +=
-          "  static public bool Verify(ref global::FlatSpanBuffers.Verifier "
+          "  public static bool Verify(ref global::FlatSpanBuffers.Verifier "
           "verifier, "
           "byte typeId, uint tablePos)\n";
       ret += "  {\n";

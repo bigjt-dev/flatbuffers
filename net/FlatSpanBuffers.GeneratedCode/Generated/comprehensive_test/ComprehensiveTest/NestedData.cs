@@ -4,7 +4,6 @@
 
 namespace ComprehensiveTest
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct NestedData : IFlatbufferObject
 {
   private Table __p;
@@ -64,9 +64,9 @@ public class NestedDataT
 }
 
 
-static public class NestedDataVerify
+public static class NestedDataVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Value*/, 4 /*int*/, 4, false)

@@ -4,7 +4,6 @@
 
 namespace ComprehensiveTest
 {
-
 public enum Equipment : byte
 {
   NONE = 0,
@@ -45,9 +44,9 @@ public class EquipmentUnion {
 
 
 
-static public class EquipmentVerify
+public static class EquipmentVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Equipment)typeId)

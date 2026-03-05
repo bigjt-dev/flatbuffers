@@ -4,7 +4,6 @@
 
 namespace KeywordTest
 {
-
 public enum KeywordsInUnion : byte
 {
   NONE = 0,
@@ -45,9 +44,9 @@ public class KeywordsInUnionUnion {
 
 
 
-static public class KeywordsInUnionVerify
+public static class KeywordsInUnionVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((KeywordsInUnion)typeId)

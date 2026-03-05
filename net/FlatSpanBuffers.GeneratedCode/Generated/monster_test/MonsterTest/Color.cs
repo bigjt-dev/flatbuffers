@@ -4,7 +4,6 @@
 
 namespace MonsterTest
 {
-
 public enum Color : sbyte
 {
   Red = 0,

@@ -4,7 +4,6 @@
 
 namespace MyGame.Example
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct ArrayTable : IFlatbufferObject
 {
   private Table __p;
@@ -83,9 +83,9 @@ public class ArrayTableT
 }
 
 
-static public class ArrayTableVerify
+public static class ArrayTableVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*A*/, 160 /*MyGame.Example.ArrayStruct*/, 8, false)

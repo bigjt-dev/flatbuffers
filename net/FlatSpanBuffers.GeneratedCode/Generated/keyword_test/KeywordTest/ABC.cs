@@ -4,7 +4,6 @@
 
 namespace KeywordTest
 {
-
 public enum ABC : int
 {
   @void = 0,

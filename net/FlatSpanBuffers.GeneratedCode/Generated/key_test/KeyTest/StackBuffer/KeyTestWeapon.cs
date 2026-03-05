@@ -4,7 +4,6 @@
 
 namespace KeyTest.StackBuffer
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public ref struct KeyTestWeapon : IFlatbufferSpanObject
 {
   private TableSpan __p;

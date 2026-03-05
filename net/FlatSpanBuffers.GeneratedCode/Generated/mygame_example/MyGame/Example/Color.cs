@@ -4,7 +4,6 @@
 
 namespace MyGame.Example
 {
-
 /// Composite components of Monster color.
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 [System.FlagsAttribute]

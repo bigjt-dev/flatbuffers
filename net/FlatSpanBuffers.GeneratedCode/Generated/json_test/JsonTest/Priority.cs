@@ -4,7 +4,6 @@
 
 namespace JsonTest
 {
-
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 [System.FlagsAttribute]
 public enum Priority : byte

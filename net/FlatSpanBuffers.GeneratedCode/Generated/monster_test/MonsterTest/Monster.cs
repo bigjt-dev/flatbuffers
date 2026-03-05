@@ -4,7 +4,6 @@
 
 namespace MonsterTest
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct Monster : IFlatbufferObject
 {
   private Table __p;
@@ -243,9 +243,9 @@ public class MonsterT
 }
 
 
-static public class MonsterVerify
+public static class MonsterVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Pos*/, 12 /*MonsterTest.Vec3*/, 4, false)

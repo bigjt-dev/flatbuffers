@@ -4,7 +4,6 @@
 
 namespace MyGame
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct InParentNamespace : IFlatbufferObject
 {
   private Table __p;
@@ -51,9 +51,9 @@ public class InParentNamespaceT
 }
 
 
-static public class InParentNamespaceVerify
+public static class InParentNamespaceVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyTableEnd(tablePos);

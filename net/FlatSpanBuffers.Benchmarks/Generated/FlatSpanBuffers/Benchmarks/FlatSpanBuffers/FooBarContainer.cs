@@ -4,7 +4,6 @@
 
 namespace Benchmarks.FlatSpanBuffers
 {
-
 using global::System;
 using global::System.Buffers;
 using global::System.Collections.Generic;
@@ -13,6 +12,7 @@ using global::FlatSpanBuffers;
 using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
+
 public struct FooBarContainer : IFlatbufferObject
 {
   private Table __p;
@@ -134,9 +134,9 @@ public class FooBarContainerT
 }
 
 
-static public class FooBarContainerVerify
+public static class FooBarContainerVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyVectorOfTables(tablePos, 4 /*List*/, Benchmarks.FlatSpanBuffers.FooBarVerify.Verify, false)

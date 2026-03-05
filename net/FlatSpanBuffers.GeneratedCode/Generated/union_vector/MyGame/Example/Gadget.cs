@@ -4,7 +4,6 @@
 
 namespace MyGame.Example
 {
-
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 public enum Gadget : byte
 {
@@ -91,9 +90,9 @@ public class GadgetUnion_JsonConverter : System.Text.Json.Serialization.JsonConv
 
 
 
-static public class GadgetVerify
+public static class GadgetVerify
 {
-  static public bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Gadget)typeId)
