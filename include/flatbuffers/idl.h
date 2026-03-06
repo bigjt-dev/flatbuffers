@@ -406,6 +406,7 @@ struct StructDef : public Definition {
         predecl(true),
         sortbysize(true),
         has_key(false),
+        is_root_type(false),
         minalign(1),
         bytesize(0),
         cycle_status{CycleStatus::NotChecked} {}
@@ -426,8 +427,9 @@ struct StructDef : public Definition {
   bool fixed;       // If it's struct, not a table.
   bool predecl;     // If it's used before it was defined.
   bool sortbysize;  // Whether fields come in the declaration or size order.
-  bool has_key;     // It has a key field.
-  size_t minalign;  // What the whole object needs to be aligned to.
+  bool has_key;       // It has a key field.
+  bool is_root_type;  // If this table is declared as a root_type.
+  size_t minalign;    // What the whole object needs to be aligned to.
   size_t bytesize;  // Size if fixed.
 
   CycleStatus cycle_status;  // used for determining if we have circular references

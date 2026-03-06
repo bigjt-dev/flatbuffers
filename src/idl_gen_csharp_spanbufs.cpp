@@ -1067,7 +1067,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       code += "return (obj.__assign(_bb.Get<int>(_bb.Position";
       code += ") + _bb.Position";
       code += ", _bb)); }\n";
-      if (parser_.root_struct_def_ == &struct_def) {
+      if (struct_def.is_root_type) {
         if (parser_.file_identifier_.length()) {
           // Check if a buffer has the identifier.
           code += "  public static ";
@@ -2088,7 +2088,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         }
       }
       code += "    return " + GenOffsetConstruct(struct_def, "o") + ";\n  }\n";
-      if (parser_.root_struct_def_ == &struct_def) {
+      if (struct_def.is_root_type) {
         std::string size_prefix[] = {"", "SizePrefixed"};
         for (int i = 0; i < 2; ++i) {
           code += "  public static void ";
@@ -3361,7 +3361,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     code += "  }\n";
     // Generate Serialization
     if (opts.cs_gen_json_serializer &&
-        parser_.root_struct_def_ == &struct_def) {
+        struct_def.is_root_type) {
       code += "\n";
       code +=
           "  private static readonly System.Text.Json.JsonSerializerOptions "
@@ -3386,7 +3386,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
           "_jsonOptions);\n";
       code += "  }\n\n";
     }
-    if (parser_.root_struct_def_ == &struct_def) {
+    if (struct_def.is_root_type) {
       code += "  public static " + class_name +
               " DeserializeFromBinary(Span<byte> fbBuffer) {\n";
       code += "    return " + spanbuf_namespace + "." + struct_def.name +

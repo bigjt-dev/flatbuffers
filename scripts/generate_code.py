@@ -86,6 +86,13 @@ flatc(
     cwd=root_path,
 )
 
+flatc(
+    CS_SPANBUF_OPTS + ["--gen-onefile"],
+    prefix=flatspanbuffers_gen + "/onefile_test",
+    schema=flatspanbuffers_fbs + "/onefile_test.fbs",
+    cwd=root_path,
+)
+
 # FlatSpanBuffers Benchmarks
 benchmark_fbs = "net/FlatSpanBuffers.Benchmarks/fbs"
 benchmark_gen = "net/FlatSpanBuffers.Benchmarks/Generated"

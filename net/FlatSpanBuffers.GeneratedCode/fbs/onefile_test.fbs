@@ -1,0 +1,72 @@
+// Schema to test --gen-onefile code generation.
+// Uses a unique namespace to avoid conflicts with multi-file generated code.
+// Also exercises root_type-specific codegen: file_identifier triggers
+// BufferHasIdentifier and identifier-aware Finish*Buffer methods.
+namespace OneFileTest;
+
+file_identifier "OFTT";
+file_extension "ofb";
+
+// Enum
+enum Priority : byte { Low = 0, Medium, High, Critical }
+
+// Union
+union Payload { TextMessage, BinaryMessage }
+
+// Struct (fixed size)
+struct Vec2 {
+    x: float;
+    y: float;
+}
+
+// Fixed-length array struct
+struct ColorRGBA {
+    channels: [float:4];
+}
+
+// Tables exercising various field types
+table TextMessage {
+    text: string (required);
+    priority: Priority = Low;
+}
+
+table BinaryMessage {
+    data: [ubyte];
+    size: int;
+}
+
+table Envelope {
+    id: long (key);
+    sender: string (required);
+    recipient: string;
+
+    // Scalar types
+    timestamp: long;
+    ttl: int = 60;
+    compressed: bool = false;
+
+    // Struct fields
+    origin: Vec2;
+    color: ColorRGBA;
+
+    // Vectors
+    tags: [string];
+    scores: [int];
+    waypoints: [Vec2];
+
+    // Enum
+    priority: Priority = Medium;
+
+    // Union
+    payload: Payload;
+
+    // Vector of unions
+    attachments: [Payload];
+
+    // Nested flatbuffer
+    nested_data: [ubyte] (nested_flatbuffer: "TextMessage");
+}
+
+// Multiple root_types per fbs is supported with flatspan. 
+root_type Envelope;
+root_type TextMessage;

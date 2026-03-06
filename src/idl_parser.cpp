@@ -3014,6 +3014,7 @@ bool Parser::SetRootType(const char* name) {
   if (!root_struct_def_)
     root_struct_def_ =
         LookupStruct(current_namespace_->GetFullyQualifiedName(name));
+  if (root_struct_def_) root_struct_def_->is_root_type = true;
   return root_struct_def_ != nullptr;
 }
 
