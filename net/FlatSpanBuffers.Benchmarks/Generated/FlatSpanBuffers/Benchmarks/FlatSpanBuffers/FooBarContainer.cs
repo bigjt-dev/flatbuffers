@@ -123,13 +123,29 @@ public class FooBarContainerT
     this.Fruit = Benchmarks.FlatSpanBuffers.Fruit.Apples;
     this.Location = null;
   }
-  public static FooBarContainerT DeserializeFromBinary(byte[] fbBuffer) {
-    return FooBarContainer.GetRootAsFooBarContainer(new ByteBuffer(fbBuffer)).UnPack();
+  public static FooBarContainerT DeserializeFromBinary(Span<byte> fbBuffer) {
+    return StackBuffer.FooBarContainer.GetRootAsFooBarContainer(new ByteSpanBuffer(fbBuffer)).UnPack();
   }
+
+  public static void DeserializeFromBinary(Span<byte> fbBuffer, FooBarContainerT o) {
+    StackBuffer.FooBarContainer.GetRootAsFooBarContainer(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);
+  }
+
   public byte[] SerializeToBinary() {
-    var fbb = new FlatBufferBuilder(0x10000);
+    var fbb = new FlatBufferBuilder(4096);
+    return SerializeToBinary(fbb).ToArray();
+  }
+
+  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {
+    fbb.Clear();
     FooBarContainer.FinishFooBarContainerBuffer(fbb, FooBarContainer.Pack(fbb, this));
-    return fbb.DataBuffer.ToSizedSpan().ToArray();
+    return fbb.DataBuffer.ToSizedSpan();
+  }
+
+  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) {
+    fbb.Clear();
+    StackBuffer.FooBarContainer.FinishFooBarContainerBuffer(ref fbb, StackBuffer.FooBarContainer.Pack(ref fbb, this));
+    return fbb.DataBuffer.ToSizedSpan();
   }
 }
 

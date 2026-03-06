@@ -276,19 +276,41 @@ public class MovieT
   }
 
   private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
-  public static MovieT DeserializeFromJson(string jsonText) {
+  public static MovieT DeserializeFromJson(ReadOnlySpan<char> jsonText) {
     return System.Text.Json.JsonSerializer.Deserialize<MovieT>(jsonText, _jsonOptions);
   }
+
+  public static MovieT DeserializeFromJson(ReadOnlySpan<byte> utf8JsonText) {
+    return System.Text.Json.JsonSerializer.Deserialize<MovieT>(utf8JsonText, _jsonOptions);
+  }
+
   public string SerializeToJson() {
     return System.Text.Json.JsonSerializer.Serialize(this, _jsonOptions);
   }
-  public static MovieT DeserializeFromBinary(byte[] fbBuffer) {
-    return Movie.GetRootAsMovie(new ByteBuffer(fbBuffer)).UnPack();
+
+  public static MovieT DeserializeFromBinary(Span<byte> fbBuffer) {
+    return StackBuffer.Movie.GetRootAsMovie(new ByteSpanBuffer(fbBuffer)).UnPack();
   }
+
+  public static void DeserializeFromBinary(Span<byte> fbBuffer, MovieT o) {
+    StackBuffer.Movie.GetRootAsMovie(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);
+  }
+
   public byte[] SerializeToBinary() {
-    var fbb = new FlatBufferBuilder(0x10000);
+    var fbb = new FlatBufferBuilder(4096);
+    return SerializeToBinary(fbb).ToArray();
+  }
+
+  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {
+    fbb.Clear();
     Movie.FinishMovieBuffer(fbb, Movie.Pack(fbb, this));
-    return fbb.DataBuffer.ToSizedSpan().ToArray();
+    return fbb.DataBuffer.ToSizedSpan();
+  }
+
+  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) {
+    fbb.Clear();
+    StackBuffer.Movie.FinishMovieBuffer(ref fbb, StackBuffer.Movie.Pack(ref fbb, this));
+    return fbb.DataBuffer.ToSizedSpan();
   }
 }
 

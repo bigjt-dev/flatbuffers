@@ -232,13 +232,29 @@ public class MonsterT
     this.Equipped = null;
     this.Path = null;
   }
-  public static MonsterT DeserializeFromBinary(byte[] fbBuffer) {
-    return Monster.GetRootAsMonster(new ByteBuffer(fbBuffer)).UnPack();
+  public static MonsterT DeserializeFromBinary(Span<byte> fbBuffer) {
+    return StackBuffer.Monster.GetRootAsMonster(new ByteSpanBuffer(fbBuffer)).UnPack();
   }
+
+  public static void DeserializeFromBinary(Span<byte> fbBuffer, MonsterT o) {
+    StackBuffer.Monster.GetRootAsMonster(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);
+  }
+
   public byte[] SerializeToBinary() {
-    var fbb = new FlatBufferBuilder(0x10000);
+    var fbb = new FlatBufferBuilder(4096);
+    return SerializeToBinary(fbb).ToArray();
+  }
+
+  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {
+    fbb.Clear();
     Monster.FinishMonsterBuffer(fbb, Monster.Pack(fbb, this));
-    return fbb.DataBuffer.ToSizedSpan().ToArray();
+    return fbb.DataBuffer.ToSizedSpan();
+  }
+
+  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) {
+    fbb.Clear();
+    StackBuffer.Monster.FinishMonsterBuffer(ref fbb, StackBuffer.Monster.Pack(ref fbb, this));
+    return fbb.DataBuffer.ToSizedSpan();
   }
 }
 

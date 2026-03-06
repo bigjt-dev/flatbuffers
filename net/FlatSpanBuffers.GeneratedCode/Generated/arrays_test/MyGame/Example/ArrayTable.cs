@@ -66,19 +66,41 @@ public class ArrayTableT
   }
 
   private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
-  public static ArrayTableT DeserializeFromJson(string jsonText) {
+  public static ArrayTableT DeserializeFromJson(ReadOnlySpan<char> jsonText) {
     return System.Text.Json.JsonSerializer.Deserialize<ArrayTableT>(jsonText, _jsonOptions);
   }
+
+  public static ArrayTableT DeserializeFromJson(ReadOnlySpan<byte> utf8JsonText) {
+    return System.Text.Json.JsonSerializer.Deserialize<ArrayTableT>(utf8JsonText, _jsonOptions);
+  }
+
   public string SerializeToJson() {
     return System.Text.Json.JsonSerializer.Serialize(this, _jsonOptions);
   }
-  public static ArrayTableT DeserializeFromBinary(byte[] fbBuffer) {
-    return ArrayTable.GetRootAsArrayTable(new ByteBuffer(fbBuffer)).UnPack();
+
+  public static ArrayTableT DeserializeFromBinary(Span<byte> fbBuffer) {
+    return StackBuffer.ArrayTable.GetRootAsArrayTable(new ByteSpanBuffer(fbBuffer)).UnPack();
   }
+
+  public static void DeserializeFromBinary(Span<byte> fbBuffer, ArrayTableT o) {
+    StackBuffer.ArrayTable.GetRootAsArrayTable(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);
+  }
+
   public byte[] SerializeToBinary() {
-    var fbb = new FlatBufferBuilder(0x10000);
+    var fbb = new FlatBufferBuilder(4096);
+    return SerializeToBinary(fbb).ToArray();
+  }
+
+  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {
+    fbb.Clear();
     ArrayTable.FinishArrayTableBuffer(fbb, ArrayTable.Pack(fbb, this));
-    return fbb.DataBuffer.ToSizedSpan().ToArray();
+    return fbb.DataBuffer.ToSizedSpan();
+  }
+
+  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) {
+    fbb.Clear();
+    StackBuffer.ArrayTable.FinishArrayTableBuffer(ref fbb, StackBuffer.ArrayTable.Pack(ref fbb, this));
+    return fbb.DataBuffer.ToSizedSpan();
   }
 }
 

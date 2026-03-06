@@ -85,13 +85,29 @@ public class KeyTestMonsterT
     this.Name = null;
     this.Hp = 0;
   }
-  public static KeyTestMonsterT DeserializeFromBinary(byte[] fbBuffer) {
-    return KeyTestMonster.GetRootAsKeyTestMonster(new ByteBuffer(fbBuffer)).UnPack();
+  public static KeyTestMonsterT DeserializeFromBinary(Span<byte> fbBuffer) {
+    return StackBuffer.KeyTestMonster.GetRootAsKeyTestMonster(new ByteSpanBuffer(fbBuffer)).UnPack();
   }
+
+  public static void DeserializeFromBinary(Span<byte> fbBuffer, KeyTestMonsterT o) {
+    StackBuffer.KeyTestMonster.GetRootAsKeyTestMonster(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);
+  }
+
   public byte[] SerializeToBinary() {
-    var fbb = new FlatBufferBuilder(0x10000);
+    var fbb = new FlatBufferBuilder(4096);
+    return SerializeToBinary(fbb).ToArray();
+  }
+
+  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {
+    fbb.Clear();
     KeyTestMonster.FinishKeyTestMonsterBuffer(fbb, KeyTestMonster.Pack(fbb, this));
-    return fbb.DataBuffer.ToSizedSpan().ToArray();
+    return fbb.DataBuffer.ToSizedSpan();
+  }
+
+  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) {
+    fbb.Clear();
+    StackBuffer.KeyTestMonster.FinishKeyTestMonsterBuffer(ref fbb, StackBuffer.KeyTestMonster.Pack(ref fbb, this));
+    return fbb.DataBuffer.ToSizedSpan();
   }
 }
 

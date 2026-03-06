@@ -128,19 +128,41 @@ public class GameStateT
   }
 
   private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
-  public static GameStateT DeserializeFromJson(string jsonText) {
+  public static GameStateT DeserializeFromJson(ReadOnlySpan<char> jsonText) {
     return System.Text.Json.JsonSerializer.Deserialize<GameStateT>(jsonText, _jsonOptions);
   }
+
+  public static GameStateT DeserializeFromJson(ReadOnlySpan<byte> utf8JsonText) {
+    return System.Text.Json.JsonSerializer.Deserialize<GameStateT>(utf8JsonText, _jsonOptions);
+  }
+
   public string SerializeToJson() {
     return System.Text.Json.JsonSerializer.Serialize(this, _jsonOptions);
   }
-  public static GameStateT DeserializeFromBinary(byte[] fbBuffer) {
-    return GameState.GetRootAsGameState(new ByteBuffer(fbBuffer)).UnPack();
+
+  public static GameStateT DeserializeFromBinary(Span<byte> fbBuffer) {
+    return StackBuffer.GameState.GetRootAsGameState(new ByteSpanBuffer(fbBuffer)).UnPack();
   }
+
+  public static void DeserializeFromBinary(Span<byte> fbBuffer, GameStateT o) {
+    StackBuffer.GameState.GetRootAsGameState(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);
+  }
+
   public byte[] SerializeToBinary() {
-    var fbb = new FlatBufferBuilder(0x10000);
+    var fbb = new FlatBufferBuilder(4096);
+    return SerializeToBinary(fbb).ToArray();
+  }
+
+  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {
+    fbb.Clear();
     GameState.FinishGameStateBuffer(fbb, GameState.Pack(fbb, this));
-    return fbb.DataBuffer.ToSizedSpan().ToArray();
+    return fbb.DataBuffer.ToSizedSpan();
+  }
+
+  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) {
+    fbb.Clear();
+    StackBuffer.GameState.FinishGameStateBuffer(ref fbb, StackBuffer.GameState.Pack(ref fbb, this));
+    return fbb.DataBuffer.ToSizedSpan();
   }
 }
 

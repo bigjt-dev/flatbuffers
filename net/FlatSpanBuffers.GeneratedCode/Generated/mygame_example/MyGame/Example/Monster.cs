@@ -1261,19 +1261,41 @@ public class MonsterT
   }
 
   private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
-  public static MonsterT DeserializeFromJson(string jsonText) {
+  public static MonsterT DeserializeFromJson(ReadOnlySpan<char> jsonText) {
     return System.Text.Json.JsonSerializer.Deserialize<MonsterT>(jsonText, _jsonOptions);
   }
+
+  public static MonsterT DeserializeFromJson(ReadOnlySpan<byte> utf8JsonText) {
+    return System.Text.Json.JsonSerializer.Deserialize<MonsterT>(utf8JsonText, _jsonOptions);
+  }
+
   public string SerializeToJson() {
     return System.Text.Json.JsonSerializer.Serialize(this, _jsonOptions);
   }
-  public static MonsterT DeserializeFromBinary(byte[] fbBuffer) {
-    return Monster.GetRootAsMonster(new ByteBuffer(fbBuffer)).UnPack();
+
+  public static MonsterT DeserializeFromBinary(Span<byte> fbBuffer) {
+    return StackBuffer.Monster.GetRootAsMonster(new ByteSpanBuffer(fbBuffer)).UnPack();
   }
+
+  public static void DeserializeFromBinary(Span<byte> fbBuffer, MonsterT o) {
+    StackBuffer.Monster.GetRootAsMonster(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);
+  }
+
   public byte[] SerializeToBinary() {
-    var fbb = new FlatBufferBuilder(0x10000);
+    var fbb = new FlatBufferBuilder(4096);
+    return SerializeToBinary(fbb).ToArray();
+  }
+
+  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {
+    fbb.Clear();
     Monster.FinishMonsterBuffer(fbb, Monster.Pack(fbb, this));
-    return fbb.DataBuffer.ToSizedSpan().ToArray();
+    return fbb.DataBuffer.ToSizedSpan();
+  }
+
+  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) {
+    fbb.Clear();
+    StackBuffer.Monster.FinishMonsterBuffer(ref fbb, StackBuffer.Monster.Pack(ref fbb, this));
+    return fbb.DataBuffer.ToSizedSpan();
   }
 }
 

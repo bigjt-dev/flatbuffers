@@ -3371,27 +3371,52 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
           "AllowNamedFloatingPointLiterals, Converters = { new "
           "System.Text.Json.Serialization.JsonStringEnumConverter() } };\n";
       code += "  public static " + class_name +
-              " DeserializeFromJson(string jsonText) {\n";
+              " DeserializeFromJson(ReadOnlySpan<char> jsonText) {\n";
       code += "    return System.Text.Json.JsonSerializer.Deserialize<" +
               class_name + ">(jsonText, _jsonOptions);\n";
-      code += "  }\n";
+      code += "  }\n\n";
+      code += "  public static " + class_name +
+              " DeserializeFromJson(ReadOnlySpan<byte> utf8JsonText) {\n";
+      code += "    return System.Text.Json.JsonSerializer.Deserialize<" +
+              class_name + ">(utf8JsonText, _jsonOptions);\n";
+      code += "  }\n\n";
       code += "  public string SerializeToJson() {\n";
       code +=
           "    return System.Text.Json.JsonSerializer.Serialize(this, "
           "_jsonOptions);\n";
-      code += "  }\n";
+      code += "  }\n\n";
     }
     if (parser_.root_struct_def_ == &struct_def) {
       code += "  public static " + class_name +
-              " DeserializeFromBinary(byte[] fbBuffer) {\n";
-      code += "    return " + struct_def.name + ".GetRootAs" + struct_def.name +
-              "(new ByteBuffer(fbBuffer)).UnPack();\n";
-      code += "  }\n";
+              " DeserializeFromBinary(Span<byte> fbBuffer) {\n";
+      code += "    return " + spanbuf_namespace + "." + struct_def.name +
+              ".GetRootAs" + struct_def.name +
+              "(new ByteSpanBuffer(fbBuffer)).UnPack();\n";
+      code += "  }\n\n";
+      code += "  public static void DeserializeFromBinary(Span<byte> fbBuffer, " +
+              class_name + " o) {\n";
+      code += "    " + spanbuf_namespace + "." + struct_def.name +
+              ".GetRootAs" + struct_def.name +
+              "(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);\n";
+      code += "  }\n\n";
       code += "  public byte[] SerializeToBinary() {\n";
-      code += "    var fbb = new FlatBufferBuilder(0x10000);\n";
+      code += "    var fbb = new FlatBufferBuilder(4096);\n";
+      code += "    return SerializeToBinary(fbb).ToArray();\n";
+      code += "  }\n\n";
+      code += "  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {\n";
+      code += "    fbb.Clear();\n";
       code += "    " + struct_def.name + ".Finish" + struct_def.name +
               "Buffer(fbb, " + struct_def.name + ".Pack(fbb, this));\n";
-      code += "    return fbb.DataBuffer.ToSizedSpan().ToArray();\n";
+      code += "    return fbb.DataBuffer.ToSizedSpan();\n";
+      code += "  }\n\n";
+      code +=
+          "  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) "
+          "{\n";
+      code += "    fbb.Clear();\n";
+      code += "    " + spanbuf_namespace + "." + struct_def.name + ".Finish" +
+              struct_def.name + "Buffer(ref fbb, " + spanbuf_namespace + "." +
+              struct_def.name + ".Pack(ref fbb, this));\n";
+      code += "    return fbb.DataBuffer.ToSizedSpan();\n";
       code += "  }\n";
     }
     code += "}\n\n";

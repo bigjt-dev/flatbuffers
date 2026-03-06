@@ -123,13 +123,29 @@ public class GameSessionT
     this.StartTime = 0;
     this.Players = null;
   }
-  public static GameSessionT DeserializeFromBinary(byte[] fbBuffer) {
-    return GameSession.GetRootAsGameSession(new ByteBuffer(fbBuffer)).UnPack();
+  public static GameSessionT DeserializeFromBinary(Span<byte> fbBuffer) {
+    return StackBuffer.GameSession.GetRootAsGameSession(new ByteSpanBuffer(fbBuffer)).UnPack();
   }
+
+  public static void DeserializeFromBinary(Span<byte> fbBuffer, GameSessionT o) {
+    StackBuffer.GameSession.GetRootAsGameSession(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);
+  }
+
   public byte[] SerializeToBinary() {
-    var fbb = new FlatBufferBuilder(0x10000);
+    var fbb = new FlatBufferBuilder(4096);
+    return SerializeToBinary(fbb).ToArray();
+  }
+
+  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {
+    fbb.Clear();
     GameSession.FinishGameSessionBuffer(fbb, GameSession.Pack(fbb, this));
-    return fbb.DataBuffer.ToSizedSpan().ToArray();
+    return fbb.DataBuffer.ToSizedSpan();
+  }
+
+  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) {
+    fbb.Clear();
+    StackBuffer.GameSession.FinishGameSessionBuffer(ref fbb, StackBuffer.GameSession.Pack(ref fbb, this));
+    return fbb.DataBuffer.ToSizedSpan();
   }
 }
 

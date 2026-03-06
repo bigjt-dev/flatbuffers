@@ -345,13 +345,29 @@ public class ScalarStuffT
     this.MaybeEnum = null;
     this.DefaultEnum = optional_scalars.OptionalByte.One;
   }
-  public static ScalarStuffT DeserializeFromBinary(byte[] fbBuffer) {
-    return ScalarStuff.GetRootAsScalarStuff(new ByteBuffer(fbBuffer)).UnPack();
+  public static ScalarStuffT DeserializeFromBinary(Span<byte> fbBuffer) {
+    return StackBuffer.ScalarStuff.GetRootAsScalarStuff(new ByteSpanBuffer(fbBuffer)).UnPack();
   }
+
+  public static void DeserializeFromBinary(Span<byte> fbBuffer, ScalarStuffT o) {
+    StackBuffer.ScalarStuff.GetRootAsScalarStuff(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);
+  }
+
   public byte[] SerializeToBinary() {
-    var fbb = new FlatBufferBuilder(0x10000);
+    var fbb = new FlatBufferBuilder(4096);
+    return SerializeToBinary(fbb).ToArray();
+  }
+
+  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {
+    fbb.Clear();
     ScalarStuff.FinishScalarStuffBuffer(fbb, ScalarStuff.Pack(fbb, this));
-    return fbb.DataBuffer.ToSizedSpan().ToArray();
+    return fbb.DataBuffer.ToSizedSpan();
+  }
+
+  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) {
+    fbb.Clear();
+    StackBuffer.ScalarStuff.FinishScalarStuffBuffer(ref fbb, StackBuffer.ScalarStuff.Pack(ref fbb, this));
+    return fbb.DataBuffer.ToSizedSpan();
   }
 }
 

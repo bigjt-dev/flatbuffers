@@ -603,5 +603,80 @@ namespace FlatSpanBuffers.Tests
             Assert.AreEqual(regularMonster.Hp, spanMonster.Hp);
             Assert.AreEqual(regularMonster.Name, spanMonster.Name);
         }
+
+        [FlatBuffersTestMethod]
+        public void StackBuffer_SerializeToBinary_Success()
+        {
+            var fbb = CreateSpanBuilderForMonster();
+
+            var str = fbb.CreateString("MyMonster");
+            var test1 = fbb.CreateString("test1");
+            var test2 = fbb.CreateString("test2");
+
+            Span<byte> inventoryData = stackalloc byte[] { 0, 1, 2, 3, 4 };
+            var inv = SpanMonster.CreateInventoryVectorBlock(ref fbb, inventoryData);
+
+            var fred = fbb.CreateString("Fred");
+            SpanMonster.StartMonster(ref fbb);
+            SpanMonster.AddName(ref fbb, fred);
+            var mon2 = SpanMonster.EndMonster(ref fbb);
+
+            SpanMonster.StartTest4Vector(ref fbb, 2);
+            MyGame.Example.StackBuffer.Test.CreateTest(ref fbb, (short)10, (sbyte)20);
+            MyGame.Example.StackBuffer.Test.CreateTest(ref fbb, (short)30, (sbyte)40);
+            var test4 = fbb.EndVector();
+
+            Span<StringOffset> testStrings = stackalloc StringOffset[] { test1, test2 };
+            var testArrayOfString = SpanMonster.CreateTestarrayofstringVectorBlock(ref fbb, testStrings);
+
+            SpanMonster.StartMonster(ref fbb);
+            SpanMonster.AddPos(ref fbb, MyGame.Example.StackBuffer.Vec3.CreateVec3(ref fbb,
+                1.0f, 2.0f, 3.0f, 3.0, Color.Green, (short)5, (sbyte)6));
+            SpanMonster.AddHp(ref fbb, (short)80);
+            SpanMonster.AddName(ref fbb, str);
+            SpanMonster.AddInventory(ref fbb, inv);
+            SpanMonster.AddTestType(ref fbb, Any.Monster);
+            SpanMonster.AddTest(ref fbb, mon2.Value);
+            SpanMonster.AddTest4(ref fbb, test4);
+            SpanMonster.AddTestarrayofstring(ref fbb, testArrayOfString);
+            SpanMonster.AddTestbool(ref fbb, true);
+            var mon = SpanMonster.EndMonster(ref fbb);
+            SpanMonster.FinishMonsterBuffer(ref fbb, mon);
+
+            var monsterT = SpanMonster.GetRootAsMonster(fbb.DataBuffer).UnPack();
+
+            var fbb2 = CreateSpanBuilderForMonster();
+            var bytes = monsterT.SerializeToBinary(ref fbb2);
+
+            Assert.IsTrue(SpanMonster.MonsterBufferHasIdentifier(new ByteSpanBuffer(bytes)));
+
+            var monsterT2 = MonsterT.DeserializeFromBinary(bytes);
+
+            Assert.AreEqual(monsterT.Name, monsterT2.Name);
+            Assert.AreEqual(monsterT.Hp, monsterT2.Hp);
+            Assert.AreEqual(monsterT.Mana, monsterT2.Mana);
+            Assert.AreEqual(monsterT.Color, monsterT2.Color);
+            Assert.AreEqual(monsterT.Testbool, monsterT2.Testbool);
+
+            Assert.IsNotNull(monsterT2.Pos);
+            Assert.AreEqual(monsterT.Pos.X, monsterT2.Pos.X, 6);
+            Assert.AreEqual(monsterT.Pos.Y, monsterT2.Pos.Y, 6);
+            Assert.AreEqual(monsterT.Pos.Z, monsterT2.Pos.Z, 6);
+
+            Assert.AreEqual(monsterT.Inventory.Count, monsterT2.Inventory.Count);
+            for (int i = 0; i < monsterT.Inventory.Count; i++)
+                Assert.AreEqual(monsterT.Inventory[i], monsterT2.Inventory[i]);
+
+            Assert.AreEqual(monsterT.Testarrayofstring.Count, monsterT2.Testarrayofstring.Count);
+            Assert.AreEqual(monsterT.Testarrayofstring[0], monsterT2.Testarrayofstring[0]);
+            Assert.AreEqual(monsterT.Testarrayofstring[1], monsterT2.Testarrayofstring[1]);
+
+            Assert.AreEqual(monsterT.Test4.Count, monsterT2.Test4.Count);
+            for (int i = 0; i < monsterT.Test4.Count; i++)
+            {
+                Assert.AreEqual(monsterT.Test4[i].A, monsterT2.Test4[i].A);
+                Assert.AreEqual(monsterT.Test4[i].B, monsterT2.Test4[i].B);
+            }
+        }
     }
 }
