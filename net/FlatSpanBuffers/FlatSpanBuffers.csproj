@@ -6,7 +6,7 @@
     <!-- NuGet package metadata -->
     <PackageId>FlatSpanBuffers</PackageId>
     <Description>A high-performance, zero-allocation FlatBuffers serialization library built on Span&lt;T&gt;. Derived from Google FlatBuffers, shares similar API but enables stack-allocated serialization with AOT compatibility.</Description>
-    <PackageTags>flatbuffers;flatbuffer;fbs;span;serialization;zero-allocation;stackalloc;aot;</PackageTags>
+    <PackageTags>flatbuffers;flatbuffer;fbs;span;serialization;zero-allocation;stackalloc;aot;memorymappedfile</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/bigjt-dev/flatbuffers/tree/flatspan</PackageProjectUrl>
 

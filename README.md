@@ -31,6 +31,7 @@ IFlatbufferSpanObject uses `ref struct` and accepts `Span<T>` arguments for more
 | **Verification** | `Verifier` is a `ref struct` operating on span-backed data. |
 | **GetRoot<T>** | Generic `TryGetRoot<T>` and `GetRootUnchecked<T>` to read root tables with or without calling the Verifier. |
 | **Nullables** | `RefStructNullable<T>` provides `.HasValue` / `.Value` for optional ref struct fields since `Nullable<T>` cannot wrap a `ref struct`. |
+| **Memory-mapped files** | `ByteSpanBuffer` can wrap a `Span<byte>` derived from a `MemoryMappedViewAccessor`, enabling zero-copy reads of FlatBuffers data directly from memory-mapped files. |
 | **JSON** | Migrated from `Newtonsoft.Json` to `System.Text.Json`. |
 | **Object API** | `Pack` / `UnPack` pre-size collections and reuse objects to reduce allocations. |
 | **Target** | .NET 10. |
