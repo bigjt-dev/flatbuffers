@@ -13,7 +13,7 @@ using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
 
-public struct Monster : IFlatbufferObject
+public struct Monster : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
@@ -21,6 +21,7 @@ public struct Monster : IFlatbufferObject
   public static Monster GetRootAsMonster(ByteBuffer _bb) { return GetRootAsMonster(_bb, new Monster()); }
   public static Monster GetRootAsMonster(ByteBuffer _bb, Monster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool VerifyMonster(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, MonsterTest.MonsterVerify.Verify); }
+  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, MonsterTest.MonsterVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public Monster __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 

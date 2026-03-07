@@ -13,7 +13,7 @@ using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
 
-public ref struct Movie : IFlatbufferSpanObject
+public ref struct Movie : IFlatbufferSpanObject, IRootTable
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
@@ -22,6 +22,7 @@ public ref struct Movie : IFlatbufferSpanObject
   public static Movie GetRootAsMovie(ByteSpanBuffer _bb, Movie obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool MovieBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "MOVI"); }
   public static bool VerifyMovie(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("MOVI", false, MyGame.Example.MovieVerify.Verify); }
+  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("MOVI", sizePrefixed, MyGame.Example.MovieVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public Movie __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 

@@ -13,7 +13,7 @@ using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
 
-public ref struct KeyTestMonster : IFlatbufferSpanObject
+public ref struct KeyTestMonster : IFlatbufferSpanObject, IRootTable
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
@@ -21,6 +21,7 @@ public ref struct KeyTestMonster : IFlatbufferSpanObject
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteSpanBuffer _bb) { return GetRootAsKeyTestMonster(_bb, new KeyTestMonster()); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteSpanBuffer _bb, KeyTestMonster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool VerifyKeyTestMonster(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, KeyTest.KeyTestMonsterVerify.Verify); }
+  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, KeyTest.KeyTestMonsterVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public KeyTestMonster __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 

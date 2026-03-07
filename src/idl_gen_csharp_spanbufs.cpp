@@ -1032,6 +1032,9 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     }
     code += "struct " + struct_def.name;
     code += " : " + FlatbufferObjectInterface();
+    if (struct_def.is_root_type) {
+      code += ", IRootTable";
+    }
     code += "\n{\n";
     code += "  private ";
     code += struct_def.fixed ? StructBaseTypeName() : TableBaseTypeName();
@@ -1095,6 +1098,20 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         code += "\", false, " + verify_class_ns + struct_def.name +
                 "Verify.Verify);";
         code += " }\n";
+      }
+
+      if (struct_def.is_root_type) {
+        std::string verify_ns =
+            FullNamespace(".", *struct_def.defined_namespace);
+        if (!verify_ns.empty()) verify_ns += ".";
+
+        code += "  static bool IRootTable.Verify";
+        code += "(ref global::FlatSpanBuffers.Verifier verifier, ";
+        code += "bool sizePrefixed) => ";
+        code += "verifier.VerifyBuffer(\"";
+        code += parser_.file_identifier_;
+        code += "\", sizePrefixed, ";
+        code += verify_ns + struct_def.name + "Verify.Verify);\n";
       }
     }
 
@@ -3360,8 +3377,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     }
     code += "  }\n";
     // Generate Serialization
-    if (opts.cs_gen_json_serializer &&
-        struct_def.is_root_type) {
+    if (opts.cs_gen_json_serializer && struct_def.is_root_type) {
       code += "\n";
       code +=
           "  private static readonly System.Text.Json.JsonSerializerOptions "
@@ -3393,8 +3409,9 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
               ".GetRootAs" + struct_def.name +
               "(new ByteSpanBuffer(fbBuffer)).UnPack();\n";
       code += "  }\n\n";
-      code += "  public static void DeserializeFromBinary(Span<byte> fbBuffer, " +
-              class_name + " o) {\n";
+      code +=
+          "  public static void DeserializeFromBinary(Span<byte> fbBuffer, " +
+          class_name + " o) {\n";
       code += "    " + spanbuf_namespace + "." + struct_def.name +
               ".GetRootAs" + struct_def.name +
               "(new ByteSpanBuffer(fbBuffer)).UnPackTo(o);\n";
@@ -3403,15 +3420,16 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       code += "    var fbb = new FlatBufferBuilder(4096);\n";
       code += "    return SerializeToBinary(fbb).ToArray();\n";
       code += "  }\n\n";
-      code += "  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {\n";
+      code +=
+          "  public Span<byte> SerializeToBinary(FlatBufferBuilder fbb) {\n";
       code += "    fbb.Clear();\n";
       code += "    " + struct_def.name + ".Finish" + struct_def.name +
               "Buffer(fbb, " + struct_def.name + ".Pack(fbb, this));\n";
       code += "    return fbb.DataBuffer.ToSizedSpan();\n";
       code += "  }\n\n";
       code +=
-          "  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder fbb) "
-          "{\n";
+          "  public Span<byte> SerializeToBinary(ref FlatSpanBufferBuilder ";
+      code += "fbb) {\n";
       code += "    fbb.Clear();\n";
       code += "    " + spanbuf_namespace + "." + struct_def.name + ".Finish" +
               struct_def.name + "Buffer(ref fbb, " + spanbuf_namespace + "." +

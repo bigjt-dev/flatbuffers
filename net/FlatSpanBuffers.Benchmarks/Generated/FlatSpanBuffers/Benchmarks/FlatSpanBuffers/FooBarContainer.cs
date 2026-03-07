@@ -13,7 +13,7 @@ using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
 
-public struct FooBarContainer : IFlatbufferObject
+public struct FooBarContainer : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
@@ -21,6 +21,7 @@ public struct FooBarContainer : IFlatbufferObject
   public static FooBarContainer GetRootAsFooBarContainer(ByteBuffer _bb) { return GetRootAsFooBarContainer(_bb, new FooBarContainer()); }
   public static FooBarContainer GetRootAsFooBarContainer(ByteBuffer _bb, FooBarContainer obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool VerifyFooBarContainer(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, Benchmarks.FlatSpanBuffers.FooBarContainerVerify.Verify); }
+  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, Benchmarks.FlatSpanBuffers.FooBarContainerVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public FooBarContainer __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 

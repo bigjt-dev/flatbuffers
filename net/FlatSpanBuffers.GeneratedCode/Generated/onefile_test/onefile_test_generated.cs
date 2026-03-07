@@ -171,7 +171,7 @@ public class ColorRGBAT
   }
 }
 
-public struct TextMessage : IFlatbufferObject
+public struct TextMessage : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
@@ -180,6 +180,7 @@ public struct TextMessage : IFlatbufferObject
   public static TextMessage GetRootAsTextMessage(ByteBuffer _bb, TextMessage obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool TextMessageBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "OFTT"); }
   public static bool VerifyTextMessage(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("OFTT", false, OneFileTest.TextMessageVerify.Verify); }
+  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("OFTT", sizePrefixed, OneFileTest.TextMessageVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public TextMessage __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -353,7 +354,7 @@ public static class BinaryMessageVerify
       && verifier.VerifyTableEnd(tablePos);
   }
 }
-public struct Envelope : IFlatbufferObject
+public struct Envelope : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
@@ -362,6 +363,7 @@ public struct Envelope : IFlatbufferObject
   public static Envelope GetRootAsEnvelope(ByteBuffer _bb, Envelope obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool EnvelopeBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "OFTT"); }
   public static bool VerifyEnvelope(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("OFTT", false, OneFileTest.EnvelopeVerify.Verify); }
+  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("OFTT", sizePrefixed, OneFileTest.EnvelopeVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public Envelope __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 

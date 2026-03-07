@@ -13,7 +13,7 @@ using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
 
-public struct GameSession : IFlatbufferObject
+public struct GameSession : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
@@ -22,6 +22,7 @@ public struct GameSession : IFlatbufferObject
   public static GameSession GetRootAsGameSession(ByteBuffer _bb, GameSession obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool GameSessionBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "TEST"); }
   public static bool VerifyGameSession(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("TEST", false, ComprehensiveTest.GameSessionVerify.Verify); }
+  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("TEST", sizePrefixed, ComprehensiveTest.GameSessionVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public GameSession __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 

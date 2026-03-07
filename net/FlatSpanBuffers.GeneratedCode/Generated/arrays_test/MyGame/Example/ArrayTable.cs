@@ -13,7 +13,7 @@ using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
 
-public struct ArrayTable : IFlatbufferObject
+public struct ArrayTable : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
@@ -22,6 +22,7 @@ public struct ArrayTable : IFlatbufferObject
   public static ArrayTable GetRootAsArrayTable(ByteBuffer _bb, ArrayTable obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool ArrayTableBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "ARRT"); }
   public static bool VerifyArrayTable(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("ARRT", false, MyGame.Example.ArrayTableVerify.Verify); }
+  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("ARRT", sizePrefixed, MyGame.Example.ArrayTableVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public ArrayTable __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 

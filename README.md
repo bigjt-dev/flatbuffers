@@ -29,6 +29,7 @@ IFlatbufferSpanObject uses `ref struct` and accepts `Span<T>` arguments for more
 | **No unsafe code** | `AllowUnsafeBlocks` is not required. No `ENABLE_SPAN_T` / `UNSAFE_BYTEBUFFER` preprocessor defines. |
 | **Vectors** | Scalar vectors return `ReadOnlySpan<T>` / `Span<T>` directly. Table/struct vectors use lightweight wrapper structs. |
 | **Verification** | `Verifier` is a `ref struct` operating on span-backed data. |
+| **GetRoot<T>** | Generic `TryGetRoot<T>` and `GetRootUnchecked<T>` to read root tables with or without calling the Verifier. |
 | **Nullables** | `RefStructNullable<T>` provides `.HasValue` / `.Value` for optional ref struct fields since `Nullable<T>` cannot wrap a `ref struct`. |
 | **JSON** | Migrated from `Newtonsoft.Json` to `System.Text.Json`. |
 | **Object API** | `Pack` / `UnPack` pre-size collections and reuse objects to reduce allocations. |

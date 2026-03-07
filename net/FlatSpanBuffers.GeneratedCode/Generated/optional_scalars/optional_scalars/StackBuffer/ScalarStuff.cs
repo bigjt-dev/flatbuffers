@@ -13,7 +13,7 @@ using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
 
-public ref struct ScalarStuff : IFlatbufferSpanObject
+public ref struct ScalarStuff : IFlatbufferSpanObject, IRootTable
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
@@ -22,6 +22,7 @@ public ref struct ScalarStuff : IFlatbufferSpanObject
   public static ScalarStuff GetRootAsScalarStuff(ByteSpanBuffer _bb, ScalarStuff obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool ScalarStuffBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "NULL"); }
   public static bool VerifyScalarStuff(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("NULL", false, optional_scalars.ScalarStuffVerify.Verify); }
+  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("NULL", sizePrefixed, optional_scalars.ScalarStuffVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public ScalarStuff __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 

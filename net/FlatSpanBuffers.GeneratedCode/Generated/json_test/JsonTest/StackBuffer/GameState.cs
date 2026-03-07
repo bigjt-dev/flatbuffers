@@ -13,7 +13,7 @@ using global::FlatSpanBuffers.Operations;
 using global::FlatSpanBuffers.Utils;
 using global::FlatSpanBuffers.Vectors;
 
-public ref struct GameState : IFlatbufferSpanObject
+public ref struct GameState : IFlatbufferSpanObject, IRootTable
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
@@ -22,6 +22,7 @@ public ref struct GameState : IFlatbufferSpanObject
   public static GameState GetRootAsGameState(ByteSpanBuffer _bb, GameState obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool GameStateBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "JSON"); }
   public static bool VerifyGameState(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("JSON", false, JsonTest.GameStateVerify.Verify); }
+  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("JSON", sizePrefixed, JsonTest.GameStateVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public GameState __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 

@@ -836,7 +836,7 @@ namespace FlatSpanBuffers.Tests
                 Assert.AreEqual(aCharactersValue.GetAs<BookReader>(1).BooksRead, bCharactersValue.GetAs<BookReader>(1).BooksRead);
                 Assert.AreEqual(aCharactersTypeValue[2], bCharactersTypeValue[2]);
                 Assert.AreEqual(aCharactersValue.GetAsString(2), bCharactersValue.GetAsString(2));
-                
+
                 var bCharsAsString = bCharactersValue.GetAsString(2);
                 int byteCount = Encoding.UTF8.GetByteCount(bCharsAsString);
                 Span<byte> utf8Bytes = new byte[byteCount];
@@ -1266,7 +1266,7 @@ namespace FlatSpanBuffers.Tests
             Monster.FinishMonsterBuffer(fbb, monsterOffset);
 
             // make a copy before verify. In place would access fbb.DataBuffer.Buffer.
-            var bufferBytes = fbb.DataBuffer.ToSizedSpan().ToArray(); 
+            var bufferBytes = fbb.DataBuffer.ToSizedSpan().ToArray();
             var readBuffer = new ByteBuffer(bufferBytes);
 
             // Verify the buffer
@@ -1289,7 +1289,7 @@ namespace FlatSpanBuffers.Tests
             var monster = Monster.GetRootAsMonster(buffer);
 
             // Check default values from schema
-            Assert.AreEqual(150, monster.Mana); 
+            Assert.AreEqual(150, monster.Mana);
             Assert.AreEqual(100, monster.Hp);
             Assert.AreEqual(Color.Blue, monster.Color);
             Assert.AreEqual(3.14159f, monster.Testf, 6);
@@ -1664,6 +1664,105 @@ namespace FlatSpanBuffers.Tests
             {
                 Assert.AreEqual(monsterT.Test4[i].A, test4Vec[i].A);
                 Assert.AreEqual(monsterT.Test4[i].B, test4Vec[i].B);
+            }
+        }
+
+        [FlatBuffersTestMethod]
+        public void TestFlatBufferRoot_GetRoot()
+        {
+            var monsterT = new MonsterT
+            {
+                Name = "PackedMonster",
+                Hp = 300,
+                Mana = 200,
+                Color = Color.Red,
+            };
+
+            var fbb = new FlatBufferBuilder(1024);
+            var offset = Monster.Pack(fbb, monsterT);
+            Monster.FinishMonsterBuffer(fbb, offset);
+            var bytes = fbb.DataBuffer.ToSizedSpan().ToArray();
+
+            {
+                var monster = FlatBufferRoot.GetRootUnchecked<Monster>(new ByteBuffer(bytes));
+                Assert.AreEqual(monsterT.Name, monster.Name);
+                Assert.AreEqual(monsterT.Hp, monster.Hp);
+                Assert.AreEqual(monsterT.Mana, monster.Mana);
+                Assert.AreEqual(monsterT.Color, monster.Color);
+            }
+            {
+                var monster = FlatBufferRoot.GetRootUnchecked<MyGame.Example.StackBuffer.Monster>(new ByteSpanBuffer(bytes));
+                Assert.AreEqual(monsterT.Name, monster.Name);
+                Assert.AreEqual(monsterT.Hp, monster.Hp);
+                Assert.AreEqual(monsterT.Mana, monster.Mana);
+                Assert.AreEqual(monsterT.Color, monster.Color);
+            }
+            {
+                if (FlatBufferRoot.TryGetRoot(new ByteBuffer(bytes), out Monster monster))
+                {
+                    Assert.AreEqual(monsterT.Name, monster.Name);
+                    Assert.AreEqual(monsterT.Hp, monster.Hp);
+                    Assert.AreEqual(monsterT.Mana, monster.Mana);
+                    Assert.AreEqual(monsterT.Color, monster.Color);
+                }
+            }
+            {
+                if (FlatBufferRoot.TryGetRoot(new ByteSpanBuffer(bytes), out MyGame.Example.StackBuffer.Monster monster))
+                {
+                    Assert.AreEqual(monsterT.Name, monster.Name);
+                    Assert.AreEqual(monsterT.Hp, monster.Hp);
+                    Assert.AreEqual(monsterT.Mana, monster.Mana);
+                    Assert.AreEqual(monsterT.Color, monster.Color);
+                }
+            }
+        }
+
+        [FlatBuffersTestMethod]
+        public void TestFlatBufferRoot_GetSizePrefixedRoot()
+        {
+            var monsterT = new MonsterT
+            {
+                Name = "SizePrefixedMonster",
+                Hp = 400,
+                Mana = 250,
+                Color = Color.Green,
+            };
+
+            var fbb = new FlatBufferBuilder(1024);
+            var offset = Monster.Pack(fbb, monsterT);
+            Monster.FinishSizePrefixedMonsterBuffer(fbb, offset);
+            var bytes = fbb.DataBuffer.ToSizedSpan().ToArray();
+
+            {
+                var monster = FlatBufferRoot.GetSizePrefixedRootUnchecked<Monster>(new ByteBuffer(bytes));
+                Assert.AreEqual(monsterT.Name, monster.Name);
+                Assert.AreEqual(monsterT.Hp, monster.Hp);
+                Assert.AreEqual(monsterT.Mana, monster.Mana);
+                Assert.AreEqual(monsterT.Color, monster.Color);
+            }
+            {
+                var monster = FlatBufferRoot.GetSizePrefixedRootUnchecked<MyGame.Example.StackBuffer.Monster>(new ByteSpanBuffer(bytes));
+                Assert.AreEqual(monsterT.Name, monster.Name);
+                Assert.AreEqual(monsterT.Hp, monster.Hp);
+                Assert.AreEqual(monsterT.Mana, monster.Mana);
+                Assert.AreEqual(monsterT.Color, monster.Color);
+            }
+            {
+                Assert.IsTrue(FlatBufferRoot.TryGetSizePrefixedRoot(new ByteBuffer(bytes), out Monster monster));
+                Assert.AreEqual(monsterT.Name, monster.Name);
+                Assert.AreEqual(monsterT.Hp, monster.Hp);
+                Assert.AreEqual(monsterT.Mana, monster.Mana);
+                Assert.AreEqual(monsterT.Color, monster.Color);
+            }
+            {
+                Assert.IsTrue(FlatBufferRoot.TryGetSizePrefixedRoot(new ByteSpanBuffer(bytes), out MyGame.Example.StackBuffer.Monster monster));
+                Assert.AreEqual(monsterT.Name, monster.Name);
+                Assert.AreEqual(monsterT.Hp, monster.Hp);
+                Assert.AreEqual(monsterT.Mana, monster.Mana);
+                Assert.AreEqual(monsterT.Color, monster.Color);
+            }
+            {
+                Assert.IsFalse(FlatBufferRoot.TryGetRoot(new ByteBuffer(bytes), out Monster _));
             }
         }
     }
