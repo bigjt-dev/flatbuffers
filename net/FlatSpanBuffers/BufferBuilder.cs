@@ -19,6 +19,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using FlatSpanBuffers.Operations;
 
@@ -67,6 +68,7 @@ namespace FlatSpanBuffers
         /// <summary>
         /// Current offset in the buffer
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int GetOffset(ref TBuffer buffer)
             => buffer.Length - _space;
 
@@ -99,12 +101,14 @@ namespace FlatSpanBuffers
             buffer.Reset();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Pad(ref TBuffer buffer, int size)
         {
             buffer.PadBytes(_space -= size, size);
         }
 
         // Prepare to write an element of size after additional_bytes have been written
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Prep(ref TBuffer buffer, int size, int additionalBytes)
         {
             // Track the biggest thing we've ever aligned to.
@@ -117,9 +121,19 @@ namespace FlatSpanBuffers
                 ((~(buffer.Length - _space + additionalBytes)) + 1) &
                 (size - 1);
 
-            // Check if we have enough space, realign if necessary
+            // Check if we have enough space, grow if necessary (cold path)
             int requiredSize = alignSize + size + additionalBytes;
-            while (_space < requiredSize)
+            if (_space < requiredSize)
+                GrowBuffer(ref buffer, requiredSize);
+
+            if (alignSize > 0)
+                Pad(ref buffer, alignSize);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void GrowBuffer(ref TBuffer buffer, int requiredSize)
+        {
+            do
             {
                 if (_bufferAllocator == null)
                     throw new OutOfMemoryException("Builder was not provided enough space to build the flatbuffer.");
@@ -128,24 +142,24 @@ namespace FlatSpanBuffers
                 var minRequiredBufferSize = buffer.Length - _space + requiredSize;
                 _bufferAllocator.GrowFront(ref buffer, minRequiredBufferSize);
                 _space += buffer.Length - oldBufSize;
-            }
-
-            if (alignSize > 0)
-                Pad(ref buffer, alignSize);
+            } while (_space < requiredSize);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Put<T>(ref TBuffer buffer, T value)
             where T : unmanaged
         {
             buffer.Put(_space -= BufferOperations.SizeOf<T>(), value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Put<T>(ref TBuffer buffer, scoped ReadOnlySpan<T> value)
             where T : unmanaged
         {
             buffer.PutSpan<T>(_space -= BufferOperations.SizeOf<T>() * value.Length, value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add<T>(ref TBuffer buffer, T value)
             where T : unmanaged
         {
@@ -264,11 +278,13 @@ namespace FlatSpanBuffers
 
         // Set the current vtable at `voffset` to the current location in the
         // buffer.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetVtableSlot(ref TBuffer buffer, Span<int> vtable, int voffset)
         {
             vtable[voffset] = GetOffset(ref buffer);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddToTable<T>(ref TBuffer buffer, Span<int> vtable, int o, T x, T d, bool forceDefaults)
             where T : unmanaged, IEquatable<T>
         {
@@ -279,6 +295,7 @@ namespace FlatSpanBuffers
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddToTable<T>(ref TBuffer buffer, Span<int> vtable, int o, T? x)
             where T : unmanaged
         {
@@ -292,6 +309,7 @@ namespace FlatSpanBuffers
         /// <summary>
         /// Add an offset value to the buffer, relative to where it will be written.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddOffset(ref TBuffer buffer, int off)
         {
             Prep(ref buffer, sizeof(int), 0); // Ensure alignment is already done.
@@ -332,6 +350,7 @@ namespace FlatSpanBuffers
         /// <summary>
         /// Adds a buffer offset to the Table at index `o` in its vtable using an offset value and default value
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddOffsetToTable(ref TBuffer buffer, Span<int> vtable, int o, int x, int d)
         {
             if (x != d)

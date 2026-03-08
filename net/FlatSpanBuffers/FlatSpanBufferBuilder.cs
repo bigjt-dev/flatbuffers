@@ -19,6 +19,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace FlatSpanBuffers
 {
@@ -111,6 +112,7 @@ namespace FlatSpanBuffers
         // such the int length field is aligned to SIZEOF_INT, and the string
         // data follows it directly.
         // If all you need to do is align, `additional_bytes` will be 0.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Prep(int size, int additionalBytes)
         {
             _builder.Prep(ref _bb, size, additionalBytes);
@@ -128,6 +130,7 @@ namespace FlatSpanBuffers
             _builder.Put(ref _bb, x);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add<T>(T value)
             where T : unmanaged
         {
@@ -148,6 +151,7 @@ namespace FlatSpanBuffers
         /// <param name="x">The value to put into the buffer. If the value is equal to the default
         /// and <see cref="ForceDefaults"/> is false, the value will be skipped.</param>
         /// <param name="d">The default value to compare the value against</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add<T>(int o, T x, T d)
             where T : unmanaged, IEquatable<T>
         {
@@ -161,6 +165,7 @@ namespace FlatSpanBuffers
         /// <param name="o">The index into the vtable</param>
         /// <param name="x">The nullable value to put into the buffer. If it doesn't have a value
         /// it will skip writing to the buffer.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add<T>(int o, T? x)
             where T : unmanaged
         {
@@ -204,6 +209,7 @@ namespace FlatSpanBuffers
         /// Adds an offset, relative to where it will be written.
         /// </summary>
         /// <param name="offset">The offset to add to the buffer.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddOffset(int offset)
         {
             _builder.AddOffset(ref _bb, offset);
@@ -216,11 +222,13 @@ namespace FlatSpanBuffers
         /// <param name="x">The value to put into the buffer. If the value is equal to the default
         /// the value will be skipped.</param>
         /// <param name="d">The default value to compare the value against</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddOffset(int o, int x, int d)
         {
             _builder.AddOffsetToTable(ref _bb, _vtable, o, x, d);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddOffset<TOffset>(int o, TOffset x, int d)
             where TOffset : IFlatBufferOffset
         {
