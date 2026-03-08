@@ -1,0 +1,38 @@
+// FlatSharp benchmark schema - equivalent to benchmark.fbs with FlatSharp attributes.
+// Same data structures, same wire format, different serializer.
+
+attribute "fs_serializer";
+
+namespace Benchmarks.FlatSharp;
+
+enum Fruit : short { Apples = 0, Pears, Bananas }
+
+struct Foo {
+  id:ulong;
+  count:short;
+  prefix:byte;
+  length:uint;
+}
+
+struct Bar {
+  parent:Foo;
+  time:int;
+  ratio:float;
+  size:ushort;
+}
+
+table FooBar {
+  sibling:Bar;
+  name:string;
+  rating:double;
+  postfix:ubyte;
+}
+
+table FooBarContainer (fs_serializer:"Lazy") {
+  list:[FooBar];
+  initialized:bool;
+  fruit:Fruit;
+  location:string;
+}
+
+root_type FooBarContainer;

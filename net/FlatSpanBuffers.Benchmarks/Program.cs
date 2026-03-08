@@ -30,12 +30,15 @@ public static class Program
     {
         List<Summary> results =
         [
-            BenchmarkRunner.Run<SimpleMonsterBenchmarks>(),
+            //BenchmarkRunner.Run<SimpleMonsterBenchmarks>(),
             BenchmarkRunner.Run<DecodeBenchmarks>(),
             BenchmarkRunner.Run<DecodeObjectApiBenchmarks>(),
             BenchmarkRunner.Run<EncodeBenchmarks>(),
             BenchmarkRunner.Run<EncodeObjectApiBenchmarks>(),
             BenchmarkRunner.Run<VerifyBenchmarks>(),
+            BenchmarkRunner.Run<FlatSharpLazyDecodeComparison>(),
+            BenchmarkRunner.Run<FlatSharpGreedyDecodeComparison>(),
+            BenchmarkRunner.Run<FlatSharpEncodeComparison>(),
         ];
 
         if (results.Count == 0)

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.0" />
+    <PackageReference Include="FlatSharp.Runtime" Version="7.9.0" />
   </ItemGroup>
 
   <ItemGroup>
