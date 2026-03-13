@@ -21,8 +21,8 @@ public struct Movie : IFlatbufferObject, IRootTable
   public static Movie GetRootAsMovie(ByteBuffer _bb) { return GetRootAsMovie(_bb, new Movie()); }
   public static Movie GetRootAsMovie(ByteBuffer _bb, Movie obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool MovieBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "MOVI"); }
-  public static bool VerifyMovie(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("MOVI", false, MyGame.Example.MovieVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("MOVI", sizePrefixed, MyGame.Example.MovieVerify.Verify);
+  public static bool VerifyMovie(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("MOVI", false, MyGame.Example.MovieVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("MOVI", sizePrefixed, MyGame.Example.MovieVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public Movie __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -197,35 +197,36 @@ public struct Movie : IFlatbufferObject, IRootTable
   }
   public static Offset<MyGame.Example.Movie> Pack(FlatBufferBuilder builder, MovieT _o) {
     if (_o == null) return default(Offset<MyGame.Example.Movie>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.Movie> Pack(FlatBufferBuilder builder, MovieT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.Movie>);
     var _main_character_type = _o.MainCharacter == null ? MyGame.Example.Character.NONE : _o.MainCharacter.Type;
     var _main_character = _o.MainCharacter == null ? 0 : MyGame.Example.CharacterUnion.Pack(builder, _o.MainCharacter);
     var _characters_type = default(VectorOffset);
     if (_o.Characters != null) {
       var _characters_type_len = _o.Characters.Count;
-      MyGame.Example.Character[] _characters_type_arr = null;
-      try {
-        Span<MyGame.Example.Character> __characters_type = _characters_type_len <= 256
-          ? stackalloc MyGame.Example.Character[_characters_type_len]
-          : (_characters_type_arr = ArrayPool<MyGame.Example.Character>.Shared.Rent(_characters_type_len)).AsSpan(0, _characters_type_len);
-        for (var _j = 0; _j < _characters_type_len; ++_j) { __characters_type[_j] = _o.Characters[_j].Type; }
-        _characters_type = CreateCharactersTypeVector(builder, __characters_type);
-      } finally {
-        if (_characters_type_arr != null) { ArrayPool<MyGame.Example.Character>.Shared.Return(_characters_type_arr); }
-      }
+      Span<MyGame.Example.Character> __characters_type = _characters_type_len <= 4096 ? stackalloc MyGame.Example.Character[_characters_type_len] : new MyGame.Example.Character[_characters_type_len];
+      for (var _j = 0; _j < _characters_type_len; ++_j) { __characters_type[_j] = _o.Characters[_j].Type; }
+      _characters_type = Movie.CreateCharactersTypeVectorBlock(builder, __characters_type);
     }
     var _characters = default(VectorOffset);
     if (_o.Characters != null) {
       var _characters_len = _o.Characters.Count;
-      int[] _characters_arr = null;
-      try {
-        Span<int> __characters = _characters_len <= 64
-          ? stackalloc int[_characters_len]
-          : (_characters_arr = ArrayPool<int>.Shared.Rent(_characters_len)).AsSpan(0, _characters_len);
-        for (var _j = 0; _j < _characters_len; ++_j) { __characters[_j] = MyGame.Example.CharacterUnion.Pack(builder,  _o.Characters[_j]); }
-        _characters = CreateCharactersVector(builder, __characters);
-      } finally {
-        if (_characters_arr != null) { ArrayPool<int>.Shared.Return(_characters_arr); }
-      }
+      Span<int> _characters_buf = _characters_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_characters_len] : lengthyVectorSpace[.._characters_len];
+      for (var _j = 0; _j < _characters_len; ++_j) { _characters_buf[_j] = MyGame.Example.CharacterUnion.Pack(builder,  _o.Characters[_j]); }
+      builder.StartVector(4, _characters_len, 4);
+      builder.AddOffsetSpan(_characters_buf);
+      _characters = builder.EndVector();
     }
     return CreateMovie(
       builder,
@@ -236,7 +237,7 @@ public struct Movie : IFlatbufferObject, IRootTable
   }
 }
 
-public class MovieT
+public class MovieT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("main_character_type")]
   private MyGame.Example.Character MainCharacterType {
@@ -270,10 +271,21 @@ public class MovieT
   }
   [System.Text.Json.Serialization.JsonPropertyName("characters")]
   public List<MyGame.Example.CharacterUnion> Characters { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MyGame.Example.CharacterUnion> CharactersAsSpan => CollectionsMarshal.AsSpan(Characters);
 
   public MovieT() {
     this.MainCharacter = null;
     this.Characters = null;
+  }
+  public void Reset() {
+    this.MainCharacter = null;
+    this.Characters?.Clear();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.Characters != null && this.Characters.Count > _max) _max = this.Characters.Count;
+    return _max;
   }
 
   private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
@@ -318,7 +330,7 @@ public class MovieT
 
 public static class MovieVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*MainCharacterType*/, 1 /*MyGame.Example.Character*/, 1, false)

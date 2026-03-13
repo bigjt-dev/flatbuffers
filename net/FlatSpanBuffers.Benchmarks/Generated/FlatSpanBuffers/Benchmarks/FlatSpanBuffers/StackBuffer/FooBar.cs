@@ -32,6 +32,19 @@ public ref struct FooBar : IFlatbufferSpanObject
   public byte Postfix { get { int o = __p.__offset(10); return o != 0 ? __p.bb.Get<byte>(o + __p.bb_pos) : (byte)0; } }
   public bool MutatePostfix(byte postfix) { int o = __p.__offset(10); if (o != 0) { __p.bb.PutByte(o + __p.bb_pos, postfix); return true; } else { return false; } }
 
+  public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar> CreateFooBar(ref FlatSpanBufferBuilder builder,
+      Benchmarks.FlatSpanBuffers.BarT sibling = null,
+      StringOffset nameOffset = default(StringOffset),
+      double rating = 0.0,
+      byte postfix = 0) {
+    builder.StartTable(4);
+    FooBar.AddRating(ref builder, rating);
+    FooBar.AddName(ref builder, nameOffset);
+    FooBar.AddSibling(ref builder, Benchmarks.FlatSpanBuffers.StackBuffer.Bar.Pack(ref builder, sibling));
+    FooBar.AddPostfix(ref builder, postfix);
+    return FooBar.EndFooBar(ref builder);
+  }
+
   public static void StartFooBar(ref FlatSpanBufferBuilder builder) { builder.StartTable(4); }
   public static void AddSibling(ref FlatSpanBufferBuilder builder, Offset<Benchmarks.FlatSpanBuffers.StackBuffer.Bar> siblingOffset) { builder.AddStruct(0, siblingOffset, 0); }
   public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
@@ -59,13 +72,26 @@ public ref struct FooBar : IFlatbufferSpanObject
   }
   public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar> Pack(ref FlatSpanBufferBuilder builder, FooBarT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar> Pack(ref FlatSpanBufferBuilder builder, FooBarT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
-    StartFooBar(ref builder);
-    AddSibling(ref builder, Benchmarks.FlatSpanBuffers.StackBuffer.Bar.Pack(ref builder, _o.Sibling));
-    AddName(ref builder, _name);
-    AddRating(ref builder, _o.Rating);
-    AddPostfix(ref builder, _o.Postfix);
-    return EndFooBar(ref builder);
+    return CreateFooBar(
+      ref builder,
+      _o.Sibling,
+      _name,
+      _o.Rating,
+      _o.Postfix);
   }
 }
 

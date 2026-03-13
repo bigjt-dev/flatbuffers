@@ -20,8 +20,8 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
   public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
   public static Monster GetRootAsMonster(ByteSpanBuffer _bb) { return GetRootAsMonster(_bb, new Monster()); }
   public static Monster GetRootAsMonster(ByteSpanBuffer _bb, Monster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
-  public static bool VerifyMonster(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, MonsterTest.MonsterVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, MonsterTest.MonsterVerify.Verify);
+  public static bool VerifyMonster(ByteSpanBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("", false, MonsterTest.MonsterVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, MonsterTest.MonsterVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public Monster __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -43,6 +43,31 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
   public RefStructNullable<TTable> Equipped<TTable>() where TTable : struct, IFlatbufferSpanObject, allows ref struct { int o = __p.__offset(22); return o != 0 ? new RefStructNullable<TTable>(__p.__union<TTable>(o + __p.bb_pos)) : default; }
   public MonsterTest.StackBuffer.Weapon EquippedAsWeapon() { return Equipped<MonsterTest.StackBuffer.Weapon>().Value; }
   public RefStructNullable<StructVectorSpan<MonsterTest.StackBuffer.Vec3>> Path { get { int o = __p.__offset(24); return o != 0 ? new RefStructNullable<StructVectorSpan<MonsterTest.StackBuffer.Vec3>>(new StructVectorSpan<MonsterTest.StackBuffer.Vec3>(__p, o, 12)) : default; } }
+
+  public static Offset<MonsterTest.StackBuffer.Monster> CreateMonster(ref FlatSpanBufferBuilder builder,
+      MonsterTest.Vec3T pos = null,
+      short mana = 150,
+      short hp = 100,
+      StringOffset nameOffset = default(StringOffset),
+      VectorOffset inventoryOffset = default(VectorOffset),
+      MonsterTest.Color color = MonsterTest.Color.Blue,
+      VectorOffset weaponsOffset = default(VectorOffset),
+      MonsterTest.Equipment equipped_type = MonsterTest.Equipment.NONE,
+      int equippedOffset = 0,
+      VectorOffset pathOffset = default(VectorOffset)) {
+    builder.StartTable(11);
+    Monster.AddPath(ref builder, pathOffset);
+    Monster.AddEquipped(ref builder, equippedOffset);
+    Monster.AddWeapons(ref builder, weaponsOffset);
+    Monster.AddInventory(ref builder, inventoryOffset);
+    Monster.AddName(ref builder, nameOffset);
+    Monster.AddPos(ref builder, MonsterTest.StackBuffer.Vec3.Pack(ref builder, pos));
+    Monster.AddHp(ref builder, hp);
+    Monster.AddMana(ref builder, mana);
+    Monster.AddEquippedType(ref builder, equipped_type);
+    Monster.AddColor(ref builder, color);
+    return Monster.EndMonster(ref builder);
+  }
 
   public static void StartMonster(ref FlatSpanBufferBuilder builder) { builder.StartTable(11); }
   public static void AddPos(ref FlatSpanBufferBuilder builder, Offset<MonsterTest.StackBuffer.Vec3> posOffset) { builder.AddStruct(0, posOffset, 0); }
@@ -143,6 +168,19 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
   }
   public static Offset<MonsterTest.StackBuffer.Monster> Pack(ref FlatSpanBufferBuilder builder, MonsterT _o) {
     if (_o == null) return default(Offset<MonsterTest.StackBuffer.Monster>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MonsterTest.StackBuffer.Monster> Pack(ref FlatSpanBufferBuilder builder, MonsterT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MonsterTest.StackBuffer.Monster>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     var _inventory = default(VectorOffset);
     if (_o.Inventory != null) {
@@ -151,16 +189,11 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
     var _weapons = default(VectorOffset);
     if (_o.Weapons != null) {
       var _weapons_len = _o.Weapons.Count;
-      Offset<MonsterTest.StackBuffer.Weapon>[] _weapons_arr = null;
-      try {
-        Span<Offset<MonsterTest.StackBuffer.Weapon>> __weapons = _weapons_len <= 64
-          ? stackalloc Offset<MonsterTest.StackBuffer.Weapon>[_weapons_len]
-          : (_weapons_arr = ArrayPool<Offset<MonsterTest.StackBuffer.Weapon>>.Shared.Rent(_weapons_len)).AsSpan(0, _weapons_len);
-        for (var _j = 0; _j < _weapons_len; ++_j) { __weapons[_j] = MonsterTest.StackBuffer.Weapon.Pack(ref builder, _o.Weapons[_j]); }
-        _weapons = CreateWeaponsVector(ref builder, __weapons);
-      } finally {
-        if (_weapons_arr != null) { ArrayPool<Offset<MonsterTest.StackBuffer.Weapon>>.Shared.Return(_weapons_arr); }
-      }
+      Span<int> _weapons_buf = _weapons_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_weapons_len] : lengthyVectorSpace[.._weapons_len];
+      for (var _j = 0; _j < _weapons_len; ++_j) { _weapons_buf[_j] = MonsterTest.StackBuffer.Weapon.Pack(ref builder, _o.Weapons[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _weapons_len, 4);
+      builder.AddOffsetSpan(_weapons_buf);
+      _weapons = builder.EndVector();
     }
     var _equipped_type = _o.Equipped == null ? MonsterTest.Equipment.NONE : _o.Equipped.Type;
     var _equipped = _o.Equipped == null ? 0 : MonsterTest.EquipmentUnion.Pack(ref builder, _o.Equipped);
@@ -170,18 +203,18 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
       for (var _j = _o.Path.Count - 1; _j >= 0; --_j) { MonsterTest.StackBuffer.Vec3.Pack(ref builder, _o.Path[_j]); }
       _path = builder.EndVector();
     }
-    StartMonster(ref builder);
-    AddPos(ref builder, MonsterTest.StackBuffer.Vec3.Pack(ref builder, _o.Pos));
-    AddMana(ref builder, _o.Mana);
-    AddHp(ref builder, _o.Hp);
-    AddName(ref builder, _name);
-    AddInventory(ref builder, _inventory);
-    AddColor(ref builder, _o.Color);
-    AddWeapons(ref builder, _weapons);
-    AddEquippedType(ref builder, _equipped_type);
-    AddEquipped(ref builder, _equipped);
-    AddPath(ref builder, _path);
-    return EndMonster(ref builder);
+    return CreateMonster(
+      ref builder,
+      _o.Pos,
+      _o.Mana,
+      _o.Hp,
+      _name,
+      _inventory,
+      _o.Color,
+      _weapons,
+      _equipped_type,
+      _equipped,
+      _path);
   }
 }
 

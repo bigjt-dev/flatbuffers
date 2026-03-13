@@ -21,8 +21,8 @@ public struct ScalarStuff : IFlatbufferObject, IRootTable
   public static ScalarStuff GetRootAsScalarStuff(ByteBuffer _bb) { return GetRootAsScalarStuff(_bb, new ScalarStuff()); }
   public static ScalarStuff GetRootAsScalarStuff(ByteBuffer _bb, ScalarStuff obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool ScalarStuffBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "NULL"); }
-  public static bool VerifyScalarStuff(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("NULL", false, optional_scalars.ScalarStuffVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("NULL", sizePrefixed, optional_scalars.ScalarStuffVerify.Verify);
+  public static bool VerifyScalarStuff(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("NULL", false, optional_scalars.ScalarStuffVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("NULL", sizePrefixed, optional_scalars.ScalarStuffVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public ScalarStuff __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -228,6 +228,19 @@ public struct ScalarStuff : IFlatbufferObject, IRootTable
   }
   public static Offset<optional_scalars.ScalarStuff> Pack(FlatBufferBuilder builder, ScalarStuffT _o) {
     if (_o == null) return default(Offset<optional_scalars.ScalarStuff>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<optional_scalars.ScalarStuff> Pack(FlatBufferBuilder builder, ScalarStuffT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<optional_scalars.ScalarStuff>);
     return CreateScalarStuff(
       builder,
       _o.JustI8,
@@ -269,7 +282,7 @@ public struct ScalarStuff : IFlatbufferObject, IRootTable
   }
 }
 
-public class ScalarStuffT
+public class ScalarStuffT : IFlatBufferObjectT
 {
   public sbyte JustI8 { get; set; }
   public sbyte? MaybeI8 { get; set; }
@@ -346,6 +359,48 @@ public class ScalarStuffT
     this.MaybeEnum = null;
     this.DefaultEnum = optional_scalars.OptionalByte.One;
   }
+  public void Reset() {
+    this.JustI8 = 0;
+    this.MaybeI8 = null;
+    this.DefaultI8 = 42;
+    this.JustU8 = 0;
+    this.MaybeU8 = null;
+    this.DefaultU8 = 42;
+    this.JustI16 = 0;
+    this.MaybeI16 = null;
+    this.DefaultI16 = 42;
+    this.JustU16 = 0;
+    this.MaybeU16 = null;
+    this.DefaultU16 = 42;
+    this.JustI32 = 0;
+    this.MaybeI32 = null;
+    this.DefaultI32 = 42;
+    this.JustU32 = 0;
+    this.MaybeU32 = null;
+    this.DefaultU32 = 42;
+    this.JustI64 = 0;
+    this.MaybeI64 = null;
+    this.DefaultI64 = 42;
+    this.JustU64 = 0;
+    this.MaybeU64 = null;
+    this.DefaultU64 = 42;
+    this.JustF32 = 0.0f;
+    this.MaybeF32 = null;
+    this.DefaultF32 = 42.0f;
+    this.JustF64 = 0.0;
+    this.MaybeF64 = null;
+    this.DefaultF64 = 42.0;
+    this.JustBool = false;
+    this.MaybeBool = null;
+    this.DefaultBool = true;
+    this.JustEnum = optional_scalars.OptionalByte.None;
+    this.MaybeEnum = null;
+    this.DefaultEnum = optional_scalars.OptionalByte.One;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
   public static ScalarStuffT DeserializeFromBinary(Span<byte> fbBuffer) {
     return StackBuffer.ScalarStuff.GetRootAsScalarStuff(new ByteSpanBuffer(fbBuffer)).UnPack();
   }
@@ -375,7 +430,7 @@ public class ScalarStuffT
 
 public static class ScalarStuffVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*JustI8*/, 1 /*sbyte*/, 1, false)

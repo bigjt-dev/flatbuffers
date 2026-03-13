@@ -204,36 +204,39 @@ public struct Player : IFlatbufferObject
   }
   public static Offset<JsonTest.Player> Pack(FlatBufferBuilder builder, PlayerT _o) {
     if (_o == null) return default(Offset<JsonTest.Player>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<JsonTest.Player> Pack(FlatBufferBuilder builder, PlayerT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<JsonTest.Player>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     var _inventory = default(VectorOffset);
     if (_o.Inventory != null) {
       var _inventory_len = _o.Inventory.Count;
-      Offset<JsonTest.Item>[] _inventory_arr = null;
-      try {
-        Span<Offset<JsonTest.Item>> __inventory = _inventory_len <= 64
-          ? stackalloc Offset<JsonTest.Item>[_inventory_len]
-          : (_inventory_arr = ArrayPool<Offset<JsonTest.Item>>.Shared.Rent(_inventory_len)).AsSpan(0, _inventory_len);
-        for (var _j = 0; _j < _inventory_len; ++_j) { __inventory[_j] = JsonTest.Item.Pack(builder, _o.Inventory[_j]); }
-        _inventory = CreateInventoryVector(builder, __inventory);
-      } finally {
-        if (_inventory_arr != null) { ArrayPool<Offset<JsonTest.Item>>.Shared.Return(_inventory_arr); }
-      }
+      Span<int> _inventory_buf = _inventory_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_inventory_len] : lengthyVectorSpace[.._inventory_len];
+      for (var _j = 0; _j < _inventory_len; ++_j) { _inventory_buf[_j] = JsonTest.Item.Pack(builder, _o.Inventory[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _inventory_len, 4);
+      builder.AddOffsetSpan(_inventory_buf);
+      _inventory = builder.EndVector();
     }
     var _equipped_type = _o.Equipped == null ? JsonTest.Equipment.NONE : _o.Equipped.Type;
     var _equipped = _o.Equipped == null ? 0 : JsonTest.EquipmentUnion.Pack(builder, _o.Equipped);
     var _tags = default(VectorOffset);
     if (_o.Tags != null) {
       var _tags_len = _o.Tags.Count;
-      StringOffset[] _tags_arr = null;
-      try {
-        Span<StringOffset> __tags = _tags_len <= 64
-          ? stackalloc StringOffset[_tags_len]
-          : (_tags_arr = ArrayPool<StringOffset>.Shared.Rent(_tags_len)).AsSpan(0, _tags_len);
-        for (var _j = 0; _j < _tags_len; ++_j) { __tags[_j] = builder.CreateString(_o.Tags[_j]); }
-        _tags = CreateTagsVector(builder, __tags);
-      } finally {
-        if (_tags_arr != null) { ArrayPool<StringOffset>.Shared.Return(_tags_arr); }
-      }
+      Span<int> _tags_buf = _tags_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_tags_len] : lengthyVectorSpace[.._tags_len];
+      for (var _j = 0; _j < _tags_len; ++_j) { _tags_buf[_j] = builder.CreateString(_o.Tags[_j]).Value; }
+      builder.StartVector(4, _tags_len, 4);
+      builder.AddOffsetSpan(_tags_buf);
+      _tags = builder.EndVector();
     }
     var _scores = default(VectorOffset);
     if (_o.Scores != null) {
@@ -257,7 +260,7 @@ public struct Player : IFlatbufferObject
   }
 }
 
-public class PlayerT
+public class PlayerT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("id")]
   public long Id { get; set; }
@@ -275,6 +278,8 @@ public class PlayerT
   public JsonTest.Priority Priorities { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("inventory")]
   public List<JsonTest.ItemT> Inventory { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<JsonTest.ItemT> InventoryAsSpan => CollectionsMarshal.AsSpan(Inventory);
   [System.Text.Json.Serialization.JsonPropertyName("equipped_type")]
   private JsonTest.Equipment EquippedType {
     get {
@@ -290,8 +295,12 @@ public class PlayerT
   public JsonTest.EquipmentUnion Equipped { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("tags")]
   public List<string> Tags { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<string> TagsAsSpan => CollectionsMarshal.AsSpan(Tags);
   [System.Text.Json.Serialization.JsonPropertyName("scores")]
   public List<int> Scores { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<int> ScoresAsSpan => CollectionsMarshal.AsSpan(Scores);
   [System.Text.Json.Serialization.JsonPropertyName("color")]
   public JsonTest.ColorT Color { get; set; }
 
@@ -309,12 +318,40 @@ public class PlayerT
     this.Scores = null;
     this.Color = new JsonTest.ColorT();
   }
+  public void Reset() {
+    this.Id = 0;
+    this.Name = null;
+    this.Level = 1;
+    this.Health = 100.0f;
+    this.Position?.Reset();
+    this.Status = JsonTest.Status.Active;
+    this.Priorities = 0;
+    this.Inventory?.Clear();
+    this.Equipped = null;
+    this.Tags?.Clear();
+    this.Scores?.Clear();
+    this.Color?.Reset();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.Inventory != null && this.Inventory.Count > _max) _max = this.Inventory.Count;
+    if (this.Inventory != null) {
+      for (var i = 0; i < this.Inventory.Count; ++i) {
+        if (this.Inventory[i] != null) {
+          var _inner_maxlen = this.Inventory[i].GetMaxVectorLength();
+          if (_inner_maxlen > _max) _max = _inner_maxlen;
+        }
+      }
+    }
+    if (this.Tags != null && this.Tags.Count > _max) _max = this.Tags.Count;
+    return _max;
+  }
 }
 
 
 public static class PlayerVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Id*/, 8 /*long*/, 8, false)

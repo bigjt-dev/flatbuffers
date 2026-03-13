@@ -53,7 +53,20 @@ public ref struct TableA : IFlatbufferSpanObject
   }
   public static Offset<MyGame.OtherNameSpace.StackBuffer.TableA> Pack(ref FlatSpanBufferBuilder builder, TableAT _o) {
     if (_o == null) return default(Offset<MyGame.OtherNameSpace.StackBuffer.TableA>);
-    var _b = _o.B == null ? default(Offset<MyGame.OtherNameSpace.StackBuffer.TableB>) : MyGame.OtherNameSpace.StackBuffer.TableB.Pack(ref builder, _o.B);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.OtherNameSpace.StackBuffer.TableA> Pack(ref FlatSpanBufferBuilder builder, TableAT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.OtherNameSpace.StackBuffer.TableA>);
+    var _b = _o.B == null ? default(Offset<MyGame.OtherNameSpace.StackBuffer.TableB>) : MyGame.OtherNameSpace.StackBuffer.TableB.Pack(ref builder, _o.B, lengthyVectorSpace);
     return CreateTableA(
       ref builder,
       _b);

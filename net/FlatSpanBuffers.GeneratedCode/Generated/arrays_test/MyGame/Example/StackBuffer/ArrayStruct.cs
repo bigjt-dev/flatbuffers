@@ -78,6 +78,19 @@ public ref struct ArrayStruct : IFlatbufferSpanObject
   }
   public static Offset<MyGame.Example.StackBuffer.ArrayStruct> Pack(ref FlatSpanBufferBuilder builder, ArrayStructT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StackBuffer.ArrayStruct>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.StackBuffer.ArrayStruct> Pack(ref FlatSpanBufferBuilder builder, ArrayStructT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.StackBuffer.ArrayStruct>);
     var _b = _o.B;
     var _d_a = new int[2,2];
     for (var idx0 = 0; idx0 < 2; ++idx0) {for (var idx1 = 0; idx1 < 2; ++idx1) {_d_a[idx0,idx1] = _o.D[idx0].A[idx1];}}

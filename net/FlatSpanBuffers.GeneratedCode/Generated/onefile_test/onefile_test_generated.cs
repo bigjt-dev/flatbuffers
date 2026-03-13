@@ -43,14 +43,14 @@ public class PayloadUnion {
   public OneFileTest.BinaryMessageT AsBinaryMessage() { return this.As<OneFileTest.BinaryMessageT>(); }
   public static PayloadUnion FromBinaryMessage(OneFileTest.BinaryMessageT _binarymessage) { return new PayloadUnion{ Type = Payload.BinaryMessage, Value = _binarymessage }; }
 
-  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, PayloadUnion _o) {
+  public static int Pack(FlatBufferBuilder builder, PayloadUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Payload.TextMessage: return OneFileTest.TextMessage.Pack(builder, _o.AsTextMessage()).Value;
       case Payload.BinaryMessage: return OneFileTest.BinaryMessage.Pack(builder, _o.AsBinaryMessage()).Value;
     }
   }
-  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, PayloadUnion _o) {
+  public static int Pack(ref FlatSpanBufferBuilder builder, PayloadUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Payload.TextMessage: return OneFileTest.StackBuffer.TextMessage.Pack(ref builder, _o.AsTextMessage()).Value;
@@ -63,7 +63,7 @@ public class PayloadUnion {
 
 public static class PayloadVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Payload)typeId)
@@ -108,6 +108,19 @@ public struct Vec2 : IFlatbufferObject
   }
   public static Offset<OneFileTest.Vec2> Pack(FlatBufferBuilder builder, Vec2T _o) {
     if (_o == null) return default(Offset<OneFileTest.Vec2>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<OneFileTest.Vec2> Pack(FlatBufferBuilder builder, Vec2T _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<OneFileTest.Vec2>);
     return CreateVec2(
       builder,
       _o.X,
@@ -115,7 +128,7 @@ public struct Vec2 : IFlatbufferObject
   }
 }
 
-public class Vec2T
+public class Vec2T : IFlatBufferObjectT
 {
   public float X { get; set; }
   public float Y { get; set; }
@@ -123,6 +136,14 @@ public class Vec2T
   public Vec2T() {
     this.X = 0.0f;
     this.Y = 0.0f;
+  }
+  public void Reset() {
+    this.X = 0.0f;
+    this.Y = 0.0f;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 
@@ -155,6 +176,19 @@ public struct ColorRGBA : IFlatbufferObject
   }
   public static Offset<OneFileTest.ColorRGBA> Pack(FlatBufferBuilder builder, ColorRGBAT _o) {
     if (_o == null) return default(Offset<OneFileTest.ColorRGBA>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<OneFileTest.ColorRGBA> Pack(FlatBufferBuilder builder, ColorRGBAT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<OneFileTest.ColorRGBA>);
     var _channels = _o.Channels;
     return CreateColorRGBA(
       builder,
@@ -162,12 +196,19 @@ public struct ColorRGBA : IFlatbufferObject
   }
 }
 
-public class ColorRGBAT
+public class ColorRGBAT : IFlatBufferObjectT
 {
   public float[] Channels { get; set; }
 
   public ColorRGBAT() {
     this.Channels = new float[4];
+  }
+  public void Reset() {
+    System.Array.Clear(this.Channels, 0, this.Channels.Length);
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 
@@ -179,8 +220,8 @@ public struct TextMessage : IFlatbufferObject, IRootTable
   public static TextMessage GetRootAsTextMessage(ByteBuffer _bb) { return GetRootAsTextMessage(_bb, new TextMessage()); }
   public static TextMessage GetRootAsTextMessage(ByteBuffer _bb, TextMessage obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool TextMessageBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "OFTT"); }
-  public static bool VerifyTextMessage(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("OFTT", false, OneFileTest.TextMessageVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("OFTT", sizePrefixed, OneFileTest.TextMessageVerify.Verify);
+  public static bool VerifyTextMessage(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("OFTT", false, OneFileTest.TextMessageVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("OFTT", sizePrefixed, OneFileTest.TextMessageVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public TextMessage __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -218,6 +259,19 @@ public struct TextMessage : IFlatbufferObject, IRootTable
   }
   public static Offset<OneFileTest.TextMessage> Pack(FlatBufferBuilder builder, TextMessageT _o) {
     if (_o == null) return default(Offset<OneFileTest.TextMessage>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<OneFileTest.TextMessage> Pack(FlatBufferBuilder builder, TextMessageT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<OneFileTest.TextMessage>);
     var _text = _o.Text == null ? default(StringOffset) : builder.CreateString(_o.Text);
     return CreateTextMessage(
       builder,
@@ -226,7 +280,7 @@ public struct TextMessage : IFlatbufferObject, IRootTable
   }
 }
 
-public class TextMessageT
+public class TextMessageT : IFlatBufferObjectT
 {
   public string Text { get; set; }
   public OneFileTest.Priority Priority { get; set; }
@@ -234,6 +288,14 @@ public class TextMessageT
   public TextMessageT() {
     this.Text = null;
     this.Priority = OneFileTest.Priority.Low;
+  }
+  public void Reset() {
+    this.Text = null;
+    this.Priority = OneFileTest.Priority.Low;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
   public static TextMessageT DeserializeFromBinary(Span<byte> fbBuffer) {
     return StackBuffer.TextMessage.GetRootAsTextMessage(new ByteSpanBuffer(fbBuffer)).UnPack();
@@ -264,7 +326,7 @@ public class TextMessageT
 
 public static class TextMessageVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyString(tablePos, 4 /*Text*/, true)
@@ -321,6 +383,19 @@ public struct BinaryMessage : IFlatbufferObject
   }
   public static Offset<OneFileTest.BinaryMessage> Pack(FlatBufferBuilder builder, BinaryMessageT _o) {
     if (_o == null) return default(Offset<OneFileTest.BinaryMessage>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<OneFileTest.BinaryMessage> Pack(FlatBufferBuilder builder, BinaryMessageT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<OneFileTest.BinaryMessage>);
     var _data = default(VectorOffset);
     if (_o.Data != null) {
       _data = CreateDataVector(builder, CollectionsMarshal.AsSpan(_o.Data));
@@ -332,21 +407,31 @@ public struct BinaryMessage : IFlatbufferObject
   }
 }
 
-public class BinaryMessageT
+public class BinaryMessageT : IFlatBufferObjectT
 {
   public List<byte> Data { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<byte> DataAsSpan => CollectionsMarshal.AsSpan(Data);
   public int Size { get; set; }
 
   public BinaryMessageT() {
     this.Data = null;
     this.Size = 0;
   }
+  public void Reset() {
+    this.Data?.Clear();
+    this.Size = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class BinaryMessageVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyVectorOfData(tablePos, 4 /*Data*/, 1 /*byte*/, false)
@@ -362,8 +447,8 @@ public struct Envelope : IFlatbufferObject, IRootTable
   public static Envelope GetRootAsEnvelope(ByteBuffer _bb) { return GetRootAsEnvelope(_bb, new Envelope()); }
   public static Envelope GetRootAsEnvelope(ByteBuffer _bb, Envelope obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool EnvelopeBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "OFTT"); }
-  public static bool VerifyEnvelope(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("OFTT", false, OneFileTest.EnvelopeVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("OFTT", sizePrefixed, OneFileTest.EnvelopeVerify.Verify);
+  public static bool VerifyEnvelope(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("OFTT", false, OneFileTest.EnvelopeVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("OFTT", sizePrefixed, OneFileTest.EnvelopeVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public Envelope __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -622,21 +707,29 @@ public struct Envelope : IFlatbufferObject, IRootTable
   }
   public static Offset<OneFileTest.Envelope> Pack(FlatBufferBuilder builder, EnvelopeT _o) {
     if (_o == null) return default(Offset<OneFileTest.Envelope>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<OneFileTest.Envelope> Pack(FlatBufferBuilder builder, EnvelopeT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<OneFileTest.Envelope>);
     var _sender = _o.Sender == null ? default(StringOffset) : builder.CreateString(_o.Sender);
     var _recipient = _o.Recipient == null ? default(StringOffset) : builder.CreateString(_o.Recipient);
     var _tags = default(VectorOffset);
     if (_o.Tags != null) {
       var _tags_len = _o.Tags.Count;
-      StringOffset[] _tags_arr = null;
-      try {
-        Span<StringOffset> __tags = _tags_len <= 64
-          ? stackalloc StringOffset[_tags_len]
-          : (_tags_arr = ArrayPool<StringOffset>.Shared.Rent(_tags_len)).AsSpan(0, _tags_len);
-        for (var _j = 0; _j < _tags_len; ++_j) { __tags[_j] = builder.CreateString(_o.Tags[_j]); }
-        _tags = CreateTagsVector(builder, __tags);
-      } finally {
-        if (_tags_arr != null) { ArrayPool<StringOffset>.Shared.Return(_tags_arr); }
-      }
+      Span<int> _tags_buf = _tags_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_tags_len] : lengthyVectorSpace[.._tags_len];
+      for (var _j = 0; _j < _tags_len; ++_j) { _tags_buf[_j] = builder.CreateString(_o.Tags[_j]).Value; }
+      builder.StartVector(4, _tags_len, 4);
+      builder.AddOffsetSpan(_tags_buf);
+      _tags = builder.EndVector();
     }
     var _scores = default(VectorOffset);
     if (_o.Scores != null) {
@@ -653,30 +746,18 @@ public struct Envelope : IFlatbufferObject, IRootTable
     var _attachments_type = default(VectorOffset);
     if (_o.Attachments != null) {
       var _attachments_type_len = _o.Attachments.Count;
-      OneFileTest.Payload[] _attachments_type_arr = null;
-      try {
-        Span<OneFileTest.Payload> __attachments_type = _attachments_type_len <= 256
-          ? stackalloc OneFileTest.Payload[_attachments_type_len]
-          : (_attachments_type_arr = ArrayPool<OneFileTest.Payload>.Shared.Rent(_attachments_type_len)).AsSpan(0, _attachments_type_len);
-        for (var _j = 0; _j < _attachments_type_len; ++_j) { __attachments_type[_j] = _o.Attachments[_j].Type; }
-        _attachments_type = CreateAttachmentsTypeVector(builder, __attachments_type);
-      } finally {
-        if (_attachments_type_arr != null) { ArrayPool<OneFileTest.Payload>.Shared.Return(_attachments_type_arr); }
-      }
+      Span<OneFileTest.Payload> __attachments_type = _attachments_type_len <= 4096 ? stackalloc OneFileTest.Payload[_attachments_type_len] : new OneFileTest.Payload[_attachments_type_len];
+      for (var _j = 0; _j < _attachments_type_len; ++_j) { __attachments_type[_j] = _o.Attachments[_j].Type; }
+      _attachments_type = Envelope.CreateAttachmentsTypeVectorBlock(builder, __attachments_type);
     }
     var _attachments = default(VectorOffset);
     if (_o.Attachments != null) {
       var _attachments_len = _o.Attachments.Count;
-      int[] _attachments_arr = null;
-      try {
-        Span<int> __attachments = _attachments_len <= 64
-          ? stackalloc int[_attachments_len]
-          : (_attachments_arr = ArrayPool<int>.Shared.Rent(_attachments_len)).AsSpan(0, _attachments_len);
-        for (var _j = 0; _j < _attachments_len; ++_j) { __attachments[_j] = OneFileTest.PayloadUnion.Pack(builder,  _o.Attachments[_j]); }
-        _attachments = CreateAttachmentsVector(builder, __attachments);
-      } finally {
-        if (_attachments_arr != null) { ArrayPool<int>.Shared.Return(_attachments_arr); }
-      }
+      Span<int> _attachments_buf = _attachments_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_attachments_len] : lengthyVectorSpace[.._attachments_len];
+      for (var _j = 0; _j < _attachments_len; ++_j) { _attachments_buf[_j] = OneFileTest.PayloadUnion.Pack(builder,  _o.Attachments[_j]); }
+      builder.StartVector(4, _attachments_len, 4);
+      builder.AddOffsetSpan(_attachments_buf);
+      _attachments = builder.EndVector();
     }
     var _nested_data = default(VectorOffset);
     if (_o.NestedData != null) {
@@ -704,7 +785,7 @@ public struct Envelope : IFlatbufferObject, IRootTable
   }
 }
 
-public class EnvelopeT
+public class EnvelopeT : IFlatBufferObjectT
 {
   public long Id { get; set; }
   public string Sender { get; set; }
@@ -715,12 +796,22 @@ public class EnvelopeT
   public OneFileTest.Vec2T Origin { get; set; }
   public OneFileTest.ColorRGBAT Color { get; set; }
   public List<string> Tags { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<string> TagsAsSpan => CollectionsMarshal.AsSpan(Tags);
   public List<int> Scores { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<int> ScoresAsSpan => CollectionsMarshal.AsSpan(Scores);
   public List<OneFileTest.Vec2T> Waypoints { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<OneFileTest.Vec2T> WaypointsAsSpan => CollectionsMarshal.AsSpan(Waypoints);
   public OneFileTest.Priority Priority { get; set; }
   public OneFileTest.PayloadUnion Payload { get; set; }
   public List<OneFileTest.PayloadUnion> Attachments { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<OneFileTest.PayloadUnion> AttachmentsAsSpan => CollectionsMarshal.AsSpan(Attachments);
   public List<byte> NestedData { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<byte> NestedDataAsSpan => CollectionsMarshal.AsSpan(NestedData);
 
   public EnvelopeT() {
     this.Id = 0;
@@ -738,6 +829,29 @@ public class EnvelopeT
     this.Payload = null;
     this.Attachments = null;
     this.NestedData = null;
+  }
+  public void Reset() {
+    this.Id = 0;
+    this.Sender = null;
+    this.Recipient = null;
+    this.Timestamp = 0;
+    this.Ttl = 60;
+    this.Compressed = false;
+    this.Origin?.Reset();
+    this.Color?.Reset();
+    this.Tags?.Clear();
+    this.Scores?.Clear();
+    this.Waypoints?.Clear();
+    this.Priority = OneFileTest.Priority.Medium;
+    this.Payload = null;
+    this.Attachments?.Clear();
+    this.NestedData?.Clear();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.Tags != null && this.Tags.Count > _max) _max = this.Tags.Count;
+    if (this.Attachments != null && this.Attachments.Count > _max) _max = this.Attachments.Count;
+    return _max;
   }
   public static EnvelopeT DeserializeFromBinary(Span<byte> fbBuffer) {
     return StackBuffer.Envelope.GetRootAsEnvelope(new ByteSpanBuffer(fbBuffer)).UnPack();
@@ -768,7 +882,7 @@ public class EnvelopeT
 
 public static class EnvelopeVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Id*/, 8 /*long*/, 8, false)

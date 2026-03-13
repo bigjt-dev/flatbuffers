@@ -56,6 +56,19 @@ public struct Bar : IFlatbufferObject
   }
   public static Offset<Benchmarks.FlatSpanBuffers.Bar> Pack(FlatBufferBuilder builder, BarT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.Bar>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<Benchmarks.FlatSpanBuffers.Bar> Pack(FlatBufferBuilder builder, BarT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.Bar>);
     var _parent_id = _o.Parent.Id;
     var _parent_count = _o.Parent.Count;
     var _parent_prefix = _o.Parent.Prefix;
@@ -72,7 +85,7 @@ public struct Bar : IFlatbufferObject
   }
 }
 
-public class BarT
+public class BarT : IFlatBufferObjectT
 {
   public Benchmarks.FlatSpanBuffers.FooT Parent { get; set; }
   public int Time { get; set; }
@@ -84,6 +97,16 @@ public class BarT
     this.Time = 0;
     this.Ratio = 0.0f;
     this.Size = 0;
+  }
+  public void Reset() {
+    this.Parent?.Reset();
+    this.Time = 0;
+    this.Ratio = 0.0f;
+    this.Size = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

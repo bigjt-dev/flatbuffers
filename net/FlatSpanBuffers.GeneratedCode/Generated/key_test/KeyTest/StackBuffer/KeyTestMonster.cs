@@ -20,8 +20,8 @@ public ref struct KeyTestMonster : IFlatbufferSpanObject, IRootTable
   public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteSpanBuffer _bb) { return GetRootAsKeyTestMonster(_bb, new KeyTestMonster()); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteSpanBuffer _bb, KeyTestMonster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
-  public static bool VerifyKeyTestMonster(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, KeyTest.KeyTestMonsterVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, KeyTest.KeyTestMonsterVerify.Verify);
+  public static bool VerifyKeyTestMonster(ByteSpanBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("", false, KeyTest.KeyTestMonsterVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, KeyTest.KeyTestMonsterVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public KeyTestMonster __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -68,6 +68,19 @@ public ref struct KeyTestMonster : IFlatbufferSpanObject, IRootTable
     _o.Hp = this.Hp;
   }
   public static Offset<KeyTest.StackBuffer.KeyTestMonster> Pack(ref FlatSpanBufferBuilder builder, KeyTestMonsterT _o) {
+    if (_o == null) return default(Offset<KeyTest.StackBuffer.KeyTestMonster>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<KeyTest.StackBuffer.KeyTestMonster> Pack(ref FlatSpanBufferBuilder builder, KeyTestMonsterT _o, scoped Span<int> lengthyVectorSpace) {
     if (_o == null) return default(Offset<KeyTest.StackBuffer.KeyTestMonster>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     return CreateKeyTestMonster(

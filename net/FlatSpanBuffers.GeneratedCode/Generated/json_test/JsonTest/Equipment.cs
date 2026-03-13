@@ -4,6 +4,15 @@
 
 namespace JsonTest
 {
+using global::System;
+using global::System.Buffers;
+using global::System.Collections.Generic;
+using global::System.Runtime.InteropServices;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
+
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 public enum Equipment : byte
 {
@@ -28,14 +37,14 @@ public class EquipmentUnion {
   public JsonTest.ArmorT AsArmor() { return this.As<JsonTest.ArmorT>(); }
   public static EquipmentUnion FromArmor(JsonTest.ArmorT _armor) { return new EquipmentUnion{ Type = Equipment.Armor, Value = _armor }; }
 
-  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, EquipmentUnion _o) {
+  public static int Pack(FlatBufferBuilder builder, EquipmentUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Equipment.Weapon: return JsonTest.Weapon.Pack(builder, _o.AsWeapon()).Value;
       case Equipment.Armor: return JsonTest.Armor.Pack(builder, _o.AsArmor()).Value;
     }
   }
-  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, EquipmentUnion _o) {
+  public static int Pack(ref FlatSpanBufferBuilder builder, EquipmentUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Equipment.Weapon: return JsonTest.StackBuffer.Weapon.Pack(ref builder, _o.AsWeapon()).Value;
@@ -92,7 +101,7 @@ public class EquipmentUnion_JsonConverter : System.Text.Json.Serialization.JsonC
 
 public static class EquipmentVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Equipment)typeId)

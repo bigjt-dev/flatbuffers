@@ -389,20 +389,28 @@ public struct Weapon : IFlatbufferObject
   }
   public static Offset<ComprehensiveTest.Weapon> Pack(FlatBufferBuilder builder, WeaponT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.Weapon>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.Weapon> Pack(FlatBufferBuilder builder, WeaponT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.Weapon>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     var _tags = default(VectorOffset);
     if (_o.Tags != null) {
       var _tags_len = _o.Tags.Count;
-      StringOffset[] _tags_arr = null;
-      try {
-        Span<StringOffset> __tags = _tags_len <= 64
-          ? stackalloc StringOffset[_tags_len]
-          : (_tags_arr = ArrayPool<StringOffset>.Shared.Rent(_tags_len)).AsSpan(0, _tags_len);
-        for (var _j = 0; _j < _tags_len; ++_j) { __tags[_j] = builder.CreateString(_o.Tags[_j]); }
-        _tags = CreateTagsVector(builder, __tags);
-      } finally {
-        if (_tags_arr != null) { ArrayPool<StringOffset>.Shared.Return(_tags_arr); }
-      }
+      Span<int> _tags_buf = _tags_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_tags_len] : lengthyVectorSpace[.._tags_len];
+      for (var _j = 0; _j < _tags_len; ++_j) { _tags_buf[_j] = builder.CreateString(_o.Tags[_j]).Value; }
+      builder.StartVector(4, _tags_len, 4);
+      builder.AddOffsetSpan(_tags_buf);
+      _tags = builder.EndVector();
     }
     var _damage_values = default(VectorOffset);
     if (_o.DamageValues != null) {
@@ -429,58 +437,34 @@ public struct Weapon : IFlatbufferObject
     var _compatible_types_type = default(VectorOffset);
     if (_o.CompatibleTypes != null) {
       var _compatible_types_type_len = _o.CompatibleTypes.Count;
-      ComprehensiveTest.Equipment[] _compatible_types_type_arr = null;
-      try {
-        Span<ComprehensiveTest.Equipment> __compatible_types_type = _compatible_types_type_len <= 256
-          ? stackalloc ComprehensiveTest.Equipment[_compatible_types_type_len]
-          : (_compatible_types_type_arr = ArrayPool<ComprehensiveTest.Equipment>.Shared.Rent(_compatible_types_type_len)).AsSpan(0, _compatible_types_type_len);
-        for (var _j = 0; _j < _compatible_types_type_len; ++_j) { __compatible_types_type[_j] = _o.CompatibleTypes[_j].Type; }
-        _compatible_types_type = CreateCompatibleTypesTypeVector(builder, __compatible_types_type);
-      } finally {
-        if (_compatible_types_type_arr != null) { ArrayPool<ComprehensiveTest.Equipment>.Shared.Return(_compatible_types_type_arr); }
-      }
+      Span<ComprehensiveTest.Equipment> __compatible_types_type = _compatible_types_type_len <= 4096 ? stackalloc ComprehensiveTest.Equipment[_compatible_types_type_len] : new ComprehensiveTest.Equipment[_compatible_types_type_len];
+      for (var _j = 0; _j < _compatible_types_type_len; ++_j) { __compatible_types_type[_j] = _o.CompatibleTypes[_j].Type; }
+      _compatible_types_type = Weapon.CreateCompatibleTypesTypeVectorBlock(builder, __compatible_types_type);
     }
     var _compatible_types = default(VectorOffset);
     if (_o.CompatibleTypes != null) {
       var _compatible_types_len = _o.CompatibleTypes.Count;
-      int[] _compatible_types_arr = null;
-      try {
-        Span<int> __compatible_types = _compatible_types_len <= 64
-          ? stackalloc int[_compatible_types_len]
-          : (_compatible_types_arr = ArrayPool<int>.Shared.Rent(_compatible_types_len)).AsSpan(0, _compatible_types_len);
-        for (var _j = 0; _j < _compatible_types_len; ++_j) { __compatible_types[_j] = ComprehensiveTest.EquipmentUnion.Pack(builder,  _o.CompatibleTypes[_j]); }
-        _compatible_types = CreateCompatibleTypesVector(builder, __compatible_types);
-      } finally {
-        if (_compatible_types_arr != null) { ArrayPool<int>.Shared.Return(_compatible_types_arr); }
-      }
+      Span<int> _compatible_types_buf = _compatible_types_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_compatible_types_len] : lengthyVectorSpace[.._compatible_types_len];
+      for (var _j = 0; _j < _compatible_types_len; ++_j) { _compatible_types_buf[_j] = ComprehensiveTest.EquipmentUnion.Pack(builder,  _o.CompatibleTypes[_j]); }
+      builder.StartVector(4, _compatible_types_len, 4);
+      builder.AddOffsetSpan(_compatible_types_buf);
+      _compatible_types = builder.EndVector();
     }
     var _compatible_items_type = default(VectorOffset);
     if (_o.CompatibleItems != null) {
       var _compatible_items_type_len = _o.CompatibleItems.Count;
-      ComprehensiveTest.Equipment[] _compatible_items_type_arr = null;
-      try {
-        Span<ComprehensiveTest.Equipment> __compatible_items_type = _compatible_items_type_len <= 256
-          ? stackalloc ComprehensiveTest.Equipment[_compatible_items_type_len]
-          : (_compatible_items_type_arr = ArrayPool<ComprehensiveTest.Equipment>.Shared.Rent(_compatible_items_type_len)).AsSpan(0, _compatible_items_type_len);
-        for (var _j = 0; _j < _compatible_items_type_len; ++_j) { __compatible_items_type[_j] = _o.CompatibleItems[_j].Type; }
-        _compatible_items_type = CreateCompatibleItemsTypeVector(builder, __compatible_items_type);
-      } finally {
-        if (_compatible_items_type_arr != null) { ArrayPool<ComprehensiveTest.Equipment>.Shared.Return(_compatible_items_type_arr); }
-      }
+      Span<ComprehensiveTest.Equipment> __compatible_items_type = _compatible_items_type_len <= 4096 ? stackalloc ComprehensiveTest.Equipment[_compatible_items_type_len] : new ComprehensiveTest.Equipment[_compatible_items_type_len];
+      for (var _j = 0; _j < _compatible_items_type_len; ++_j) { __compatible_items_type[_j] = _o.CompatibleItems[_j].Type; }
+      _compatible_items_type = Weapon.CreateCompatibleItemsTypeVectorBlock(builder, __compatible_items_type);
     }
     var _compatible_items = default(VectorOffset);
     if (_o.CompatibleItems != null) {
       var _compatible_items_len = _o.CompatibleItems.Count;
-      int[] _compatible_items_arr = null;
-      try {
-        Span<int> __compatible_items = _compatible_items_len <= 64
-          ? stackalloc int[_compatible_items_len]
-          : (_compatible_items_arr = ArrayPool<int>.Shared.Rent(_compatible_items_len)).AsSpan(0, _compatible_items_len);
-        for (var _j = 0; _j < _compatible_items_len; ++_j) { __compatible_items[_j] = ComprehensiveTest.EquipmentUnion.Pack(builder,  _o.CompatibleItems[_j]); }
-        _compatible_items = CreateCompatibleItemsVector(builder, __compatible_items);
-      } finally {
-        if (_compatible_items_arr != null) { ArrayPool<int>.Shared.Return(_compatible_items_arr); }
-      }
+      Span<int> _compatible_items_buf = _compatible_items_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_compatible_items_len] : lengthyVectorSpace[.._compatible_items_len];
+      for (var _j = 0; _j < _compatible_items_len; ++_j) { _compatible_items_buf[_j] = ComprehensiveTest.EquipmentUnion.Pack(builder,  _o.CompatibleItems[_j]); }
+      builder.StartVector(4, _compatible_items_len, 4);
+      builder.AddOffsetSpan(_compatible_items_buf);
+      _compatible_items = builder.EndVector();
     }
     var _metadata = default(VectorOffset);
     if (_o.Metadata != null) {
@@ -513,24 +497,40 @@ public struct Weapon : IFlatbufferObject
   }
 }
 
-public class WeaponT
+public class WeaponT : IFlatBufferObjectT
 {
   public string Name { get; set; }
   public int Damage { get; set; }
   public float Durability { get; set; }
   public bool Enchanted { get; set; }
   public List<string> Tags { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<string> TagsAsSpan => CollectionsMarshal.AsSpan(Tags);
   public List<int> DamageValues { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<int> DamageValuesAsSpan => CollectionsMarshal.AsSpan(DamageValues);
   public List<float> Modifiers { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<float> ModifiersAsSpan => CollectionsMarshal.AsSpan(Modifiers);
   public ComprehensiveTest.TransformT Transform { get; set; }
   public List<ComprehensiveTest.Vec3T> HitPoints { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<ComprehensiveTest.Vec3T> HitPointsAsSpan => CollectionsMarshal.AsSpan(HitPoints);
   public ComprehensiveTest.Color Rarity { get; set; }
   public List<ComprehensiveTest.Color> ValidColors { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<ComprehensiveTest.Color> ValidColorsAsSpan => CollectionsMarshal.AsSpan(ValidColors);
   public ComprehensiveTest.EquipmentUnion WeaponType { get; set; }
   public ComprehensiveTest.EquipmentUnion WeaponEquipment { get; set; }
   public List<ComprehensiveTest.EquipmentUnion> CompatibleTypes { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<ComprehensiveTest.EquipmentUnion> CompatibleTypesAsSpan => CollectionsMarshal.AsSpan(CompatibleTypes);
   public List<ComprehensiveTest.EquipmentUnion> CompatibleItems { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<ComprehensiveTest.EquipmentUnion> CompatibleItemsAsSpan => CollectionsMarshal.AsSpan(CompatibleItems);
   public List<byte> Metadata { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<byte> MetadataAsSpan => CollectionsMarshal.AsSpan(Metadata);
   public ComprehensiveTest.FixedStatsT FixedStats { get; set; }
   public ComprehensiveTest.PositionHistoryT PositionHistory { get; set; }
 
@@ -554,12 +554,39 @@ public class WeaponT
     this.FixedStats = new ComprehensiveTest.FixedStatsT();
     this.PositionHistory = new ComprehensiveTest.PositionHistoryT();
   }
+  public void Reset() {
+    this.Name = null;
+    this.Damage = 10;
+    this.Durability = 100.0f;
+    this.Enchanted = false;
+    this.Tags?.Clear();
+    this.DamageValues?.Clear();
+    this.Modifiers?.Clear();
+    this.Transform?.Reset();
+    this.HitPoints?.Clear();
+    this.Rarity = ComprehensiveTest.Color.Red;
+    this.ValidColors?.Clear();
+    this.WeaponType = null;
+    this.WeaponEquipment = null;
+    this.CompatibleTypes?.Clear();
+    this.CompatibleItems?.Clear();
+    this.Metadata?.Clear();
+    this.FixedStats?.Reset();
+    this.PositionHistory?.Reset();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.Tags != null && this.Tags.Count > _max) _max = this.Tags.Count;
+    if (this.CompatibleTypes != null && this.CompatibleTypes.Count > _max) _max = this.CompatibleTypes.Count;
+    if (this.CompatibleItems != null && this.CompatibleItems.Count > _max) _max = this.CompatibleItems.Count;
+    return _max;
+  }
 }
 
 
 public static class WeaponVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyString(tablePos, 4 /*Name*/, true)

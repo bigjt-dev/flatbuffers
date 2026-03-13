@@ -45,6 +45,43 @@ public ref struct Player : IFlatbufferSpanObject
   public ComprehensiveTest.StackBuffer.Weapon EquippedItemAsWeapon() { return EquippedItem<ComprehensiveTest.StackBuffer.Weapon>().Value; }
   public ComprehensiveTest.StackBuffer.Armor EquippedItemAsArmor() { return EquippedItem<ComprehensiveTest.StackBuffer.Armor>().Value; }
 
+  public static Offset<ComprehensiveTest.StackBuffer.Player> CreatePlayer(ref FlatSpanBufferBuilder builder,
+      int id = 0,
+      StringOffset nameOffset = default(StringOffset),
+      int level = 1,
+      long experience = 0,
+      float health = 100.0f,
+      float mana = 50.0f,
+      VectorOffset inventory_typeOffset = default(VectorOffset),
+      VectorOffset inventoryOffset = default(VectorOffset),
+      VectorOffset skillsOffset = default(VectorOffset),
+      VectorOffset statsOffset = default(VectorOffset),
+      ComprehensiveTest.Vec3T spawn_point = null,
+      ComprehensiveTest.Status status = ComprehensiveTest.Status.Pending,
+      ComprehensiveTest.Equipment equipped_type_type = ComprehensiveTest.Equipment.NONE,
+      int equipped_typeOffset = 0,
+      ComprehensiveTest.Equipment equipped_item_type = ComprehensiveTest.Equipment.NONE,
+      int equipped_itemOffset = 0) {
+    builder.StartTable(16);
+    Player.AddExperience(ref builder, experience);
+    Player.AddEquippedItem(ref builder, equipped_itemOffset);
+    Player.AddEquippedType(ref builder, equipped_typeOffset);
+    Player.AddStatus(ref builder, status);
+    Player.AddSpawnPoint(ref builder, ComprehensiveTest.StackBuffer.Vec3.Pack(ref builder, spawn_point));
+    Player.AddStats(ref builder, statsOffset);
+    Player.AddSkills(ref builder, skillsOffset);
+    Player.AddInventory(ref builder, inventoryOffset);
+    Player.AddInventoryType(ref builder, inventory_typeOffset);
+    Player.AddMana(ref builder, mana);
+    Player.AddHealth(ref builder, health);
+    Player.AddLevel(ref builder, level);
+    Player.AddName(ref builder, nameOffset);
+    Player.AddId(ref builder, id);
+    Player.AddEquippedItemType(ref builder, equipped_item_type);
+    Player.AddEquippedTypeType(ref builder, equipped_type_type);
+    return Player.EndPlayer(ref builder);
+  }
+
   public static void StartPlayer(ref FlatSpanBufferBuilder builder) { builder.StartTable(16); }
   public static void AddId(ref FlatSpanBufferBuilder builder, int id) { builder.Add<int>(0, id, 0); }
   public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
@@ -236,48 +273,44 @@ public ref struct Player : IFlatbufferSpanObject
   }
   public static Offset<ComprehensiveTest.StackBuffer.Player> Pack(ref FlatSpanBufferBuilder builder, PlayerT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.Player>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.StackBuffer.Player> Pack(ref FlatSpanBufferBuilder builder, PlayerT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.Player>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     var _inventory_type = default(VectorOffset);
     if (_o.Inventory != null) {
       var _inventory_type_len = _o.Inventory.Count;
-      ComprehensiveTest.Equipment[] _inventory_type_arr = null;
-      try {
-        Span<ComprehensiveTest.Equipment> __inventory_type = _inventory_type_len <= 256
-          ? stackalloc ComprehensiveTest.Equipment[_inventory_type_len]
-          : (_inventory_type_arr = ArrayPool<ComprehensiveTest.Equipment>.Shared.Rent(_inventory_type_len)).AsSpan(0, _inventory_type_len);
-        for (var _j = 0; _j < _inventory_type_len; ++_j) { __inventory_type[_j] = _o.Inventory[_j].Type; }
-        _inventory_type = CreateInventoryTypeVector(ref builder, __inventory_type);
-      } finally {
-        if (_inventory_type_arr != null) { ArrayPool<ComprehensiveTest.Equipment>.Shared.Return(_inventory_type_arr); }
-      }
+      Span<ComprehensiveTest.Equipment> __inventory_type = _inventory_type_len <= 4096 ? stackalloc ComprehensiveTest.Equipment[_inventory_type_len] : new ComprehensiveTest.Equipment[_inventory_type_len];
+      for (var _j = 0; _j < _inventory_type_len; ++_j) { __inventory_type[_j] = _o.Inventory[_j].Type; }
+      _inventory_type = Player.CreateInventoryTypeVectorBlock(ref builder, __inventory_type);
     }
     var _inventory = default(VectorOffset);
     if (_o.Inventory != null) {
       var _inventory_len = _o.Inventory.Count;
-      int[] _inventory_arr = null;
-      try {
-        Span<int> __inventory = _inventory_len <= 64
-          ? stackalloc int[_inventory_len]
-          : (_inventory_arr = ArrayPool<int>.Shared.Rent(_inventory_len)).AsSpan(0, _inventory_len);
-        for (var _j = 0; _j < _inventory_len; ++_j) { __inventory[_j] = ComprehensiveTest.EquipmentUnion.Pack(ref builder,  _o.Inventory[_j]); }
-        _inventory = CreateInventoryVector(ref builder, __inventory);
-      } finally {
-        if (_inventory_arr != null) { ArrayPool<int>.Shared.Return(_inventory_arr); }
-      }
+      Span<int> _inventory_buf = _inventory_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_inventory_len] : lengthyVectorSpace[.._inventory_len];
+      for (var _j = 0; _j < _inventory_len; ++_j) { _inventory_buf[_j] = ComprehensiveTest.EquipmentUnion.Pack(ref builder,  _o.Inventory[_j]); }
+      builder.StartVector(4, _inventory_len, 4);
+      builder.AddOffsetSpan(_inventory_buf);
+      _inventory = builder.EndVector();
     }
     var _skills = default(VectorOffset);
     if (_o.Skills != null) {
       var _skills_len = _o.Skills.Count;
-      StringOffset[] _skills_arr = null;
-      try {
-        Span<StringOffset> __skills = _skills_len <= 64
-          ? stackalloc StringOffset[_skills_len]
-          : (_skills_arr = ArrayPool<StringOffset>.Shared.Rent(_skills_len)).AsSpan(0, _skills_len);
-        for (var _j = 0; _j < _skills_len; ++_j) { __skills[_j] = builder.CreateString(_o.Skills[_j]); }
-        _skills = CreateSkillsVector(ref builder, __skills);
-      } finally {
-        if (_skills_arr != null) { ArrayPool<StringOffset>.Shared.Return(_skills_arr); }
-      }
+      Span<int> _skills_buf = _skills_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_skills_len] : lengthyVectorSpace[.._skills_len];
+      for (var _j = 0; _j < _skills_len; ++_j) { _skills_buf[_j] = builder.CreateString(_o.Skills[_j]).Value; }
+      builder.StartVector(4, _skills_len, 4);
+      builder.AddOffsetSpan(_skills_buf);
+      _skills = builder.EndVector();
     }
     var _stats = default(VectorOffset);
     if (_o.Stats != null) {
@@ -287,24 +320,24 @@ public ref struct Player : IFlatbufferSpanObject
     var _equipped_type = _o.EquippedType == null ? 0 : ComprehensiveTest.EquipmentUnion.Pack(ref builder, _o.EquippedType);
     var _equipped_item_type = _o.EquippedItem == null ? ComprehensiveTest.Equipment.NONE : _o.EquippedItem.Type;
     var _equipped_item = _o.EquippedItem == null ? 0 : ComprehensiveTest.EquipmentUnion.Pack(ref builder, _o.EquippedItem);
-    StartPlayer(ref builder);
-    AddId(ref builder, _o.Id);
-    AddName(ref builder, _name);
-    AddLevel(ref builder, _o.Level);
-    AddExperience(ref builder, _o.Experience);
-    AddHealth(ref builder, _o.Health);
-    AddMana(ref builder, _o.Mana);
-    AddInventoryType(ref builder, _inventory_type);
-    AddInventory(ref builder, _inventory);
-    AddSkills(ref builder, _skills);
-    AddStats(ref builder, _stats);
-    AddSpawnPoint(ref builder, ComprehensiveTest.StackBuffer.Vec3.Pack(ref builder, _o.SpawnPoint));
-    AddStatus(ref builder, _o.Status);
-    AddEquippedTypeType(ref builder, _equipped_type_type);
-    AddEquippedType(ref builder, _equipped_type);
-    AddEquippedItemType(ref builder, _equipped_item_type);
-    AddEquippedItem(ref builder, _equipped_item);
-    return EndPlayer(ref builder);
+    return CreatePlayer(
+      ref builder,
+      _o.Id,
+      _name,
+      _o.Level,
+      _o.Experience,
+      _o.Health,
+      _o.Mana,
+      _inventory_type,
+      _inventory,
+      _skills,
+      _stats,
+      _o.SpawnPoint,
+      _o.Status,
+      _equipped_type_type,
+      _equipped_type,
+      _equipped_item_type,
+      _equipped_item);
   }
 }
 

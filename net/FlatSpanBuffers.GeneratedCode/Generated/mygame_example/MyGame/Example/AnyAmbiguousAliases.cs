@@ -4,6 +4,15 @@
 
 namespace MyGame.Example
 {
+using global::System;
+using global::System.Buffers;
+using global::System.Collections.Generic;
+using global::System.Runtime.InteropServices;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
+
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 public enum AnyAmbiguousAliases : byte
 {
@@ -31,7 +40,7 @@ public class AnyAmbiguousAliasesUnion {
   public MyGame.Example.MonsterT AsM3() { return this.As<MyGame.Example.MonsterT>(); }
   public static AnyAmbiguousAliasesUnion FromM3(MyGame.Example.MonsterT _m3) { return new AnyAmbiguousAliasesUnion{ Type = AnyAmbiguousAliases.M3, Value = _m3 }; }
 
-  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, AnyAmbiguousAliasesUnion _o) {
+  public static int Pack(FlatBufferBuilder builder, AnyAmbiguousAliasesUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case AnyAmbiguousAliases.M1: return MyGame.Example.Monster.Pack(builder, _o.AsM1()).Value;
@@ -39,7 +48,7 @@ public class AnyAmbiguousAliasesUnion {
       case AnyAmbiguousAliases.M3: return MyGame.Example.Monster.Pack(builder, _o.AsM3()).Value;
     }
   }
-  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, AnyAmbiguousAliasesUnion _o) {
+  public static int Pack(ref FlatSpanBufferBuilder builder, AnyAmbiguousAliasesUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case AnyAmbiguousAliases.M1: return MyGame.Example.StackBuffer.Monster.Pack(ref builder, _o.AsM1()).Value;
@@ -99,7 +108,7 @@ public class AnyAmbiguousAliasesUnion_JsonConverter : System.Text.Json.Serializa
 
 public static class AnyAmbiguousAliasesVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((AnyAmbiguousAliases)typeId)

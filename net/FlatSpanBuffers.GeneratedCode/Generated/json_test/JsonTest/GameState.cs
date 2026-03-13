@@ -21,8 +21,8 @@ public struct GameState : IFlatbufferObject, IRootTable
   public static GameState GetRootAsGameState(ByteBuffer _bb) { return GetRootAsGameState(_bb, new GameState()); }
   public static GameState GetRootAsGameState(ByteBuffer _bb, GameState obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool GameStateBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "JSON"); }
-  public static bool VerifyGameState(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("JSON", false, JsonTest.GameStateVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("JSON", sizePrefixed, JsonTest.GameStateVerify.Verify);
+  public static bool VerifyGameState(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("JSON", false, JsonTest.GameStateVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("JSON", sizePrefixed, JsonTest.GameStateVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public GameState __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -86,20 +86,28 @@ public struct GameState : IFlatbufferObject, IRootTable
   }
   public static Offset<JsonTest.GameState> Pack(FlatBufferBuilder builder, GameStateT _o) {
     if (_o == null) return default(Offset<JsonTest.GameState>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<JsonTest.GameState> Pack(FlatBufferBuilder builder, GameStateT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<JsonTest.GameState>);
     var _version = _o.Version == null ? default(StringOffset) : builder.CreateString(_o.Version);
     var _players = default(VectorOffset);
     if (_o.Players != null) {
       var _players_len = _o.Players.Count;
-      Offset<JsonTest.Player>[] _players_arr = null;
-      try {
-        Span<Offset<JsonTest.Player>> __players = _players_len <= 64
-          ? stackalloc Offset<JsonTest.Player>[_players_len]
-          : (_players_arr = ArrayPool<Offset<JsonTest.Player>>.Shared.Rent(_players_len)).AsSpan(0, _players_len);
-        for (var _j = 0; _j < _players_len; ++_j) { __players[_j] = JsonTest.Player.Pack(builder, _o.Players[_j]); }
-        _players = CreatePlayersVector(builder, __players);
-      } finally {
-        if (_players_arr != null) { ArrayPool<Offset<JsonTest.Player>>.Shared.Return(_players_arr); }
-      }
+      Span<int> _players_buf = _players_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_players_len] : lengthyVectorSpace[.._players_len];
+      for (var _j = 0; _j < _players_len; ++_j) { _players_buf[_j] = JsonTest.Player.Pack(builder, _o.Players[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _players_len, 4);
+      builder.AddOffsetSpan(_players_buf);
+      _players = builder.EndVector();
     }
     return CreateGameState(
       builder,
@@ -110,12 +118,14 @@ public struct GameState : IFlatbufferObject, IRootTable
   }
 }
 
-public class GameStateT
+public class GameStateT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("version")]
   public string Version { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("players")]
   public List<JsonTest.PlayerT> Players { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<JsonTest.PlayerT> PlayersAsSpan => CollectionsMarshal.AsSpan(Players);
   [System.Text.Json.Serialization.JsonPropertyName("active_player_id")]
   public long ActivePlayerId { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("timestamp")]
@@ -126,6 +136,25 @@ public class GameStateT
     this.Players = null;
     this.ActivePlayerId = 0;
     this.Timestamp = 0;
+  }
+  public void Reset() {
+    this.Version = null;
+    this.Players?.Clear();
+    this.ActivePlayerId = 0;
+    this.Timestamp = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.Players != null && this.Players.Count > _max) _max = this.Players.Count;
+    if (this.Players != null) {
+      for (var i = 0; i < this.Players.Count; ++i) {
+        if (this.Players[i] != null) {
+          var _inner_maxlen = this.Players[i].GetMaxVectorLength();
+          if (_inner_maxlen > _max) _max = _inner_maxlen;
+        }
+      }
+    }
+    return _max;
   }
 
   private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
@@ -170,7 +199,7 @@ public class GameStateT
 
 public static class GameStateVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyString(tablePos, 4 /*Version*/, false)

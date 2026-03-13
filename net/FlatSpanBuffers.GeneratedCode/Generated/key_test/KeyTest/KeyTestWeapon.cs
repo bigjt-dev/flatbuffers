@@ -69,6 +69,19 @@ public struct KeyTestWeapon : IFlatbufferObject
   }
   public static Offset<KeyTest.KeyTestWeapon> Pack(FlatBufferBuilder builder, KeyTestWeaponT _o) {
     if (_o == null) return default(Offset<KeyTest.KeyTestWeapon>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<KeyTest.KeyTestWeapon> Pack(FlatBufferBuilder builder, KeyTestWeaponT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<KeyTest.KeyTestWeapon>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     return CreateKeyTestWeapon(
       builder,
@@ -78,7 +91,7 @@ public struct KeyTestWeapon : IFlatbufferObject
   }
 }
 
-public class KeyTestWeaponT
+public class KeyTestWeaponT : IFlatBufferObjectT
 {
   public int Id { get; set; }
   public string Name { get; set; }
@@ -89,12 +102,21 @@ public class KeyTestWeaponT
     this.Name = null;
     this.Damage = 0;
   }
+  public void Reset() {
+    this.Id = 0;
+    this.Name = null;
+    this.Damage = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class KeyTestWeaponVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Id*/, 4 /*int*/, 4, false)

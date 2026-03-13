@@ -29,6 +29,19 @@ public ref struct Armor : IFlatbufferSpanObject
   public float Weight { get { int o = __p.__offset(8); return o != 0 ? __p.bb.Get<float>(o + __p.bb_pos) : (float)1.0f; } }
   public RefStructNullable<ComprehensiveTest.StackBuffer.Transform> Transform { get { int o = __p.__offset(10); return o != 0 ? new RefStructNullable<ComprehensiveTest.StackBuffer.Transform>((new ComprehensiveTest.StackBuffer.Transform()).__assign(o + __p.bb_pos, __p.bb)) : default; } }
 
+  public static Offset<ComprehensiveTest.StackBuffer.Armor> CreateArmor(ref FlatSpanBufferBuilder builder,
+      StringOffset nameOffset = default(StringOffset),
+      int defense = 5,
+      float weight = 1.0f,
+      ComprehensiveTest.TransformT transform = null) {
+    builder.StartTable(4);
+    Armor.AddTransform(ref builder, ComprehensiveTest.StackBuffer.Transform.Pack(ref builder, transform));
+    Armor.AddWeight(ref builder, weight);
+    Armor.AddDefense(ref builder, defense);
+    Armor.AddName(ref builder, nameOffset);
+    return Armor.EndArmor(ref builder);
+  }
+
   public static void StartArmor(ref FlatSpanBufferBuilder builder) { builder.StartTable(4); }
   public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset); }
   public static void AddDefense(ref FlatSpanBufferBuilder builder, int defense) { builder.Add<int>(1, defense, 5); }
@@ -57,13 +70,26 @@ public ref struct Armor : IFlatbufferSpanObject
   }
   public static Offset<ComprehensiveTest.StackBuffer.Armor> Pack(ref FlatSpanBufferBuilder builder, ArmorT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.Armor>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.StackBuffer.Armor> Pack(ref FlatSpanBufferBuilder builder, ArmorT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.Armor>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
-    StartArmor(ref builder);
-    AddName(ref builder, _name);
-    AddDefense(ref builder, _o.Defense);
-    AddWeight(ref builder, _o.Weight);
-    AddTransform(ref builder, ComprehensiveTest.StackBuffer.Transform.Pack(ref builder, _o.Transform));
-    return EndArmor(ref builder);
+    return CreateArmor(
+      ref builder,
+      _name,
+      _o.Defense,
+      _o.Weight,
+      _o.Transform);
   }
 }
 

@@ -46,6 +46,19 @@ public struct Color : IFlatbufferObject
   }
   public static Offset<JsonTest.Color> Pack(FlatBufferBuilder builder, ColorT _o) {
     if (_o == null) return default(Offset<JsonTest.Color>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<JsonTest.Color> Pack(FlatBufferBuilder builder, ColorT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<JsonTest.Color>);
     return CreateColor(
       builder,
       _o.R,
@@ -55,7 +68,7 @@ public struct Color : IFlatbufferObject
   }
 }
 
-public class ColorT
+public class ColorT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("r")]
   public byte R { get; set; }
@@ -71,6 +84,16 @@ public class ColorT
     this.G = 0;
     this.B = 0;
     this.A = 0;
+  }
+  public void Reset() {
+    this.R = 0;
+    this.G = 0;
+    this.B = 0;
+    this.A = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

@@ -23,6 +23,10 @@ namespace FlatSpanBuffers.Utils
 {
     public static class ObjectApiUtil
     {
+        // Maximum number of offsets that can be stackalloc'd when building
+        // offset vectors during Object API Pack functions.
+        public const int MaxOffsetsStackallocLength = 256;
+
         public static void ResizeList<T>(List<T> list, int count)
         {
             if (list.Count == count)

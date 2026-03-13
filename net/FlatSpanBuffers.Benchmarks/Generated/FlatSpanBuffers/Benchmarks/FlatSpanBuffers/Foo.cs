@@ -51,6 +51,19 @@ public struct Foo : IFlatbufferObject
   }
   public static Offset<Benchmarks.FlatSpanBuffers.Foo> Pack(FlatBufferBuilder builder, FooT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.Foo>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<Benchmarks.FlatSpanBuffers.Foo> Pack(FlatBufferBuilder builder, FooT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.Foo>);
     return CreateFoo(
       builder,
       _o.Id,
@@ -60,7 +73,7 @@ public struct Foo : IFlatbufferObject
   }
 }
 
-public class FooT
+public class FooT : IFlatBufferObjectT
 {
   public ulong Id { get; set; }
   public short Count { get; set; }
@@ -72,6 +85,16 @@ public class FooT
     this.Count = 0;
     this.Prefix = 0;
     this.Length = 0;
+  }
+  public void Reset() {
+    this.Id = 0;
+    this.Count = 0;
+    this.Prefix = 0;
+    this.Length = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

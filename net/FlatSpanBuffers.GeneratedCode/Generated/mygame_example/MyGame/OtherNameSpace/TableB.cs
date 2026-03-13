@@ -53,14 +53,27 @@ public struct TableB : IFlatbufferObject
   }
   public static Offset<MyGame.OtherNameSpace.TableB> Pack(FlatBufferBuilder builder, TableBT _o) {
     if (_o == null) return default(Offset<MyGame.OtherNameSpace.TableB>);
-    var _a = _o.A == null ? default(Offset<MyGame.OtherNameSpace.TableA>) : MyGame.OtherNameSpace.TableA.Pack(builder, _o.A);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.OtherNameSpace.TableB> Pack(FlatBufferBuilder builder, TableBT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.OtherNameSpace.TableB>);
+    var _a = _o.A == null ? default(Offset<MyGame.OtherNameSpace.TableA>) : MyGame.OtherNameSpace.TableA.Pack(builder, _o.A, lengthyVectorSpace);
     return CreateTableB(
       builder,
       _a);
   }
 }
 
-public class TableBT
+public class TableBT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("a")]
   public MyGame.OtherNameSpace.TableAT A { get; set; }
@@ -68,12 +81,20 @@ public class TableBT
   public TableBT() {
     this.A = null;
   }
+  public void Reset() {
+    this.A = null;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.A != null) { var _inner_maxlen = this.A.GetMaxVectorLength(); if (_inner_maxlen > _max) _max = _inner_maxlen; }
+    return _max;
+  }
 }
 
 
 public static class TableBVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyTable(tablePos, 4 /*A*/, MyGame.OtherNameSpace.TableAVerify.Verify, false)

@@ -43,6 +43,19 @@ public struct PositionHistory : IFlatbufferObject
   }
   public static Offset<ComprehensiveTest.PositionHistory> Pack(FlatBufferBuilder builder, PositionHistoryT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.PositionHistory>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.PositionHistory> Pack(FlatBufferBuilder builder, PositionHistoryT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.PositionHistory>);
     var _positions_x = new float[10];
     for (var idx0 = 0; idx0 < 10; ++idx0) {_positions_x[idx0] = _o.Positions[idx0].X;}
     var _positions_y = new float[10];
@@ -57,12 +70,21 @@ public struct PositionHistory : IFlatbufferObject
   }
 }
 
-public class PositionHistoryT
+public class PositionHistoryT : IFlatBufferObjectT
 {
   public ComprehensiveTest.Vec3T[] Positions { get; set; }
 
   public PositionHistoryT() {
     this.Positions = new ComprehensiveTest.Vec3T[10];
+  }
+  public void Reset() {
+    for (var _i = 0; _i < this.Positions.Length; ++_i) {
+      this.Positions[_i]?.Reset();
+    }
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

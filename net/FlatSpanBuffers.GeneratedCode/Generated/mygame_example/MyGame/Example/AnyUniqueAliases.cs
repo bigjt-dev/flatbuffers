@@ -4,6 +4,15 @@
 
 namespace MyGame.Example
 {
+using global::System;
+using global::System.Buffers;
+using global::System.Collections.Generic;
+using global::System.Runtime.InteropServices;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
+
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 public enum AnyUniqueAliases : byte
 {
@@ -31,7 +40,7 @@ public class AnyUniqueAliasesUnion {
   public MyGame.Example2.MonsterT AsM2() { return this.As<MyGame.Example2.MonsterT>(); }
   public static AnyUniqueAliasesUnion FromM2(MyGame.Example2.MonsterT _m2) { return new AnyUniqueAliasesUnion{ Type = AnyUniqueAliases.M2, Value = _m2 }; }
 
-  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, AnyUniqueAliasesUnion _o) {
+  public static int Pack(FlatBufferBuilder builder, AnyUniqueAliasesUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case AnyUniqueAliases.M: return MyGame.Example.Monster.Pack(builder, _o.AsM()).Value;
@@ -39,7 +48,7 @@ public class AnyUniqueAliasesUnion {
       case AnyUniqueAliases.M2: return MyGame.Example2.Monster.Pack(builder, _o.AsM2()).Value;
     }
   }
-  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, AnyUniqueAliasesUnion _o) {
+  public static int Pack(ref FlatSpanBufferBuilder builder, AnyUniqueAliasesUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case AnyUniqueAliases.M: return MyGame.Example.StackBuffer.Monster.Pack(ref builder, _o.AsM()).Value;
@@ -99,7 +108,7 @@ public class AnyUniqueAliasesUnion_JsonConverter : System.Text.Json.Serializatio
 
 public static class AnyUniqueAliasesVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((AnyUniqueAliases)typeId)

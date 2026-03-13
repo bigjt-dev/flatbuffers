@@ -69,6 +69,19 @@ public struct Item : IFlatbufferObject
   }
   public static Offset<JsonTest.Item> Pack(FlatBufferBuilder builder, ItemT _o) {
     if (_o == null) return default(Offset<JsonTest.Item>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<JsonTest.Item> Pack(FlatBufferBuilder builder, ItemT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<JsonTest.Item>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     return CreateItem(
       builder,
@@ -78,7 +91,7 @@ public struct Item : IFlatbufferObject
   }
 }
 
-public class ItemT
+public class ItemT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("id")]
   public int Id { get; set; }
@@ -92,12 +105,21 @@ public class ItemT
     this.Name = null;
     this.Value = 0.0f;
   }
+  public void Reset() {
+    this.Id = 0;
+    this.Name = null;
+    this.Value = 0.0f;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class ItemVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Id*/, 4 /*int*/, 4, false)

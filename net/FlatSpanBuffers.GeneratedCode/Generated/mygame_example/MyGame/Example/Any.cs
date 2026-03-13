@@ -4,6 +4,15 @@
 
 namespace MyGame.Example
 {
+using global::System;
+using global::System.Buffers;
+using global::System.Collections.Generic;
+using global::System.Runtime.InteropServices;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
+
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 public enum Any : byte
 {
@@ -31,7 +40,7 @@ public class AnyUnion {
   public MyGame.Example2.MonsterT AsMyGame_Example2_Monster() { return this.As<MyGame.Example2.MonsterT>(); }
   public static AnyUnion FromMyGame_Example2_Monster(MyGame.Example2.MonsterT _mygame_example2_monster) { return new AnyUnion{ Type = Any.MyGame_Example2_Monster, Value = _mygame_example2_monster }; }
 
-  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, AnyUnion _o) {
+  public static int Pack(FlatBufferBuilder builder, AnyUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Any.Monster: return MyGame.Example.Monster.Pack(builder, _o.AsMonster()).Value;
@@ -39,7 +48,7 @@ public class AnyUnion {
       case Any.MyGame_Example2_Monster: return MyGame.Example2.Monster.Pack(builder, _o.AsMyGame_Example2_Monster()).Value;
     }
   }
-  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, AnyUnion _o) {
+  public static int Pack(ref FlatSpanBufferBuilder builder, AnyUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Any.Monster: return MyGame.Example.StackBuffer.Monster.Pack(ref builder, _o.AsMonster()).Value;
@@ -99,7 +108,7 @@ public class AnyUnion_JsonConverter : System.Text.Json.Serialization.JsonConvert
 
 public static class AnyVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Any)typeId)

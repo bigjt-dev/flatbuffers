@@ -85,6 +85,19 @@ public ref struct Table2 : IFlatbufferSpanObject
   }
   public static Offset<KeywordTest.StackBuffer.Table2> Pack(ref FlatSpanBufferBuilder builder, Table2T _o) {
     if (_o == null) return default(Offset<KeywordTest.StackBuffer.Table2>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<KeywordTest.StackBuffer.Table2> Pack(ref FlatSpanBufferBuilder builder, Table2T _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<KeywordTest.StackBuffer.Table2>);
     var _type_type = _o.Type == null ? KeywordTest.KeywordsInUnion.NONE : _o.Type.Type;
     var _type = _o.Type == null ? 0 : KeywordTest.KeywordsInUnionUnion.Pack(ref builder, _o.Type);
     return CreateTable2(

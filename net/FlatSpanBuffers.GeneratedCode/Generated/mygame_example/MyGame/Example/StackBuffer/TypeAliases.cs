@@ -135,6 +135,19 @@ public ref struct TypeAliases : IFlatbufferSpanObject
   }
   public static Offset<MyGame.Example.StackBuffer.TypeAliases> Pack(ref FlatSpanBufferBuilder builder, TypeAliasesT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StackBuffer.TypeAliases>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.StackBuffer.TypeAliases> Pack(ref FlatSpanBufferBuilder builder, TypeAliasesT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.StackBuffer.TypeAliases>);
     var _v8 = default(VectorOffset);
     if (_o.V8 != null) {
       _v8 = CreateV8Vector(ref builder, CollectionsMarshal.AsSpan(_o.V8));

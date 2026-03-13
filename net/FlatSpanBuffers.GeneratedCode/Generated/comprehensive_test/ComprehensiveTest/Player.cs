@@ -273,48 +273,44 @@ public struct Player : IFlatbufferObject
   }
   public static Offset<ComprehensiveTest.Player> Pack(FlatBufferBuilder builder, PlayerT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.Player>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.Player> Pack(FlatBufferBuilder builder, PlayerT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.Player>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     var _inventory_type = default(VectorOffset);
     if (_o.Inventory != null) {
       var _inventory_type_len = _o.Inventory.Count;
-      ComprehensiveTest.Equipment[] _inventory_type_arr = null;
-      try {
-        Span<ComprehensiveTest.Equipment> __inventory_type = _inventory_type_len <= 256
-          ? stackalloc ComprehensiveTest.Equipment[_inventory_type_len]
-          : (_inventory_type_arr = ArrayPool<ComprehensiveTest.Equipment>.Shared.Rent(_inventory_type_len)).AsSpan(0, _inventory_type_len);
-        for (var _j = 0; _j < _inventory_type_len; ++_j) { __inventory_type[_j] = _o.Inventory[_j].Type; }
-        _inventory_type = CreateInventoryTypeVector(builder, __inventory_type);
-      } finally {
-        if (_inventory_type_arr != null) { ArrayPool<ComprehensiveTest.Equipment>.Shared.Return(_inventory_type_arr); }
-      }
+      Span<ComprehensiveTest.Equipment> __inventory_type = _inventory_type_len <= 4096 ? stackalloc ComprehensiveTest.Equipment[_inventory_type_len] : new ComprehensiveTest.Equipment[_inventory_type_len];
+      for (var _j = 0; _j < _inventory_type_len; ++_j) { __inventory_type[_j] = _o.Inventory[_j].Type; }
+      _inventory_type = Player.CreateInventoryTypeVectorBlock(builder, __inventory_type);
     }
     var _inventory = default(VectorOffset);
     if (_o.Inventory != null) {
       var _inventory_len = _o.Inventory.Count;
-      int[] _inventory_arr = null;
-      try {
-        Span<int> __inventory = _inventory_len <= 64
-          ? stackalloc int[_inventory_len]
-          : (_inventory_arr = ArrayPool<int>.Shared.Rent(_inventory_len)).AsSpan(0, _inventory_len);
-        for (var _j = 0; _j < _inventory_len; ++_j) { __inventory[_j] = ComprehensiveTest.EquipmentUnion.Pack(builder,  _o.Inventory[_j]); }
-        _inventory = CreateInventoryVector(builder, __inventory);
-      } finally {
-        if (_inventory_arr != null) { ArrayPool<int>.Shared.Return(_inventory_arr); }
-      }
+      Span<int> _inventory_buf = _inventory_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_inventory_len] : lengthyVectorSpace[.._inventory_len];
+      for (var _j = 0; _j < _inventory_len; ++_j) { _inventory_buf[_j] = ComprehensiveTest.EquipmentUnion.Pack(builder,  _o.Inventory[_j]); }
+      builder.StartVector(4, _inventory_len, 4);
+      builder.AddOffsetSpan(_inventory_buf);
+      _inventory = builder.EndVector();
     }
     var _skills = default(VectorOffset);
     if (_o.Skills != null) {
       var _skills_len = _o.Skills.Count;
-      StringOffset[] _skills_arr = null;
-      try {
-        Span<StringOffset> __skills = _skills_len <= 64
-          ? stackalloc StringOffset[_skills_len]
-          : (_skills_arr = ArrayPool<StringOffset>.Shared.Rent(_skills_len)).AsSpan(0, _skills_len);
-        for (var _j = 0; _j < _skills_len; ++_j) { __skills[_j] = builder.CreateString(_o.Skills[_j]); }
-        _skills = CreateSkillsVector(builder, __skills);
-      } finally {
-        if (_skills_arr != null) { ArrayPool<StringOffset>.Shared.Return(_skills_arr); }
-      }
+      Span<int> _skills_buf = _skills_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_skills_len] : lengthyVectorSpace[.._skills_len];
+      for (var _j = 0; _j < _skills_len; ++_j) { _skills_buf[_j] = builder.CreateString(_o.Skills[_j]).Value; }
+      builder.StartVector(4, _skills_len, 4);
+      builder.AddOffsetSpan(_skills_buf);
+      _skills = builder.EndVector();
     }
     var _stats = default(VectorOffset);
     if (_o.Stats != null) {
@@ -345,7 +341,7 @@ public struct Player : IFlatbufferObject
   }
 }
 
-public class PlayerT
+public class PlayerT : IFlatBufferObjectT
 {
   public int Id { get; set; }
   public string Name { get; set; }
@@ -354,8 +350,14 @@ public class PlayerT
   public float Health { get; set; }
   public float Mana { get; set; }
   public List<ComprehensiveTest.EquipmentUnion> Inventory { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<ComprehensiveTest.EquipmentUnion> InventoryAsSpan => CollectionsMarshal.AsSpan(Inventory);
   public List<string> Skills { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<string> SkillsAsSpan => CollectionsMarshal.AsSpan(Skills);
   public List<int> Stats { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<int> StatsAsSpan => CollectionsMarshal.AsSpan(Stats);
   public ComprehensiveTest.Vec3T SpawnPoint { get; set; }
   public ComprehensiveTest.Status Status { get; set; }
   public ComprehensiveTest.EquipmentUnion EquippedType { get; set; }
@@ -376,12 +378,33 @@ public class PlayerT
     this.EquippedType = null;
     this.EquippedItem = null;
   }
+  public void Reset() {
+    this.Id = 0;
+    this.Name = null;
+    this.Level = 1;
+    this.Experience = 0;
+    this.Health = 100.0f;
+    this.Mana = 50.0f;
+    this.Inventory?.Clear();
+    this.Skills?.Clear();
+    this.Stats?.Clear();
+    this.SpawnPoint?.Reset();
+    this.Status = ComprehensiveTest.Status.Pending;
+    this.EquippedType = null;
+    this.EquippedItem = null;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.Inventory != null && this.Inventory.Count > _max) _max = this.Inventory.Count;
+    if (this.Skills != null && this.Skills.Count > _max) _max = this.Skills.Count;
+    return _max;
+  }
 }
 
 
 public static class PlayerVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Id*/, 4 /*int*/, 4, false)

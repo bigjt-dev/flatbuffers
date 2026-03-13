@@ -53,6 +53,19 @@ public struct StructOfStructs : IFlatbufferObject
   }
   public static Offset<MyGame.Example.StructOfStructs> Pack(FlatBufferBuilder builder, StructOfStructsT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StructOfStructs>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.StructOfStructs> Pack(FlatBufferBuilder builder, StructOfStructsT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.StructOfStructs>);
     var _a_id = _o.A.Id;
     var _a_distance = _o.A.Distance;
     var _b_a = _o.B.A;
@@ -70,7 +83,7 @@ public struct StructOfStructs : IFlatbufferObject
   }
 }
 
-public class StructOfStructsT
+public class StructOfStructsT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("a")]
   public MyGame.Example.AbilityT A { get; set; }
@@ -83,6 +96,15 @@ public class StructOfStructsT
     this.A = new MyGame.Example.AbilityT();
     this.B = new MyGame.Example.TestT();
     this.C = new MyGame.Example.AbilityT();
+  }
+  public void Reset() {
+    this.A?.Reset();
+    this.B?.Reset();
+    this.C?.Reset();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

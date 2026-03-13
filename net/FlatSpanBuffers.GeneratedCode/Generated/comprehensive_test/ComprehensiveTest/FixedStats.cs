@@ -42,6 +42,19 @@ public struct FixedStats : IFlatbufferObject
   }
   public static Offset<ComprehensiveTest.FixedStats> Pack(FlatBufferBuilder builder, FixedStatsT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.FixedStats>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.FixedStats> Pack(FlatBufferBuilder builder, FixedStatsT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.FixedStats>);
     var _values = _o.Values;
     return CreateFixedStats(
       builder,
@@ -49,12 +62,19 @@ public struct FixedStats : IFlatbufferObject
   }
 }
 
-public class FixedStatsT
+public class FixedStatsT : IFlatBufferObjectT
 {
   public int[] Values { get; set; }
 
   public FixedStatsT() {
     this.Values = new int[4];
+  }
+  public void Reset() {
+    System.Array.Clear(this.Values, 0, this.Values.Length);
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

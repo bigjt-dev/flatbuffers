@@ -21,8 +21,8 @@ public struct ArrayTable : IFlatbufferObject, IRootTable
   public static ArrayTable GetRootAsArrayTable(ByteBuffer _bb) { return GetRootAsArrayTable(_bb, new ArrayTable()); }
   public static ArrayTable GetRootAsArrayTable(ByteBuffer _bb, ArrayTable obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool ArrayTableBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "ARRT"); }
-  public static bool VerifyArrayTable(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("ARRT", false, MyGame.Example.ArrayTableVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("ARRT", sizePrefixed, MyGame.Example.ArrayTableVerify.Verify);
+  public static bool VerifyArrayTable(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("ARRT", false, MyGame.Example.ArrayTableVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("ARRT", sizePrefixed, MyGame.Example.ArrayTableVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public ArrayTable __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -51,19 +51,39 @@ public struct ArrayTable : IFlatbufferObject, IRootTable
   }
   public static Offset<MyGame.Example.ArrayTable> Pack(FlatBufferBuilder builder, ArrayTableT _o) {
     if (_o == null) return default(Offset<MyGame.Example.ArrayTable>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.ArrayTable> Pack(FlatBufferBuilder builder, ArrayTableT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.ArrayTable>);
     StartArrayTable(builder);
     AddA(builder, MyGame.Example.ArrayStruct.Pack(builder, _o.A));
     return EndArrayTable(builder);
   }
 }
 
-public class ArrayTableT
+public class ArrayTableT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("a")]
   public MyGame.Example.ArrayStructT A { get; set; }
 
   public ArrayTableT() {
     this.A = new MyGame.Example.ArrayStructT();
+  }
+  public void Reset() {
+    this.A?.Reset();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 
   private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
@@ -108,7 +128,7 @@ public class ArrayTableT
 
 public static class ArrayTableVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*A*/, 160 /*MyGame.Example.ArrayStruct*/, 8, false)

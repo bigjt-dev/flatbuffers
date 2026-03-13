@@ -21,8 +21,8 @@ public ref struct ScalarStuff : IFlatbufferSpanObject, IRootTable
   public static ScalarStuff GetRootAsScalarStuff(ByteSpanBuffer _bb) { return GetRootAsScalarStuff(_bb, new ScalarStuff()); }
   public static ScalarStuff GetRootAsScalarStuff(ByteSpanBuffer _bb, ScalarStuff obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool ScalarStuffBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "NULL"); }
-  public static bool VerifyScalarStuff(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("NULL", false, optional_scalars.ScalarStuffVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("NULL", sizePrefixed, optional_scalars.ScalarStuffVerify.Verify);
+  public static bool VerifyScalarStuff(ByteSpanBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("NULL", false, optional_scalars.ScalarStuffVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("NULL", sizePrefixed, optional_scalars.ScalarStuffVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public ScalarStuff __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -227,6 +227,19 @@ public ref struct ScalarStuff : IFlatbufferSpanObject, IRootTable
     _o.DefaultEnum = this.DefaultEnum;
   }
   public static Offset<optional_scalars.StackBuffer.ScalarStuff> Pack(ref FlatSpanBufferBuilder builder, ScalarStuffT _o) {
+    if (_o == null) return default(Offset<optional_scalars.StackBuffer.ScalarStuff>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<optional_scalars.StackBuffer.ScalarStuff> Pack(ref FlatSpanBufferBuilder builder, ScalarStuffT _o, scoped Span<int> lengthyVectorSpace) {
     if (_o == null) return default(Offset<optional_scalars.StackBuffer.ScalarStuff>);
     return CreateScalarStuff(
       ref builder,

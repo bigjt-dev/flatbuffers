@@ -78,6 +78,19 @@ public struct ArrayStruct : IFlatbufferObject
   }
   public static Offset<MyGame.Example.ArrayStruct> Pack(FlatBufferBuilder builder, ArrayStructT _o) {
     if (_o == null) return default(Offset<MyGame.Example.ArrayStruct>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.ArrayStruct> Pack(FlatBufferBuilder builder, ArrayStructT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.ArrayStruct>);
     var _b = _o.B;
     var _d_a = new int[2,2];
     for (var idx0 = 0; idx0 < 2; ++idx0) {for (var idx1 = 0; idx1 < 2; ++idx1) {_d_a[idx0,idx1] = _o.D[idx0].A[idx1];}}
@@ -102,7 +115,7 @@ public struct ArrayStruct : IFlatbufferObject
   }
 }
 
-public class ArrayStructT
+public class ArrayStructT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("a")]
   public float A { get; set; }
@@ -124,6 +137,20 @@ public class ArrayStructT
     this.D = new MyGame.Example.NestedStructT[2];
     this.E = 0;
     this.F = new long[2];
+  }
+  public void Reset() {
+    this.A = 0.0f;
+    System.Array.Clear(this.B, 0, this.B.Length);
+    this.C = 0;
+    for (var _i = 0; _i < this.D.Length; ++_i) {
+      this.D[_i]?.Reset();
+    }
+    this.E = 0;
+    System.Array.Clear(this.F, 0, this.F.Length);
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

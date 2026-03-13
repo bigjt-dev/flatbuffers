@@ -48,13 +48,26 @@ public struct HandFan : IFlatbufferObject
   }
   public static Offset<MyGame.Example.HandFan> Pack(FlatBufferBuilder builder, HandFanT _o) {
     if (_o == null) return default(Offset<MyGame.Example.HandFan>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.HandFan> Pack(FlatBufferBuilder builder, HandFanT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.HandFan>);
     return CreateHandFan(
       builder,
       _o.Length);
   }
 }
 
-public class HandFanT
+public class HandFanT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("length")]
   public int Length { get; set; }
@@ -62,12 +75,19 @@ public class HandFanT
   public HandFanT() {
     this.Length = 0;
   }
+  public void Reset() {
+    this.Length = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class HandFanVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Length*/, 4 /*int*/, 4, false)

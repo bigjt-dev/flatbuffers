@@ -49,13 +49,26 @@ public struct TestSimpleTableWithEnum : IFlatbufferObject
   }
   public static Offset<MyGame.Example.TestSimpleTableWithEnum> Pack(FlatBufferBuilder builder, TestSimpleTableWithEnumT _o) {
     if (_o == null) return default(Offset<MyGame.Example.TestSimpleTableWithEnum>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.TestSimpleTableWithEnum> Pack(FlatBufferBuilder builder, TestSimpleTableWithEnumT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.TestSimpleTableWithEnum>);
     return CreateTestSimpleTableWithEnum(
       builder,
       _o.Color);
   }
 }
 
-public class TestSimpleTableWithEnumT
+public class TestSimpleTableWithEnumT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("color")]
   public MyGame.Example.Color Color { get; set; }
@@ -63,12 +76,19 @@ public class TestSimpleTableWithEnumT
   public TestSimpleTableWithEnumT() {
     this.Color = MyGame.Example.Color.Green;
   }
+  public void Reset() {
+    this.Color = MyGame.Example.Color.Green;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class TestSimpleTableWithEnumVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Color*/, 1 /*MyGame.Example.Color*/, 1, false)

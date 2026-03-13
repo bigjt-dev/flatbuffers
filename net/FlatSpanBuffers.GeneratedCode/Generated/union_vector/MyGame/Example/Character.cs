@@ -4,6 +4,15 @@
 
 namespace MyGame.Example
 {
+using global::System;
+using global::System.Buffers;
+using global::System.Collections.Generic;
+using global::System.Runtime.InteropServices;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
+
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 public enum Character : byte
 {
@@ -40,7 +49,7 @@ public class CharacterUnion {
   public string AsUnused() { return this.As<string>(); }
   public static CharacterUnion FromUnused(string _unused) { return new CharacterUnion{ Type = Character.Unused, Value = _unused }; }
 
-  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, CharacterUnion _o) {
+  public static int Pack(FlatBufferBuilder builder, CharacterUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Character.MuLan: return MyGame.Example.Attacker.Pack(builder, _o.AsMuLan()).Value;
@@ -51,7 +60,7 @@ public class CharacterUnion {
       case Character.Unused: return builder.CreateString(_o.AsUnused()).Value;
     }
   }
-  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, CharacterUnion _o) {
+  public static int Pack(ref FlatSpanBufferBuilder builder, CharacterUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Character.MuLan: return MyGame.Example.StackBuffer.Attacker.Pack(ref builder, _o.AsMuLan()).Value;
@@ -120,7 +129,7 @@ public class CharacterUnion_JsonConverter : System.Text.Json.Serialization.JsonC
 
 public static class CharacterVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Character)typeId)

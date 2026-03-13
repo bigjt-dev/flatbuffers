@@ -20,8 +20,8 @@ public struct KeyTestMonster : IFlatbufferObject, IRootTable
   public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteBuffer _bb) { return GetRootAsKeyTestMonster(_bb, new KeyTestMonster()); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteBuffer _bb, KeyTestMonster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
-  public static bool VerifyKeyTestMonster(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, KeyTest.KeyTestMonsterVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, KeyTest.KeyTestMonsterVerify.Verify);
+  public static bool VerifyKeyTestMonster(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("", false, KeyTest.KeyTestMonsterVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, KeyTest.KeyTestMonsterVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public KeyTestMonster __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -69,6 +69,19 @@ public struct KeyTestMonster : IFlatbufferObject, IRootTable
   }
   public static Offset<KeyTest.KeyTestMonster> Pack(FlatBufferBuilder builder, KeyTestMonsterT _o) {
     if (_o == null) return default(Offset<KeyTest.KeyTestMonster>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<KeyTest.KeyTestMonster> Pack(FlatBufferBuilder builder, KeyTestMonsterT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<KeyTest.KeyTestMonster>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     return CreateKeyTestMonster(
       builder,
@@ -77,7 +90,7 @@ public struct KeyTestMonster : IFlatbufferObject, IRootTable
   }
 }
 
-public class KeyTestMonsterT
+public class KeyTestMonsterT : IFlatBufferObjectT
 {
   public string Name { get; set; }
   public int Hp { get; set; }
@@ -85,6 +98,14 @@ public class KeyTestMonsterT
   public KeyTestMonsterT() {
     this.Name = null;
     this.Hp = 0;
+  }
+  public void Reset() {
+    this.Name = null;
+    this.Hp = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
   public static KeyTestMonsterT DeserializeFromBinary(Span<byte> fbBuffer) {
     return StackBuffer.KeyTestMonster.GetRootAsKeyTestMonster(new ByteSpanBuffer(fbBuffer)).UnPack();
@@ -115,7 +136,7 @@ public class KeyTestMonsterT
 
 public static class KeyTestMonsterVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyString(tablePos, 4 /*Name*/, true)

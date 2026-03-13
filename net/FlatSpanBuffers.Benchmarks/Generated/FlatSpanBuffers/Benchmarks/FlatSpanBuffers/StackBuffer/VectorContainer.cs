@@ -160,6 +160,19 @@ public ref struct VectorContainer : IFlatbufferSpanObject
   }
   public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.VectorContainer> Pack(ref FlatSpanBufferBuilder builder, VectorContainerT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.VectorContainer>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.VectorContainer> Pack(ref FlatSpanBufferBuilder builder, VectorContainerT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.VectorContainer>);
     var _bytes = default(VectorOffset);
     if (_o.Bytes != null) {
       _bytes = CreateBytesVector(ref builder, CollectionsMarshal.AsSpan(_o.Bytes));
@@ -187,16 +200,11 @@ public ref struct VectorContainer : IFlatbufferSpanObject
     var _strings = default(VectorOffset);
     if (_o.Strings != null) {
       var _strings_len = _o.Strings.Count;
-      StringOffset[] _strings_arr = null;
-      try {
-        Span<StringOffset> __strings = _strings_len <= 64
-          ? stackalloc StringOffset[_strings_len]
-          : (_strings_arr = ArrayPool<StringOffset>.Shared.Rent(_strings_len)).AsSpan(0, _strings_len);
-        for (var _j = 0; _j < _strings_len; ++_j) { __strings[_j] = builder.CreateString(_o.Strings[_j]); }
-        _strings = CreateStringsVector(ref builder, __strings);
-      } finally {
-        if (_strings_arr != null) { ArrayPool<StringOffset>.Shared.Return(_strings_arr); }
-      }
+      Span<int> _strings_buf = _strings_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_strings_len] : lengthyVectorSpace[.._strings_len];
+      for (var _j = 0; _j < _strings_len; ++_j) { _strings_buf[_j] = builder.CreateString(_o.Strings[_j]).Value; }
+      builder.StartVector(4, _strings_len, 4);
+      builder.AddOffsetSpan(_strings_buf);
+      _strings = builder.EndVector();
     }
     return CreateVectorContainer(
       ref builder,

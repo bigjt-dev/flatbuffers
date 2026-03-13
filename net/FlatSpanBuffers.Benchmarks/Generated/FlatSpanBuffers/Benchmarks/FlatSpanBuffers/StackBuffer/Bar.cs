@@ -56,6 +56,19 @@ public ref struct Bar : IFlatbufferSpanObject
   }
   public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.Bar> Pack(ref FlatSpanBufferBuilder builder, BarT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.Bar>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.Bar> Pack(ref FlatSpanBufferBuilder builder, BarT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.Bar>);
     var _parent_id = _o.Parent.Id;
     var _parent_count = _o.Parent.Count;
     var _parent_prefix = _o.Parent.Prefix;

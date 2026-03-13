@@ -135,6 +135,19 @@ public struct TypeAliases : IFlatbufferObject
   }
   public static Offset<MyGame.Example.TypeAliases> Pack(FlatBufferBuilder builder, TypeAliasesT _o) {
     if (_o == null) return default(Offset<MyGame.Example.TypeAliases>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.TypeAliases> Pack(FlatBufferBuilder builder, TypeAliasesT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.TypeAliases>);
     var _v8 = default(VectorOffset);
     if (_o.V8 != null) {
       _v8 = CreateV8Vector(builder, CollectionsMarshal.AsSpan(_o.V8));
@@ -160,7 +173,7 @@ public struct TypeAliases : IFlatbufferObject
   }
 }
 
-public class TypeAliasesT
+public class TypeAliasesT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("i8")]
   public sbyte I8 { get; set; }
@@ -184,8 +197,12 @@ public class TypeAliasesT
   public double F64 { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("v8")]
   public List<sbyte> V8 { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<sbyte> V8AsSpan => CollectionsMarshal.AsSpan(V8);
   [System.Text.Json.Serialization.JsonPropertyName("vf64")]
   public List<double> Vf64 { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<double> Vf64AsSpan => CollectionsMarshal.AsSpan(Vf64);
 
   public TypeAliasesT() {
     this.I8 = 0;
@@ -201,12 +218,30 @@ public class TypeAliasesT
     this.V8 = null;
     this.Vf64 = null;
   }
+  public void Reset() {
+    this.I8 = 0;
+    this.U8 = 0;
+    this.I16 = 0;
+    this.U16 = 0;
+    this.I32 = 0;
+    this.U32 = 0;
+    this.I64 = 0;
+    this.U64 = 0;
+    this.F32 = 0.0f;
+    this.F64 = 0.0;
+    this.V8?.Clear();
+    this.Vf64?.Clear();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class TypeAliasesVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*I8*/, 1 /*sbyte*/, 1, false)

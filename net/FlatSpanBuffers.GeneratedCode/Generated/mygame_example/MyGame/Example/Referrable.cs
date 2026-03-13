@@ -59,13 +59,26 @@ public struct Referrable : IFlatbufferObject
   }
   public static Offset<MyGame.Example.Referrable> Pack(FlatBufferBuilder builder, ReferrableT _o) {
     if (_o == null) return default(Offset<MyGame.Example.Referrable>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.Referrable> Pack(FlatBufferBuilder builder, ReferrableT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.Referrable>);
     return CreateReferrable(
       builder,
       _o.Id);
   }
 }
 
-public class ReferrableT
+public class ReferrableT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("id")]
   public ulong Id { get; set; }
@@ -73,12 +86,19 @@ public class ReferrableT
   public ReferrableT() {
     this.Id = 0;
   }
+  public void Reset() {
+    this.Id = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class ReferrableVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Id*/, 8 /*ulong*/, 8, false)

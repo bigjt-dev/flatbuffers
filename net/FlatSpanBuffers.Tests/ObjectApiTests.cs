@@ -1036,5 +1036,123 @@ namespace FlatSpanBuffers.Tests
             Assert.AreEqual("Bow2", newBow.Name);
         }
 
+        [FlatBuffersTestMethod]
+        public void Reset_Table_ClearsScalarsToDefault()
+        {
+            var weaponT = new WeaponT
+            {
+                Name = "Excalibur",
+                Damage = 999,
+                Durability = 0.1f,
+                Enchanted = true,
+                Rarity = Color.Blue,
+            };
+
+            weaponT.Reset();
+
+            Assert.IsNull(weaponT.Name);
+            Assert.AreEqual(10, weaponT.Damage);
+            Assert.AreEqual(100.0f, weaponT.Durability, 6);
+            Assert.AreEqual(false, weaponT.Enchanted);
+            Assert.AreEqual(Color.Red, weaponT.Rarity);
+        }
+
+        [FlatBuffersTestMethod]
+        public void Reset_Table_ClearsListsNotNullsThemPreservesInstances()
+        {
+            var weaponT = new WeaponT();
+            var tags = new List<string> { "fire", "ancient" };
+            var damageValues = new List<int> { 10, 20, 30 };
+            weaponT.Tags = tags;
+            weaponT.DamageValues = damageValues;
+
+            weaponT.Reset();
+
+            // Lists are cleared so the instance can be reused
+            Assert.IsTrue(ReferenceEquals(tags, weaponT.Tags));
+            Assert.AreEqual(0, weaponT.Tags.Count);
+
+            Assert.IsTrue(ReferenceEquals(damageValues, weaponT.DamageValues));
+            Assert.AreEqual(0, weaponT.DamageValues.Count);
+        }
+
+        [FlatBuffersTestMethod]
+        public void Reset_Table_NullsUnionFields()
+        {
+            var weaponT = new WeaponT
+            {
+                WeaponType = EquipmentUnion.FromWeapon(new WeaponT { Name = "Sub", Damage = 5 }),
+            };
+
+            weaponT.Reset();
+
+            Assert.IsNull(weaponT.WeaponType);
+        }
+
+        [FlatBuffersTestMethod]
+        public void Reset_Table_NestedFixedStructIsResetRecursively()
+        {
+            var weaponT = new WeaponT();
+            // Transform is a fixed struct, always allocated; mutate it
+            weaponT.Transform.Position = new Vec3T { X = 1.0f, Y = 2.0f, Z = 3.0f };
+            var transformRef = weaponT.Transform;
+
+            weaponT.Reset();
+
+            // Same instance, but fields are back to defaults
+            Assert.IsTrue(ReferenceEquals(transformRef, weaponT.Transform));
+            Assert.AreEqual(0.0f, weaponT.Transform.Position.X, 6);
+            Assert.AreEqual(0.0f, weaponT.Transform.Position.Y, 6);
+            Assert.AreEqual(0.0f, weaponT.Transform.Position.Z, 6);
+        }
+
+        [FlatBuffersTestMethod]
+        public void Reset_FixedArrayField_ZeroesArrayInPlace()
+        {
+            var fixedStats = new ComprehensiveTest.FixedStatsT();
+            var arr = fixedStats.Values;
+            arr[0] = 10;
+            arr[1] = 20;
+            arr[2] = 30;
+            arr[3] = 40;
+
+            fixedStats.Reset();
+
+            // Same array instance, contents zeroed
+            Assert.IsTrue(ReferenceEquals(arr, fixedStats.Values));
+            Assert.AreEqual(0, fixedStats.Values[0]);
+            Assert.AreEqual(0, fixedStats.Values[1]);
+            Assert.AreEqual(0, fixedStats.Values[2]);
+            Assert.AreEqual(0, fixedStats.Values[3]);
+        }
+
+        [FlatBuffersTestMethod]
+        public void Reset_AfterUnPack_CanRepopulateAndRepack()
+        {
+            // Pack an initial object
+            var fbb = CreateBuilder(512);
+            var nameOffset = fbb.CreateString("Sword");
+            Weapon.StartWeapon(fbb);
+            Weapon.AddName(fbb, nameOffset);
+            Weapon.AddDamage(fbb, 75);
+            var offset = Weapon.EndWeapon(fbb);
+            fbb.Finish(offset.Value);
+
+            var weaponT = Weapon.GetRootAsWeapon(fbb.DataBuffer).UnPack();
+            Assert.AreEqual("Sword", weaponT.Name);
+            Assert.AreEqual(75, weaponT.Damage);
+
+            weaponT.Reset();
+            weaponT.Name = "Axe";
+            weaponT.Damage = 200;
+
+            var fbb2 = CreateBuilder(512);
+            var offset2 = Weapon.Pack(fbb2, weaponT);
+            fbb2.Finish(offset2.Value);
+
+            var repacked = Weapon.GetRootAsWeapon(fbb2.DataBuffer).UnPack();
+            Assert.AreEqual("Axe", repacked.Name);
+            Assert.AreEqual(200, repacked.Damage);
+        }
     }
 }

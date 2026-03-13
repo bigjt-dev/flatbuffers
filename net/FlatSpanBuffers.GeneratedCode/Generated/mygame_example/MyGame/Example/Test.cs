@@ -43,6 +43,19 @@ public struct Test : IFlatbufferObject
   }
   public static Offset<MyGame.Example.Test> Pack(FlatBufferBuilder builder, TestT _o) {
     if (_o == null) return default(Offset<MyGame.Example.Test>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.Test> Pack(FlatBufferBuilder builder, TestT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.Test>);
     return CreateTest(
       builder,
       _o.A,
@@ -50,7 +63,7 @@ public struct Test : IFlatbufferObject
   }
 }
 
-public class TestT
+public class TestT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("a")]
   public short A { get; set; }
@@ -60,6 +73,14 @@ public class TestT
   public TestT() {
     this.A = 0;
     this.B = 0;
+  }
+  public void Reset() {
+    this.A = 0;
+    this.B = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

@@ -20,8 +20,8 @@ public struct Monster : IFlatbufferObject, IRootTable
   public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
   public static Monster GetRootAsMonster(ByteBuffer _bb) { return GetRootAsMonster(_bb, new Monster()); }
   public static Monster GetRootAsMonster(ByteBuffer _bb, Monster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
-  public static bool VerifyMonster(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, MonsterTest.MonsterVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, MonsterTest.MonsterVerify.Verify);
+  public static bool VerifyMonster(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("", false, MonsterTest.MonsterVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, MonsterTest.MonsterVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public Monster __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -168,6 +168,19 @@ public struct Monster : IFlatbufferObject, IRootTable
   }
   public static Offset<MonsterTest.Monster> Pack(FlatBufferBuilder builder, MonsterT _o) {
     if (_o == null) return default(Offset<MonsterTest.Monster>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MonsterTest.Monster> Pack(FlatBufferBuilder builder, MonsterT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MonsterTest.Monster>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     var _inventory = default(VectorOffset);
     if (_o.Inventory != null) {
@@ -176,16 +189,11 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _weapons = default(VectorOffset);
     if (_o.Weapons != null) {
       var _weapons_len = _o.Weapons.Count;
-      Offset<MonsterTest.Weapon>[] _weapons_arr = null;
-      try {
-        Span<Offset<MonsterTest.Weapon>> __weapons = _weapons_len <= 64
-          ? stackalloc Offset<MonsterTest.Weapon>[_weapons_len]
-          : (_weapons_arr = ArrayPool<Offset<MonsterTest.Weapon>>.Shared.Rent(_weapons_len)).AsSpan(0, _weapons_len);
-        for (var _j = 0; _j < _weapons_len; ++_j) { __weapons[_j] = MonsterTest.Weapon.Pack(builder, _o.Weapons[_j]); }
-        _weapons = CreateWeaponsVector(builder, __weapons);
-      } finally {
-        if (_weapons_arr != null) { ArrayPool<Offset<MonsterTest.Weapon>>.Shared.Return(_weapons_arr); }
-      }
+      Span<int> _weapons_buf = _weapons_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_weapons_len] : lengthyVectorSpace[.._weapons_len];
+      for (var _j = 0; _j < _weapons_len; ++_j) { _weapons_buf[_j] = MonsterTest.Weapon.Pack(builder, _o.Weapons[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _weapons_len, 4);
+      builder.AddOffsetSpan(_weapons_buf);
+      _weapons = builder.EndVector();
     }
     var _equipped_type = _o.Equipped == null ? MonsterTest.Equipment.NONE : _o.Equipped.Type;
     var _equipped = _o.Equipped == null ? 0 : MonsterTest.EquipmentUnion.Pack(builder, _o.Equipped);
@@ -210,17 +218,23 @@ public struct Monster : IFlatbufferObject, IRootTable
   }
 }
 
-public class MonsterT
+public class MonsterT : IFlatBufferObjectT
 {
   public MonsterTest.Vec3T Pos { get; set; }
   public short Mana { get; set; }
   public short Hp { get; set; }
   public string Name { get; set; }
   public List<byte> Inventory { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<byte> InventoryAsSpan => CollectionsMarshal.AsSpan(Inventory);
   public MonsterTest.Color Color { get; set; }
   public List<MonsterTest.WeaponT> Weapons { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MonsterTest.WeaponT> WeaponsAsSpan => CollectionsMarshal.AsSpan(Weapons);
   public MonsterTest.EquipmentUnion Equipped { get; set; }
   public List<MonsterTest.Vec3T> Path { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MonsterTest.Vec3T> PathAsSpan => CollectionsMarshal.AsSpan(Path);
 
   public MonsterT() {
     this.Pos = new MonsterTest.Vec3T();
@@ -232,6 +246,30 @@ public class MonsterT
     this.Weapons = null;
     this.Equipped = null;
     this.Path = null;
+  }
+  public void Reset() {
+    this.Pos?.Reset();
+    this.Mana = 150;
+    this.Hp = 100;
+    this.Name = null;
+    this.Inventory?.Clear();
+    this.Color = MonsterTest.Color.Blue;
+    this.Weapons?.Clear();
+    this.Equipped = null;
+    this.Path?.Clear();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.Weapons != null && this.Weapons.Count > _max) _max = this.Weapons.Count;
+    if (this.Weapons != null) {
+      for (var i = 0; i < this.Weapons.Count; ++i) {
+        if (this.Weapons[i] != null) {
+          var _inner_maxlen = this.Weapons[i].GetMaxVectorLength();
+          if (_inner_maxlen > _max) _max = _inner_maxlen;
+        }
+      }
+    }
+    return _max;
   }
   public static MonsterT DeserializeFromBinary(Span<byte> fbBuffer) {
     return StackBuffer.Monster.GetRootAsMonster(new ByteSpanBuffer(fbBuffer)).UnPack();
@@ -262,7 +300,7 @@ public class MonsterT
 
 public static class MonsterVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Pos*/, 12 /*MonsterTest.Vec3*/, 4, false)

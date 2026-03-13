@@ -62,6 +62,19 @@ public struct NestedStruct : IFlatbufferObject
   }
   public static Offset<MyGame.Example.NestedStruct> Pack(FlatBufferBuilder builder, NestedStructT _o) {
     if (_o == null) return default(Offset<MyGame.Example.NestedStruct>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.NestedStruct> Pack(FlatBufferBuilder builder, NestedStructT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.NestedStruct>);
     var _a = _o.A;
     var _c = _o.C;
     var _d = _o.D;
@@ -74,7 +87,7 @@ public struct NestedStruct : IFlatbufferObject
   }
 }
 
-public class NestedStructT
+public class NestedStructT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("a")]
   public int[] A { get; set; }
@@ -90,6 +103,16 @@ public class NestedStructT
     this.B = MyGame.Example.TestEnum.A;
     this.C = new MyGame.Example.TestEnum[2];
     this.D = new long[2];
+  }
+  public void Reset() {
+    System.Array.Clear(this.A, 0, this.A.Length);
+    this.B = MyGame.Example.TestEnum.A;
+    System.Array.Clear(this.C, 0, this.C.Length);
+    System.Array.Clear(this.D, 0, this.D.Length);
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

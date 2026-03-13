@@ -64,6 +64,19 @@ public struct Vec3 : IFlatbufferObject
   }
   public static Offset<MyGame.Example.Vec3> Pack(FlatBufferBuilder builder, Vec3T _o) {
     if (_o == null) return default(Offset<MyGame.Example.Vec3>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.Vec3> Pack(FlatBufferBuilder builder, Vec3T _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.Vec3>);
     var _test3_a = _o.Test3.A;
     var _test3_b = _o.Test3.B;
     return CreateVec3(
@@ -78,7 +91,7 @@ public struct Vec3 : IFlatbufferObject
   }
 }
 
-public class Vec3T
+public class Vec3T : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("x")]
   public float X { get; set; }
@@ -100,6 +113,18 @@ public class Vec3T
     this.Test1 = 0.0;
     this.Test2 = 0;
     this.Test3 = new MyGame.Example.TestT();
+  }
+  public void Reset() {
+    this.X = 0.0f;
+    this.Y = 0.0f;
+    this.Z = 0.0f;
+    this.Test1 = 0.0;
+    this.Test2 = 0;
+    this.Test3?.Reset();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

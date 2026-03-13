@@ -22,8 +22,8 @@ public struct Monster : IFlatbufferObject, IRootTable
   public static Monster GetRootAsMonster(ByteBuffer _bb) { return GetRootAsMonster(_bb, new Monster()); }
   public static Monster GetRootAsMonster(ByteBuffer _bb, Monster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool MonsterBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "MONS"); }
-  public static bool VerifyMonster(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("MONS", false, MyGame.Example.MonsterVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("MONS", sizePrefixed, MyGame.Example.MonsterVerify.Verify);
+  public static bool VerifyMonster(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("MONS", false, MyGame.Example.MonsterVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("MONS", sizePrefixed, MyGame.Example.MonsterVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public Monster __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -826,6 +826,19 @@ public struct Monster : IFlatbufferObject, IRootTable
   }
   public static Offset<MyGame.Example.Monster> Pack(FlatBufferBuilder builder, MonsterT _o) {
     if (_o == null) return default(Offset<MyGame.Example.Monster>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.Monster> Pack(FlatBufferBuilder builder, MonsterT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.Monster>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     var _inventory = default(VectorOffset);
     if (_o.Inventory != null) {
@@ -842,37 +855,27 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _testarrayofstring = default(VectorOffset);
     if (_o.Testarrayofstring != null) {
       var _testarrayofstring_len = _o.Testarrayofstring.Count;
-      StringOffset[] _testarrayofstring_arr = null;
-      try {
-        Span<StringOffset> __testarrayofstring = _testarrayofstring_len <= 64
-          ? stackalloc StringOffset[_testarrayofstring_len]
-          : (_testarrayofstring_arr = ArrayPool<StringOffset>.Shared.Rent(_testarrayofstring_len)).AsSpan(0, _testarrayofstring_len);
-        for (var _j = 0; _j < _testarrayofstring_len; ++_j) { __testarrayofstring[_j] = builder.CreateString(_o.Testarrayofstring[_j]); }
-        _testarrayofstring = CreateTestarrayofstringVector(builder, __testarrayofstring);
-      } finally {
-        if (_testarrayofstring_arr != null) { ArrayPool<StringOffset>.Shared.Return(_testarrayofstring_arr); }
-      }
+      Span<int> _testarrayofstring_buf = _testarrayofstring_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_testarrayofstring_len] : lengthyVectorSpace[.._testarrayofstring_len];
+      for (var _j = 0; _j < _testarrayofstring_len; ++_j) { _testarrayofstring_buf[_j] = builder.CreateString(_o.Testarrayofstring[_j]).Value; }
+      builder.StartVector(4, _testarrayofstring_len, 4);
+      builder.AddOffsetSpan(_testarrayofstring_buf);
+      _testarrayofstring = builder.EndVector();
     }
     var _testarrayoftables = default(VectorOffset);
     if (_o.Testarrayoftables != null) {
       var _testarrayoftables_len = _o.Testarrayoftables.Count;
-      Offset<MyGame.Example.Monster>[] _testarrayoftables_arr = null;
-      try {
-        Span<Offset<MyGame.Example.Monster>> __testarrayoftables = _testarrayoftables_len <= 64
-          ? stackalloc Offset<MyGame.Example.Monster>[_testarrayoftables_len]
-          : (_testarrayoftables_arr = ArrayPool<Offset<MyGame.Example.Monster>>.Shared.Rent(_testarrayoftables_len)).AsSpan(0, _testarrayoftables_len);
-        for (var _j = 0; _j < _testarrayoftables_len; ++_j) { __testarrayoftables[_j] = MyGame.Example.Monster.Pack(builder, _o.Testarrayoftables[_j]); }
-        _testarrayoftables = CreateTestarrayoftablesVector(builder, __testarrayoftables);
-      } finally {
-        if (_testarrayoftables_arr != null) { ArrayPool<Offset<MyGame.Example.Monster>>.Shared.Return(_testarrayoftables_arr); }
-      }
+      Span<int> _testarrayoftables_buf = _testarrayoftables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_testarrayoftables_len] : lengthyVectorSpace[.._testarrayoftables_len];
+      for (var _j = 0; _j < _testarrayoftables_len; ++_j) { _testarrayoftables_buf[_j] = MyGame.Example.Monster.Pack(builder, _o.Testarrayoftables[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _testarrayoftables_len, 4);
+      builder.AddOffsetSpan(_testarrayoftables_buf);
+      _testarrayoftables = builder.EndVector();
     }
-    var _enemy = _o.Enemy == null ? default(Offset<MyGame.Example.Monster>) : MyGame.Example.Monster.Pack(builder, _o.Enemy);
+    var _enemy = _o.Enemy == null ? default(Offset<MyGame.Example.Monster>) : MyGame.Example.Monster.Pack(builder, _o.Enemy, lengthyVectorSpace);
     var _testnestedflatbuffer = default(VectorOffset);
     if (_o.Testnestedflatbuffer != null) {
       _testnestedflatbuffer = CreateTestnestedflatbufferVector(builder, CollectionsMarshal.AsSpan(_o.Testnestedflatbuffer));
     }
-    var _testempty = _o.Testempty == null ? default(Offset<MyGame.Example.Stat>) : MyGame.Example.Stat.Pack(builder, _o.Testempty);
+    var _testempty = _o.Testempty == null ? default(Offset<MyGame.Example.Stat>) : MyGame.Example.Stat.Pack(builder, _o.Testempty, lengthyVectorSpace);
     var _testarrayofbools = default(VectorOffset);
     if (_o.Testarrayofbools != null) {
       _testarrayofbools = CreateTestarrayofboolsVector(builder, CollectionsMarshal.AsSpan(_o.Testarrayofbools));
@@ -880,16 +883,11 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _testarrayofstring2 = default(VectorOffset);
     if (_o.Testarrayofstring2 != null) {
       var _testarrayofstring2_len = _o.Testarrayofstring2.Count;
-      StringOffset[] _testarrayofstring2_arr = null;
-      try {
-        Span<StringOffset> __testarrayofstring2 = _testarrayofstring2_len <= 64
-          ? stackalloc StringOffset[_testarrayofstring2_len]
-          : (_testarrayofstring2_arr = ArrayPool<StringOffset>.Shared.Rent(_testarrayofstring2_len)).AsSpan(0, _testarrayofstring2_len);
-        for (var _j = 0; _j < _testarrayofstring2_len; ++_j) { __testarrayofstring2[_j] = builder.CreateString(_o.Testarrayofstring2[_j]); }
-        _testarrayofstring2 = CreateTestarrayofstring2Vector(builder, __testarrayofstring2);
-      } finally {
-        if (_testarrayofstring2_arr != null) { ArrayPool<StringOffset>.Shared.Return(_testarrayofstring2_arr); }
-      }
+      Span<int> _testarrayofstring2_buf = _testarrayofstring2_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_testarrayofstring2_len] : lengthyVectorSpace[.._testarrayofstring2_len];
+      for (var _j = 0; _j < _testarrayofstring2_len; ++_j) { _testarrayofstring2_buf[_j] = builder.CreateString(_o.Testarrayofstring2[_j]).Value; }
+      builder.StartVector(4, _testarrayofstring2_len, 4);
+      builder.AddOffsetSpan(_testarrayofstring2_buf);
+      _testarrayofstring2 = builder.EndVector();
     }
     var _testarrayofsortedstruct = default(VectorOffset);
     if (_o.Testarrayofsortedstruct != null) {
@@ -915,20 +913,15 @@ public struct Monster : IFlatbufferObject, IRootTable
     if (_o.VectorOfDoubles != null) {
       _vector_of_doubles = CreateVectorOfDoublesVector(builder, CollectionsMarshal.AsSpan(_o.VectorOfDoubles));
     }
-    var _parent_namespace_test = _o.ParentNamespaceTest == null ? default(Offset<MyGame.InParentNamespace>) : MyGame.InParentNamespace.Pack(builder, _o.ParentNamespaceTest);
+    var _parent_namespace_test = _o.ParentNamespaceTest == null ? default(Offset<MyGame.InParentNamespace>) : MyGame.InParentNamespace.Pack(builder, _o.ParentNamespaceTest, lengthyVectorSpace);
     var _vector_of_referrables = default(VectorOffset);
     if (_o.VectorOfReferrables != null) {
       var _vector_of_referrables_len = _o.VectorOfReferrables.Count;
-      Offset<MyGame.Example.Referrable>[] _vector_of_referrables_arr = null;
-      try {
-        Span<Offset<MyGame.Example.Referrable>> __vector_of_referrables = _vector_of_referrables_len <= 64
-          ? stackalloc Offset<MyGame.Example.Referrable>[_vector_of_referrables_len]
-          : (_vector_of_referrables_arr = ArrayPool<Offset<MyGame.Example.Referrable>>.Shared.Rent(_vector_of_referrables_len)).AsSpan(0, _vector_of_referrables_len);
-        for (var _j = 0; _j < _vector_of_referrables_len; ++_j) { __vector_of_referrables[_j] = MyGame.Example.Referrable.Pack(builder, _o.VectorOfReferrables[_j]); }
-        _vector_of_referrables = CreateVectorOfReferrablesVector(builder, __vector_of_referrables);
-      } finally {
-        if (_vector_of_referrables_arr != null) { ArrayPool<Offset<MyGame.Example.Referrable>>.Shared.Return(_vector_of_referrables_arr); }
-      }
+      Span<int> _vector_of_referrables_buf = _vector_of_referrables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_vector_of_referrables_len] : lengthyVectorSpace[.._vector_of_referrables_len];
+      for (var _j = 0; _j < _vector_of_referrables_len; ++_j) { _vector_of_referrables_buf[_j] = MyGame.Example.Referrable.Pack(builder, _o.VectorOfReferrables[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _vector_of_referrables_len, 4);
+      builder.AddOffsetSpan(_vector_of_referrables_buf);
+      _vector_of_referrables = builder.EndVector();
     }
     var _vector_of_weak_references = default(VectorOffset);
     if (_o.VectorOfWeakReferences != null) {
@@ -937,16 +930,11 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _vector_of_strong_referrables = default(VectorOffset);
     if (_o.VectorOfStrongReferrables != null) {
       var _vector_of_strong_referrables_len = _o.VectorOfStrongReferrables.Count;
-      Offset<MyGame.Example.Referrable>[] _vector_of_strong_referrables_arr = null;
-      try {
-        Span<Offset<MyGame.Example.Referrable>> __vector_of_strong_referrables = _vector_of_strong_referrables_len <= 64
-          ? stackalloc Offset<MyGame.Example.Referrable>[_vector_of_strong_referrables_len]
-          : (_vector_of_strong_referrables_arr = ArrayPool<Offset<MyGame.Example.Referrable>>.Shared.Rent(_vector_of_strong_referrables_len)).AsSpan(0, _vector_of_strong_referrables_len);
-        for (var _j = 0; _j < _vector_of_strong_referrables_len; ++_j) { __vector_of_strong_referrables[_j] = MyGame.Example.Referrable.Pack(builder, _o.VectorOfStrongReferrables[_j]); }
-        _vector_of_strong_referrables = CreateVectorOfStrongReferrablesVector(builder, __vector_of_strong_referrables);
-      } finally {
-        if (_vector_of_strong_referrables_arr != null) { ArrayPool<Offset<MyGame.Example.Referrable>>.Shared.Return(_vector_of_strong_referrables_arr); }
-      }
+      Span<int> _vector_of_strong_referrables_buf = _vector_of_strong_referrables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_vector_of_strong_referrables_len] : lengthyVectorSpace[.._vector_of_strong_referrables_len];
+      for (var _j = 0; _j < _vector_of_strong_referrables_len; ++_j) { _vector_of_strong_referrables_buf[_j] = MyGame.Example.Referrable.Pack(builder, _o.VectorOfStrongReferrables[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _vector_of_strong_referrables_len, 4);
+      builder.AddOffsetSpan(_vector_of_strong_referrables_buf);
+      _vector_of_strong_referrables = builder.EndVector();
     }
     var _vector_of_co_owning_references = default(VectorOffset);
     if (_o.VectorOfCoOwningReferences != null) {
@@ -971,16 +959,11 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _scalar_key_sorted_tables = default(VectorOffset);
     if (_o.ScalarKeySortedTables != null) {
       var _scalar_key_sorted_tables_len = _o.ScalarKeySortedTables.Count;
-      Offset<MyGame.Example.Stat>[] _scalar_key_sorted_tables_arr = null;
-      try {
-        Span<Offset<MyGame.Example.Stat>> __scalar_key_sorted_tables = _scalar_key_sorted_tables_len <= 64
-          ? stackalloc Offset<MyGame.Example.Stat>[_scalar_key_sorted_tables_len]
-          : (_scalar_key_sorted_tables_arr = ArrayPool<Offset<MyGame.Example.Stat>>.Shared.Rent(_scalar_key_sorted_tables_len)).AsSpan(0, _scalar_key_sorted_tables_len);
-        for (var _j = 0; _j < _scalar_key_sorted_tables_len; ++_j) { __scalar_key_sorted_tables[_j] = MyGame.Example.Stat.Pack(builder, _o.ScalarKeySortedTables[_j]); }
-        _scalar_key_sorted_tables = CreateScalarKeySortedTablesVector(builder, __scalar_key_sorted_tables);
-      } finally {
-        if (_scalar_key_sorted_tables_arr != null) { ArrayPool<Offset<MyGame.Example.Stat>>.Shared.Return(_scalar_key_sorted_tables_arr); }
-      }
+      Span<int> _scalar_key_sorted_tables_buf = _scalar_key_sorted_tables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_scalar_key_sorted_tables_len] : lengthyVectorSpace[.._scalar_key_sorted_tables_len];
+      for (var _j = 0; _j < _scalar_key_sorted_tables_len; ++_j) { _scalar_key_sorted_tables_buf[_j] = MyGame.Example.Stat.Pack(builder, _o.ScalarKeySortedTables[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _scalar_key_sorted_tables_len, 4);
+      builder.AddOffsetSpan(_scalar_key_sorted_tables_buf);
+      _scalar_key_sorted_tables = builder.EndVector();
     }
     return CreateMonster(
       builder,
@@ -1048,7 +1031,7 @@ public struct Monster : IFlatbufferObject, IRootTable
   }
 }
 
-public class MonsterT
+public class MonsterT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("pos")]
   public MyGame.Example.Vec3T Pos { get; set; }
@@ -1060,6 +1043,8 @@ public class MonsterT
   public string Name { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("inventory")]
   public List<byte> Inventory { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<byte> InventoryAsSpan => CollectionsMarshal.AsSpan(Inventory);
   [System.Text.Json.Serialization.JsonPropertyName("color")]
   public MyGame.Example.Color Color { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("test_type")]
@@ -1077,14 +1062,22 @@ public class MonsterT
   public MyGame.Example.AnyUnion Test { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("test4")]
   public List<MyGame.Example.TestT> Test4 { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MyGame.Example.TestT> Test4AsSpan => CollectionsMarshal.AsSpan(Test4);
   [System.Text.Json.Serialization.JsonPropertyName("testarrayofstring")]
   public List<string> Testarrayofstring { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<string> TestarrayofstringAsSpan => CollectionsMarshal.AsSpan(Testarrayofstring);
   [System.Text.Json.Serialization.JsonPropertyName("testarrayoftables")]
   public List<MyGame.Example.MonsterT> Testarrayoftables { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MyGame.Example.MonsterT> TestarrayoftablesAsSpan => CollectionsMarshal.AsSpan(Testarrayoftables);
   [System.Text.Json.Serialization.JsonPropertyName("enemy")]
   public MyGame.Example.MonsterT Enemy { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("testnestedflatbuffer")]
   public List<byte> Testnestedflatbuffer { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<byte> TestnestedflatbufferAsSpan => CollectionsMarshal.AsSpan(Testnestedflatbuffer);
   [System.Text.Json.Serialization.JsonPropertyName("testempty")]
   public MyGame.Example.StatT Testempty { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("testbool")]
@@ -1107,6 +1100,8 @@ public class MonsterT
   public ulong Testhashu64Fnv1a { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("testarrayofbools")]
   public List<bool> Testarrayofbools { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<bool> TestarrayofboolsAsSpan => CollectionsMarshal.AsSpan(Testarrayofbools);
   [System.Text.Json.Serialization.JsonPropertyName("testf")]
   public float Testf { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("testf2")]
@@ -1115,34 +1110,56 @@ public class MonsterT
   public float Testf3 { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("testarrayofstring2")]
   public List<string> Testarrayofstring2 { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<string> Testarrayofstring2AsSpan => CollectionsMarshal.AsSpan(Testarrayofstring2);
   [System.Text.Json.Serialization.JsonPropertyName("testarrayofsortedstruct")]
   public List<MyGame.Example.AbilityT> Testarrayofsortedstruct { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MyGame.Example.AbilityT> TestarrayofsortedstructAsSpan => CollectionsMarshal.AsSpan(Testarrayofsortedstruct);
   [System.Text.Json.Serialization.JsonPropertyName("flex")]
   public List<byte> Flex { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<byte> FlexAsSpan => CollectionsMarshal.AsSpan(Flex);
   [System.Text.Json.Serialization.JsonPropertyName("test5")]
   public List<MyGame.Example.TestT> Test5 { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MyGame.Example.TestT> Test5AsSpan => CollectionsMarshal.AsSpan(Test5);
   [System.Text.Json.Serialization.JsonPropertyName("vector_of_longs")]
   public List<long> VectorOfLongs { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<long> VectorOfLongsAsSpan => CollectionsMarshal.AsSpan(VectorOfLongs);
   [System.Text.Json.Serialization.JsonPropertyName("vector_of_doubles")]
   public List<double> VectorOfDoubles { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<double> VectorOfDoublesAsSpan => CollectionsMarshal.AsSpan(VectorOfDoubles);
   [System.Text.Json.Serialization.JsonPropertyName("parent_namespace_test")]
   public MyGame.InParentNamespaceT ParentNamespaceTest { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("vector_of_referrables")]
   public List<MyGame.Example.ReferrableT> VectorOfReferrables { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MyGame.Example.ReferrableT> VectorOfReferrablesAsSpan => CollectionsMarshal.AsSpan(VectorOfReferrables);
   [System.Text.Json.Serialization.JsonPropertyName("single_weak_reference")]
   public ulong SingleWeakReference { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("vector_of_weak_references")]
   public List<ulong> VectorOfWeakReferences { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<ulong> VectorOfWeakReferencesAsSpan => CollectionsMarshal.AsSpan(VectorOfWeakReferences);
   [System.Text.Json.Serialization.JsonPropertyName("vector_of_strong_referrables")]
   public List<MyGame.Example.ReferrableT> VectorOfStrongReferrables { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MyGame.Example.ReferrableT> VectorOfStrongReferrablesAsSpan => CollectionsMarshal.AsSpan(VectorOfStrongReferrables);
   [System.Text.Json.Serialization.JsonPropertyName("co_owning_reference")]
   public ulong CoOwningReference { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("vector_of_co_owning_references")]
   public List<ulong> VectorOfCoOwningReferences { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<ulong> VectorOfCoOwningReferencesAsSpan => CollectionsMarshal.AsSpan(VectorOfCoOwningReferences);
   [System.Text.Json.Serialization.JsonPropertyName("non_owning_reference")]
   public ulong NonOwningReference { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("vector_of_non_owning_references")]
   public List<ulong> VectorOfNonOwningReferences { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<ulong> VectorOfNonOwningReferencesAsSpan => CollectionsMarshal.AsSpan(VectorOfNonOwningReferences);
   [System.Text.Json.Serialization.JsonPropertyName("any_unique_type")]
   private MyGame.Example.AnyUniqueAliases AnyUniqueType {
     get {
@@ -1171,12 +1188,18 @@ public class MonsterT
   public MyGame.Example.AnyAmbiguousAliasesUnion AnyAmbiguous { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("vector_of_enums")]
   public List<MyGame.Example.Color> VectorOfEnums { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MyGame.Example.Color> VectorOfEnumsAsSpan => CollectionsMarshal.AsSpan(VectorOfEnums);
   [System.Text.Json.Serialization.JsonPropertyName("signed_enum")]
   public MyGame.Example.Race SignedEnum { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("testrequirednestedflatbuffer")]
   public List<byte> Testrequirednestedflatbuffer { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<byte> TestrequirednestedflatbufferAsSpan => CollectionsMarshal.AsSpan(Testrequirednestedflatbuffer);
   [System.Text.Json.Serialization.JsonPropertyName("scalar_key_sorted_tables")]
   public List<MyGame.Example.StatT> ScalarKeySortedTables { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<MyGame.Example.StatT> ScalarKeySortedTablesAsSpan => CollectionsMarshal.AsSpan(ScalarKeySortedTables);
   [System.Text.Json.Serialization.JsonPropertyName("native_inline")]
   public MyGame.Example.TestT NativeInline { get; set; }
   [System.Text.Json.Serialization.JsonPropertyName("long_enum_non_enum_default")]
@@ -1260,6 +1283,111 @@ public class MonsterT
     this.NegativeInfinityDefault = Single.NegativeInfinity;
     this.DoubleInfDefault = Double.PositiveInfinity;
   }
+  public void Reset() {
+    this.Pos?.Reset();
+    this.Mana = 150;
+    this.Hp = 100;
+    this.Name = null;
+    this.Inventory?.Clear();
+    this.Color = MyGame.Example.Color.Blue;
+    this.Test = null;
+    this.Test4?.Clear();
+    this.Testarrayofstring?.Clear();
+    this.Testarrayoftables?.Clear();
+    this.Enemy = null;
+    this.Testnestedflatbuffer?.Clear();
+    this.Testempty = null;
+    this.Testbool = false;
+    this.Testhashs32Fnv1 = 0;
+    this.Testhashu32Fnv1 = 0;
+    this.Testhashs64Fnv1 = 0;
+    this.Testhashu64Fnv1 = 0;
+    this.Testhashs32Fnv1a = 0;
+    this.Testhashu32Fnv1a = 0;
+    this.Testhashs64Fnv1a = 0;
+    this.Testhashu64Fnv1a = 0;
+    this.Testarrayofbools?.Clear();
+    this.Testf = 3.14159f;
+    this.Testf2 = 3.0f;
+    this.Testf3 = 0.0f;
+    this.Testarrayofstring2?.Clear();
+    this.Testarrayofsortedstruct?.Clear();
+    this.Flex?.Clear();
+    this.Test5?.Clear();
+    this.VectorOfLongs?.Clear();
+    this.VectorOfDoubles?.Clear();
+    this.ParentNamespaceTest = null;
+    this.VectorOfReferrables?.Clear();
+    this.SingleWeakReference = 0;
+    this.VectorOfWeakReferences?.Clear();
+    this.VectorOfStrongReferrables?.Clear();
+    this.CoOwningReference = 0;
+    this.VectorOfCoOwningReferences?.Clear();
+    this.NonOwningReference = 0;
+    this.VectorOfNonOwningReferences?.Clear();
+    this.AnyUnique = null;
+    this.AnyAmbiguous = null;
+    this.VectorOfEnums?.Clear();
+    this.SignedEnum = MyGame.Example.Race.None;
+    this.Testrequirednestedflatbuffer?.Clear();
+    this.ScalarKeySortedTables?.Clear();
+    this.NativeInline?.Reset();
+    this.LongEnumNonEnumDefault = 0;
+    this.LongEnumNormalDefault = MyGame.Example.LongEnum.LongOne;
+    this.NanDefault = Single.NaN;
+    this.InfDefault = Single.PositiveInfinity;
+    this.PositiveInfDefault = Single.PositiveInfinity;
+    this.InfinityDefault = Single.PositiveInfinity;
+    this.PositiveInfinityDefault = Single.PositiveInfinity;
+    this.NegativeInfDefault = Single.NegativeInfinity;
+    this.NegativeInfinityDefault = Single.NegativeInfinity;
+    this.DoubleInfDefault = Double.PositiveInfinity;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.Testarrayofstring != null && this.Testarrayofstring.Count > _max) _max = this.Testarrayofstring.Count;
+    if (this.Testarrayoftables != null && this.Testarrayoftables.Count > _max) _max = this.Testarrayoftables.Count;
+    if (this.Testarrayoftables != null) {
+      for (var i = 0; i < this.Testarrayoftables.Count; ++i) {
+        if (this.Testarrayoftables[i] != null) {
+          var _inner_maxlen = this.Testarrayoftables[i].GetMaxVectorLength();
+          if (_inner_maxlen > _max) _max = _inner_maxlen;
+        }
+      }
+    }
+    if (this.Enemy != null) { var _inner_maxlen = this.Enemy.GetMaxVectorLength(); if (_inner_maxlen > _max) _max = _inner_maxlen; }
+    if (this.Testempty != null) { var _inner_maxlen = this.Testempty.GetMaxVectorLength(); if (_inner_maxlen > _max) _max = _inner_maxlen; }
+    if (this.Testarrayofstring2 != null && this.Testarrayofstring2.Count > _max) _max = this.Testarrayofstring2.Count;
+    if (this.ParentNamespaceTest != null) { var _inner_maxlen = this.ParentNamespaceTest.GetMaxVectorLength(); if (_inner_maxlen > _max) _max = _inner_maxlen; }
+    if (this.VectorOfReferrables != null && this.VectorOfReferrables.Count > _max) _max = this.VectorOfReferrables.Count;
+    if (this.VectorOfReferrables != null) {
+      for (var i = 0; i < this.VectorOfReferrables.Count; ++i) {
+        if (this.VectorOfReferrables[i] != null) {
+          var _inner_maxlen = this.VectorOfReferrables[i].GetMaxVectorLength();
+          if (_inner_maxlen > _max) _max = _inner_maxlen;
+        }
+      }
+    }
+    if (this.VectorOfStrongReferrables != null && this.VectorOfStrongReferrables.Count > _max) _max = this.VectorOfStrongReferrables.Count;
+    if (this.VectorOfStrongReferrables != null) {
+      for (var i = 0; i < this.VectorOfStrongReferrables.Count; ++i) {
+        if (this.VectorOfStrongReferrables[i] != null) {
+          var _inner_maxlen = this.VectorOfStrongReferrables[i].GetMaxVectorLength();
+          if (_inner_maxlen > _max) _max = _inner_maxlen;
+        }
+      }
+    }
+    if (this.ScalarKeySortedTables != null && this.ScalarKeySortedTables.Count > _max) _max = this.ScalarKeySortedTables.Count;
+    if (this.ScalarKeySortedTables != null) {
+      for (var i = 0; i < this.ScalarKeySortedTables.Count; ++i) {
+        if (this.ScalarKeySortedTables[i] != null) {
+          var _inner_maxlen = this.ScalarKeySortedTables[i].GetMaxVectorLength();
+          if (_inner_maxlen > _max) _max = _inner_maxlen;
+        }
+      }
+    }
+    return _max;
+  }
 
   private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };
   public static MonsterT DeserializeFromJson(ReadOnlySpan<char> jsonText) {
@@ -1303,7 +1431,7 @@ public class MonsterT
 
 public static class MonsterVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Pos*/, 32 /*MyGame.Example.Vec3*/, 8, false)

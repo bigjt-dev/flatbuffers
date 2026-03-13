@@ -174,8 +174,10 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         if (parser_.opts.one_file) {
           one_file_code += enumcode;
         } else {
+          bool needs_includes = parser_.opts.generate_object_based_api &&
+            enum_def.is_union;
           if (!SaveType(enum_def.name, *enum_def.defined_namespace, enumcode,
-                        false, parser_.opts))
+                  needs_includes, parser_.opts))
             return false;
         }
       }
@@ -826,7 +828,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     code += "public static class " + struct_def.name + "Verify\n";
     code += "{\n";
     code += "  public static bool Verify";
-    code += "(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)\n";
+    code += "(ref Verifier verifier, uint tablePos)\n";
     code += "  {\n";
     code += "    return verifier.VerifyTableStart(tablePos)\n";
   }
@@ -1086,8 +1088,8 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         code += "  public static ";
         code += "bool Verify" + struct_def.name + "(" + BufferTypeName() +
                 " _bb) {";
-        code += "global::FlatSpanBuffers.Verifier verifier = new ";
-        code += "global::FlatSpanBuffers.Verifier(_bb); ";
+        code += "Verifier verifier = new ";
+        code += "Verifier(_bb); ";
         // For SpanBuf mode, we reference the base namespace's Verify class
         // since verifiers operate on the buffer
         std::string verify_class_ns =
@@ -1106,7 +1108,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         if (!verify_ns.empty()) verify_ns += ".";
 
         code += "  static bool IRootTable.Verify";
-        code += "(ref global::FlatSpanBuffers.Verifier verifier, ";
+        code += "(ref Verifier verifier, ";
         code += "bool sizePrefixed) => ";
         code += "verifier.VerifyBuffer(\"";
         code += parser_.file_identifier_;
@@ -1903,10 +1905,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       }
       // JVM specifications restrict default constructor params to be < 255.
       // Longs and doubles take up 2 units, so we set the limit to be < 127.
-      // In SpanBuffer mode, skip Object API generation, so don't use struct
-      // fields pattern
-      bool use_object_api_for_create =
-          opts.generate_object_based_api && !IsSpanMode();
+      bool use_object_api_for_create = opts.generate_object_based_api;
       if ((has_no_struct_fields || use_object_api_for_create) && num_fields &&
           num_fields < 127) {
         struct_has_create = true;
@@ -2186,7 +2185,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       auto ret = "\n\npublic static class " + enum_def.name + "Verify\n";
       ret += "{\n";
       ret +=
-          "  public static bool Verify(ref global::FlatSpanBuffers.Verifier "
+          "  public static bool Verify(ref Verifier "
           "verifier, "
           "byte typeId, uint tablePos)\n";
       ret += "  {\n";
@@ -2304,7 +2303,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     code += "\n";
     // Pack()
     code +=
-        "  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder "
+        "  public static int Pack(FlatBufferBuilder "
         "builder, " +
         union_name + " _o) {\n";
     code += "    switch (_o.Type) {\n";
@@ -2327,7 +2326,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     // Pack() for SpanBuf mode - uses ref parameter for ref struct builder
     code +=
         "  public static int Pack(ref "
-        "global::FlatSpanBuffers.FlatSpanBufferBuilder "
+        "FlatSpanBufferBuilder "
         "builder, " +
         union_name + " _o) {\n";
     code += "    switch (_o.Type) {\n";
@@ -2810,6 +2809,32 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
             BuilderParam() + ", " + struct_name + " _o) {\n";
     code += "    if (_o == null) return default(" + GenOffsetType(struct_def) +
             ");\n";
+    code += "    var _maxVecLen = _o.GetMaxVectorLength();\n";
+    code +=
+        "    if (_maxVecLen > "
+        "ObjectApiUtil."
+        "MaxOffsetsStackallocLength) {\n";
+    code +=
+        "      var _pooledArr = "
+        "ArrayPool<int>.Shared.Rent(_maxVecLen);\n";
+    code += "      try {\n";
+    code += "        return Pack(" + BuilderArg() +
+            ", _o, _pooledArr.AsSpan(0, _maxVecLen));\n";
+    code += "      } finally {\n";
+    code +=
+        "        "
+        "ArrayPool<int>.Shared.Return(_pooledArr);\n";
+    code += "      }\n";
+    code += "    }\n";
+    code += "    return Pack(" + BuilderArg() + ", _o, Span<int>.Empty);\n";
+    code += "  }\n";
+    // Overload to Pack, adds lengthyVectorSpace as alternative to the
+    // stackallocs if the vector exceeds the stackalloc threshold.
+    code += "  public static " + GenOffsetType(struct_def) + " Pack(" +
+            BuilderParam() + ", " + struct_name + " _o, " + ScopedPrefix() +
+            "Span<int> lengthyVectorSpace) {\n";
+    code += "    if (_o == null) return default(" + GenOffsetType(struct_def) +
+            ");\n";
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       auto &field = **it;
@@ -2827,7 +2852,8 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
                     " == null ? default(" +
                     GenOffsetType(*field.value.type.struct_def) +
                     ") : " + GenTypeGet(field.value.type) + ".Pack(" +
-                    BuilderArg() + ", _o." + camel_name + ");\n";
+                    BuilderArg() + ", _o." + camel_name +
+                    ", lengthyVectorSpace);\n";
           } else if (struct_def.fixed && struct_has_create) {
             std::vector<FieldArrayLength> array_lengths;
             FieldArrayLength tmp_array_length = {
@@ -2856,7 +2882,6 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
             std::string array_name = "__" + field.name;
             std::string array_type = "";
             std::string to_array = "";
-            std::string element_size = "4";  // default for offsets and ints
             switch (field.value.type.element) {
               case BASE_TYPE_STRING: {
                 std::string create_string =
@@ -2864,22 +2889,19 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
                 array_type = "StringOffset";
                 to_array += "builder." + create_string + "(_o." +
                             property_name + "[_j])";
-                element_size = "4";
                 break;
               }
               case BASE_TYPE_STRUCT:
                 array_type = "Offset<" + GenTypeGet(field.value.type) + ">";
                 to_array = GenTypeGet(field.value.type) + ".Pack(" +
-                           BuilderArg() + ", _o." + property_name + "[_j])";
-                element_size = "4";
+                           BuilderArg() + ", _o." + property_name +
+                           "[_j], lengthyVectorSpace)";
                 break;
               case BASE_TYPE_UTYPE:
                 property_name = camel_name.substr(0, camel_name.size() - 4);
                 // Union enum types are always in base namespace
                 array_type = BaseNamespacedEnumName(*field.value.type.enum_def);
                 to_array = "_o." + property_name + "[_j].Type";
-                // Enum size is typically 1 byte (sbyte/byte)
-                element_size = "1";
                 break;
               case BASE_TYPE_UNION:
                 array_type = "int";
@@ -2887,7 +2909,6 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
                 to_array = BaseNamespacedEnumName(*field.value.type.enum_def) +
                            "Union.Pack(" + BuilderArg() + ",  _o." +
                            property_name + "[_j])";
-                element_size = "4";
                 break;
               default:
                 gen_for_loop = false;
@@ -2896,35 +2917,48 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
             code += "    var _" + field.name + " = default(VectorOffset);\n";
             code += "    if (_o." + property_name + " != null) {\n";
             if (gen_for_loop) {
-              // Use stackalloc for small arrays, ArrayPool for larger ones
-              const int stackalloc_threshold_bytes = 256;
-              std::string stackalloc_threshold = std::to_string(
-                  stackalloc_threshold_bytes / std::stoi(element_size));
               std::string count_expr = "_o." + property_name + ".Count";
               code +=
                   "      var _" + field.name + "_len = " + count_expr + ";\n";
-              code += "      " + array_type + "[] _" + field.name +
-                      "_arr = null;\n";
-              code += "      try {\n";
-              code += "        Span<" + array_type + "> " + array_name +
-                      " = _" + field.name + "_len <= " + stackalloc_threshold +
-                      "\n";
-              code += "          ? stackalloc " + array_type + "[_" +
-                      field.name + "_len]\n";
-              code += "          : (_" + field.name + "_arr = ArrayPool<" +
-                      array_type + ">.Shared.Rent(_" + field.name +
-                      "_len)).AsSpan(0, _" + field.name + "_len);\n";
-              code += "        for (var _j = 0; _j < _" + field.name +
-                      "_len; ++_j) { ";
-              code += array_name + "[_j] = " + to_array + "; }\n";
-              code += "        _" + field.name + " = Create" +
-                      camel_name_short + "Vector(" + BuilderArg() + ", " +
-                      array_name + ");\n";
-              code += "      } finally {\n";
-              code += "        if (_" + field.name +
-                      "_arr != null) { ArrayPool<" + array_type +
-                      ">.Shared.Return(_" + field.name + "_arr); }\n";
-              code += "      }\n";
+
+              bool is_offset_element =
+                  (field.value.type.element == BASE_TYPE_STRING ||
+                   field.value.type.element == BASE_TYPE_STRUCT ||
+                   field.value.type.element == BASE_TYPE_UNION);
+
+              if (is_offset_element) {
+                // STRING/STRUCT/UNION: stackalloc per-site when small,
+                // or reuse the caller-supplied lengthyVectorSpace when large.
+                bool is_union_element =
+                    (field.value.type.element == BASE_TYPE_UNION);
+                std::string value_suffix = is_union_element ? "" : ".Value";
+                std::string buf_name = "_" + field.name + "_buf";
+                code += "      Span<int> " + buf_name + " = _" + field.name +
+                        "_len <= "
+                        "ObjectApiUtil.MaxOffsetsStackallocLength"
+                        " ? stackalloc int[_" +
+                        field.name + "_len] : lengthyVectorSpace[.._" +
+                        field.name + "_len];\n";
+                code += "      for (var _j = 0; _j < _" + field.name +
+                        "_len; ++_j) { " + buf_name + "[_j] = " + to_array +
+                        value_suffix + "; }\n";
+                code += "      builder.StartVector(4, _" + field.name +
+                        "_len, 4);\n";
+                code += "      builder.AddOffsetSpan(" + buf_name + ");\n";
+                code += "      _" + field.name + " = builder.EndVector();\n";
+              } else {
+                // UTYPE (byte-backed enum scalars): per-site stackalloc.
+                code += "      Span<" + array_type + "> " + array_name +
+                        " = _" + field.name + "_len <= 4096 ? stackalloc " +
+                        array_type + "[_" + field.name + "_len] : new " +
+                        array_type + "[_" + field.name + "_len];\n";
+                code += "      for (var _j = 0; _j < _" + field.name +
+                        "_len; ++_j) { ";
+                code += array_name + "[_j] = " + to_array + "; }\n";
+                code += "      _" + field.name + " = " + Name(struct_def) +
+                        ".Create" + camel_name_short + "VectorBlock(" +
+                        BuilderArg() + ", " + array_name + ");\n";
+              }
             } else {
               code += "      _" + field.name + " = Create" + camel_name_short +
                       "Vector(" + BuilderArg() +
@@ -3263,7 +3297,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       code += "partial ";
     }
     auto class_name = GenTypeName_ObjectAPI(struct_def.name, opts);
-    code += "class " + class_name;
+    code += "class " + class_name + " : IFlatBufferObjectT";
     code += "\n{\n";
     // Generate Properties
     for (auto it = struct_def.fields.vec.begin();
@@ -3333,6 +3367,16 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         }
       }
       code += "  public " + type_name + " " + camel_name + " { get; set; }\n";
+      // Create a Span accessor for list properties. The element type
+      // is baked in the List type, pull it out and reuse for the Span.
+      if (field.value.type.base_type == BASE_TYPE_VECTOR) {
+        const auto elem_start = type_name.find('<') + 1;
+        const auto elem_type =
+            type_name.substr(elem_start, type_name.rfind('>') - elem_start);
+        code += "  [System.Text.Json.Serialization.JsonIgnore]\n";
+        code += "  public Span<" + elem_type + "> " + camel_name +
+                "AsSpan => CollectionsMarshal.AsSpan(" + camel_name + ");\n";
+      }
     }
     // Generate Constructor
     code += "\n";
@@ -3373,6 +3417,108 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         }
       }
     }
+    code += "  }\n";
+    // Generate Reset
+    code += "  public void Reset() {\n";
+    for (auto it = struct_def.fields.vec.begin();
+         it != struct_def.fields.vec.end(); ++it) {
+      auto &field = **it;
+      if (field.deprecated) continue;
+      if (field.value.type.base_type == BASE_TYPE_UTYPE) continue;
+      if (field.value.type.element == BASE_TYPE_UTYPE) continue;
+      auto camel_name = Name(field);
+      if (camel_name == struct_def.name) {
+        camel_name += "_";
+      }
+      if (IsScalar(field.value.type.base_type)) {
+        code +=
+            "    this." + camel_name + " = " + GenDefaultValue(field) + ";\n";
+      } else {
+        switch (field.value.type.base_type) {
+          case BASE_TYPE_STRUCT: {
+            if (IsStruct(field.value.type)) {
+              code += "    this." + camel_name + "?.Reset();\n";
+            } else {
+              code += "    this." + camel_name + " = null;\n";
+            }
+            break;
+          }
+          case BASE_TYPE_ARRAY: {
+            if (field.value.type.struct_def != nullptr) {
+              // Array of T objects - reset each element if not null
+              code += "    for (var _i = 0; _i < this." + camel_name +
+                      ".Length; ++_i) {\n";
+              code += "      this." + camel_name + "[_i]?.Reset();\n";
+              code += "    }\n";
+            } else {
+              // Scalar or enum array - zero in place
+              code += "    System.Array.Clear(this." + camel_name +
+                      ", 0, this." + camel_name + ".Length);\n";
+            }
+            break;
+          }
+          case BASE_TYPE_VECTOR: {
+            code += "    this." + camel_name + "?.Clear();\n";
+            break;
+          }
+          default: {
+            // string, union
+            code += "    this." + camel_name + " = null;\n";
+            break;
+          }
+        }
+      }
+    }
+    code += "  }\n";
+    code += "  public int GetMaxVectorLength() {\n";
+    code += "    var _max = 0;\n";
+    for (auto it = struct_def.fields.vec.begin();
+         it != struct_def.fields.vec.end(); ++it) {
+      auto &field = **it;
+      if (field.deprecated) continue;
+      auto camel_field = Name(field);
+      if (camel_field == struct_def.name) camel_field += "_";
+      auto bt = field.value.type.base_type;
+      if (bt == BASE_TYPE_VECTOR) {
+        if (field.value.type.element == BASE_TYPE_UTYPE) continue;
+        auto element = field.value.type.element;
+        bool is_offset = (element == BASE_TYPE_STRING) ||
+                         (element == BASE_TYPE_STRUCT &&
+                          field.value.type.struct_def != nullptr &&
+                          !field.value.type.struct_def->fixed) ||
+                         (element == BASE_TYPE_UNION);
+        if (is_offset) {
+          // Count this vector's own length.
+          code += "    if (this." + camel_field + " != null && this." +
+                  camel_field + ".Count > _max) _max = this." + camel_field +
+                  ".Count;\n";
+        }
+        // For vector-of-tables, also roll up each element's subtree.
+        if (element == BASE_TYPE_STRUCT &&
+            field.value.type.struct_def != nullptr &&
+            !field.value.type.struct_def->fixed) {
+          code += "    if (this." + camel_field + " != null) {\n";
+          code += "      for (var i = 0; i < this." + camel_field +
+                  ".Count; ++i) {\n";
+          code += "        if (this." + camel_field + "[i] != null) {\n";
+          code += "          var _inner_maxlen = this." + camel_field +
+                  "[i].GetMaxVectorLength();\n";
+          code += "          if (_inner_maxlen > _max) _max = _inner_maxlen;\n";
+          code += "        }\n";
+          code += "      }\n";
+          code += "    }\n";
+        }
+      } else if (bt == BASE_TYPE_STRUCT &&
+                 field.value.type.struct_def != nullptr &&
+                 !field.value.type.struct_def->fixed) {
+        // Direct table field - roll up its subtree.
+        code += "    if (this." + camel_field +
+                " != null) { var _inner_maxlen = this." + camel_field +
+                ".GetMaxVectorLength(); if (_inner_maxlen > _max) _max = "
+                "_inner_maxlen; }\n";
+      }
+    }
+    code += "    return _max;\n";
     code += "  }\n";
     // Generate Serialization
     if (opts.cs_gen_json_serializer && struct_def.is_root_type) {

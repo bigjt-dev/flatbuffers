@@ -160,6 +160,19 @@ public struct VectorContainer : IFlatbufferObject
   }
   public static Offset<Benchmarks.FlatSpanBuffers.VectorContainer> Pack(FlatBufferBuilder builder, VectorContainerT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.VectorContainer>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<Benchmarks.FlatSpanBuffers.VectorContainer> Pack(FlatBufferBuilder builder, VectorContainerT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.VectorContainer>);
     var _bytes = default(VectorOffset);
     if (_o.Bytes != null) {
       _bytes = CreateBytesVector(builder, CollectionsMarshal.AsSpan(_o.Bytes));
@@ -187,16 +200,11 @@ public struct VectorContainer : IFlatbufferObject
     var _strings = default(VectorOffset);
     if (_o.Strings != null) {
       var _strings_len = _o.Strings.Count;
-      StringOffset[] _strings_arr = null;
-      try {
-        Span<StringOffset> __strings = _strings_len <= 64
-          ? stackalloc StringOffset[_strings_len]
-          : (_strings_arr = ArrayPool<StringOffset>.Shared.Rent(_strings_len)).AsSpan(0, _strings_len);
-        for (var _j = 0; _j < _strings_len; ++_j) { __strings[_j] = builder.CreateString(_o.Strings[_j]); }
-        _strings = CreateStringsVector(builder, __strings);
-      } finally {
-        if (_strings_arr != null) { ArrayPool<StringOffset>.Shared.Return(_strings_arr); }
-      }
+      Span<int> _strings_buf = _strings_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_strings_len] : lengthyVectorSpace[.._strings_len];
+      for (var _j = 0; _j < _strings_len; ++_j) { _strings_buf[_j] = builder.CreateString(_o.Strings[_j]).Value; }
+      builder.StartVector(4, _strings_len, 4);
+      builder.AddOffsetSpan(_strings_buf);
+      _strings = builder.EndVector();
     }
     return CreateVectorContainer(
       builder,
@@ -210,15 +218,29 @@ public struct VectorContainer : IFlatbufferObject
   }
 }
 
-public class VectorContainerT
+public class VectorContainerT : IFlatBufferObjectT
 {
   public List<byte> Bytes { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<byte> BytesAsSpan => CollectionsMarshal.AsSpan(Bytes);
   public List<short> Shorts { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<short> ShortsAsSpan => CollectionsMarshal.AsSpan(Shorts);
   public List<int> Ints { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<int> IntsAsSpan => CollectionsMarshal.AsSpan(Ints);
   public List<long> Longs { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<long> LongsAsSpan => CollectionsMarshal.AsSpan(Longs);
   public List<float> Floats { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<float> FloatsAsSpan => CollectionsMarshal.AsSpan(Floats);
   public List<double> Doubles { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<double> DoublesAsSpan => CollectionsMarshal.AsSpan(Doubles);
   public List<string> Strings { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<string> StringsAsSpan => CollectionsMarshal.AsSpan(Strings);
 
   public VectorContainerT() {
     this.Bytes = null;
@@ -229,12 +251,26 @@ public class VectorContainerT
     this.Doubles = null;
     this.Strings = null;
   }
+  public void Reset() {
+    this.Bytes?.Clear();
+    this.Shorts?.Clear();
+    this.Ints?.Clear();
+    this.Longs?.Clear();
+    this.Floats?.Clear();
+    this.Doubles?.Clear();
+    this.Strings?.Clear();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.Strings != null && this.Strings.Count > _max) _max = this.Strings.Count;
+    return _max;
+  }
 }
 
 
 public static class VectorContainerVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyVectorOfData(tablePos, 4 /*Bytes*/, 1 /*byte*/, false)

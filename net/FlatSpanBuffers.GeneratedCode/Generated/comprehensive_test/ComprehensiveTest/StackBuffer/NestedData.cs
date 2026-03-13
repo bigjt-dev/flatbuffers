@@ -48,6 +48,19 @@ public ref struct NestedData : IFlatbufferSpanObject
   }
   public static Offset<ComprehensiveTest.StackBuffer.NestedData> Pack(ref FlatSpanBufferBuilder builder, NestedDataT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.NestedData>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.StackBuffer.NestedData> Pack(ref FlatSpanBufferBuilder builder, NestedDataT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.NestedData>);
     return CreateNestedData(
       ref builder,
       _o.Value);

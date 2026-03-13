@@ -55,6 +55,19 @@ public struct Transform : IFlatbufferObject
   }
   public static Offset<ComprehensiveTest.Transform> Pack(FlatBufferBuilder builder, TransformT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.Transform>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.Transform> Pack(FlatBufferBuilder builder, TransformT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.Transform>);
     var _position_x = _o.Position.X;
     var _position_y = _o.Position.Y;
     var _position_z = _o.Position.Z;
@@ -78,7 +91,7 @@ public struct Transform : IFlatbufferObject
   }
 }
 
-public class TransformT
+public class TransformT : IFlatBufferObjectT
 {
   public ComprehensiveTest.Vec3T Position { get; set; }
   public ComprehensiveTest.Vec3T Rotation { get; set; }
@@ -88,6 +101,15 @@ public class TransformT
     this.Position = new ComprehensiveTest.Vec3T();
     this.Rotation = new ComprehensiveTest.Vec3T();
     this.Scale = new ComprehensiveTest.Vec3T();
+  }
+  public void Reset() {
+    this.Position?.Reset();
+    this.Rotation?.Reset();
+    this.Scale?.Reset();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

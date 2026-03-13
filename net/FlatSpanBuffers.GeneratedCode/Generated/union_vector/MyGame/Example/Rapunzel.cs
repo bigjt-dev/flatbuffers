@@ -37,19 +37,39 @@ public struct Rapunzel : IFlatbufferObject
   }
   public static Offset<MyGame.Example.Rapunzel> Pack(FlatBufferBuilder builder, RapunzelT _o) {
     if (_o == null) return default(Offset<MyGame.Example.Rapunzel>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.Rapunzel> Pack(FlatBufferBuilder builder, RapunzelT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.Rapunzel>);
     return CreateRapunzel(
       builder,
       _o.HairLength);
   }
 }
 
-public class RapunzelT
+public class RapunzelT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("hair_length")]
   public int HairLength { get; set; }
 
   public RapunzelT() {
     this.HairLength = 0;
+  }
+  public void Reset() {
+    this.HairLength = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

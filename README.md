@@ -40,13 +40,33 @@ IFlatbufferSpanObject uses `ref struct` and accepts `Span<T>` arguments for more
 
 All benchmarks compare the original `Google.FlatBuffers`, with `FlatSpanBuffers`. The summarized results below compare the original against stackalloc'd, ref struct `StackBuffer` objects.
 
+See [Benchmarks.md](net/FlatSpanBuffers.Benchmarks/Benchmarks.md) for the complete results.
+
+### vs Google.FlatBuffers
+
+Measured on AMD Ryzen 7 7800X3D, .NET 10.0.3.
+
 | Scenario | Improvement |
 |----------|-------------|
-| Decode | ~4.8x |
-| Encode | ~1.6x |
+| Decode | ~3.7x |
+| Encode | ~2.1x |
 | Decode (Object API) | ~2.5x |
-| Encode (Object API) | ~1.35x |
-| Verify | ~2.9x |
+| Encode (Object API) | ~1.8x |
+| Verify | ~2.5x |
+
+### vs FlatSharp
+
+[FlatSharp](https://github.com/jamescourtney/FlatSharp) is a popular .NET FlatBuffers library that uses pre-compiled serializers (source-generated code, AOT-friendly) with a different performance profile.
+
+FlatSpanBuffers is on par with FlatSharp, with the exception of the Object API's Encoding/Pack() function. In benchmarks results, there is a ~35ns gap.
+
+| Scenario | Notes |
+|----------|-----------|
+| Lazy Decode | FlatSpanBuffers ~3.7x faster, zero allocation |
+| Greedy Decode (vs ObjectApi UnPack()) | ~Equal performance, FlatSpanBuffers less memory use |
+| Encode (vs FlatSpanBuilder) | FlatSpanBuffers ~9% faster |
+| Encode (vs ObjectApi Pack()) | FlatSharp ~25% faster |
+
 
 ---
 

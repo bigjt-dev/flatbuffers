@@ -176,7 +176,7 @@ public class FlatSharpEncodeComparison
         var byteSpanBuffer = new ByteSpanBuffer(buffer);
         var builder = new FlatSpanBufferBuilder(byteSpanBuffer, vtableSpace, vtableOffsetSpace);
 
-        var offset = StackFooBarContainer.Pack(ref builder, _flatSpanContainerT);
+        var offset = StackFooBarContainer.Pack(ref builder, _flatSpanContainerT, Span<int>.Empty);
         StackFooBarContainer.FinishFooBarContainerBuffer(ref builder, offset);
     }
 }

@@ -21,8 +21,8 @@ public struct GameSession : IFlatbufferObject, IRootTable
   public static GameSession GetRootAsGameSession(ByteBuffer _bb) { return GetRootAsGameSession(_bb, new GameSession()); }
   public static GameSession GetRootAsGameSession(ByteBuffer _bb, GameSession obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool GameSessionBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "TEST"); }
-  public static bool VerifyGameSession(ByteBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("TEST", false, ComprehensiveTest.GameSessionVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("TEST", sizePrefixed, ComprehensiveTest.GameSessionVerify.Verify);
+  public static bool VerifyGameSession(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("TEST", false, ComprehensiveTest.GameSessionVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("TEST", sizePrefixed, ComprehensiveTest.GameSessionVerify.Verify);
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public GameSession __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -87,20 +87,28 @@ public struct GameSession : IFlatbufferObject, IRootTable
   }
   public static Offset<ComprehensiveTest.GameSession> Pack(FlatBufferBuilder builder, GameSessionT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.GameSession>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.GameSession> Pack(FlatBufferBuilder builder, GameSessionT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.GameSession>);
     var _session_id = _o.SessionId == null ? default(StringOffset) : builder.CreateString(_o.SessionId);
     var _players = default(VectorOffset);
     if (_o.Players != null) {
       var _players_len = _o.Players.Count;
-      Offset<ComprehensiveTest.Player>[] _players_arr = null;
-      try {
-        Span<Offset<ComprehensiveTest.Player>> __players = _players_len <= 64
-          ? stackalloc Offset<ComprehensiveTest.Player>[_players_len]
-          : (_players_arr = ArrayPool<Offset<ComprehensiveTest.Player>>.Shared.Rent(_players_len)).AsSpan(0, _players_len);
-        for (var _j = 0; _j < _players_len; ++_j) { __players[_j] = ComprehensiveTest.Player.Pack(builder, _o.Players[_j]); }
-        _players = CreatePlayersVector(builder, __players);
-      } finally {
-        if (_players_arr != null) { ArrayPool<Offset<ComprehensiveTest.Player>>.Shared.Return(_players_arr); }
-      }
+      Span<int> _players_buf = _players_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_players_len] : lengthyVectorSpace[.._players_len];
+      for (var _j = 0; _j < _players_len; ++_j) { _players_buf[_j] = ComprehensiveTest.Player.Pack(builder, _o.Players[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _players_len, 4);
+      builder.AddOffsetSpan(_players_buf);
+      _players = builder.EndVector();
     }
     return CreateGameSession(
       builder,
@@ -111,18 +119,39 @@ public struct GameSession : IFlatbufferObject, IRootTable
   }
 }
 
-public class GameSessionT
+public class GameSessionT : IFlatBufferObjectT
 {
   public string SessionId { get; set; }
   public int PlayerCount { get; set; }
   public long StartTime { get; set; }
   public List<ComprehensiveTest.PlayerT> Players { get; set; }
+  [System.Text.Json.Serialization.JsonIgnore]
+  public Span<ComprehensiveTest.PlayerT> PlayersAsSpan => CollectionsMarshal.AsSpan(Players);
 
   public GameSessionT() {
     this.SessionId = null;
     this.PlayerCount = 0;
     this.StartTime = 0;
     this.Players = null;
+  }
+  public void Reset() {
+    this.SessionId = null;
+    this.PlayerCount = 0;
+    this.StartTime = 0;
+    this.Players?.Clear();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    if (this.Players != null && this.Players.Count > _max) _max = this.Players.Count;
+    if (this.Players != null) {
+      for (var i = 0; i < this.Players.Count; ++i) {
+        if (this.Players[i] != null) {
+          var _inner_maxlen = this.Players[i].GetMaxVectorLength();
+          if (_inner_maxlen > _max) _max = _inner_maxlen;
+        }
+      }
+    }
+    return _max;
   }
   public static GameSessionT DeserializeFromBinary(Span<byte> fbBuffer) {
     return StackBuffer.GameSession.GetRootAsGameSession(new ByteSpanBuffer(fbBuffer)).UnPack();
@@ -153,7 +182,7 @@ public class GameSessionT
 
 public static class GameSessionVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyString(tablePos, 4 /*SessionId*/, true)

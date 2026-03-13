@@ -63,6 +63,19 @@ public struct KeywordsInTable : IFlatbufferObject
   }
   public static Offset<KeywordTest.KeywordsInTable> Pack(FlatBufferBuilder builder, KeywordsInTableT _o) {
     if (_o == null) return default(Offset<KeywordTest.KeywordsInTable>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<KeywordTest.KeywordsInTable> Pack(FlatBufferBuilder builder, KeywordsInTableT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<KeywordTest.KeywordsInTable>);
     return CreateKeywordsInTable(
       builder,
       _o.Is,
@@ -72,7 +85,7 @@ public struct KeywordsInTable : IFlatbufferObject
   }
 }
 
-public class KeywordsInTableT
+public class KeywordsInTableT : IFlatBufferObjectT
 {
   public KeywordTest.ABC Is { get; set; }
   public KeywordTest.@public Private { get; set; }
@@ -85,12 +98,22 @@ public class KeywordsInTableT
     this.Type = 0;
     this.Default = false;
   }
+  public void Reset() {
+    this.Is = KeywordTest.ABC.@void;
+    this.Private = KeywordTest.@public.NONE;
+    this.Type = 0;
+    this.Default = false;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class KeywordsInTableVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Is*/, 4 /*KeywordTest.ABC*/, 4, false)

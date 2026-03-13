@@ -21,8 +21,8 @@ public ref struct GameState : IFlatbufferSpanObject, IRootTable
   public static GameState GetRootAsGameState(ByteSpanBuffer _bb) { return GetRootAsGameState(_bb, new GameState()); }
   public static GameState GetRootAsGameState(ByteSpanBuffer _bb, GameState obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool GameStateBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "JSON"); }
-  public static bool VerifyGameState(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("JSON", false, JsonTest.GameStateVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("JSON", sizePrefixed, JsonTest.GameStateVerify.Verify);
+  public static bool VerifyGameState(ByteSpanBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("JSON", false, JsonTest.GameStateVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("JSON", sizePrefixed, JsonTest.GameStateVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public GameState __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -86,20 +86,28 @@ public ref struct GameState : IFlatbufferSpanObject, IRootTable
   }
   public static Offset<JsonTest.StackBuffer.GameState> Pack(ref FlatSpanBufferBuilder builder, GameStateT _o) {
     if (_o == null) return default(Offset<JsonTest.StackBuffer.GameState>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<JsonTest.StackBuffer.GameState> Pack(ref FlatSpanBufferBuilder builder, GameStateT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<JsonTest.StackBuffer.GameState>);
     var _version = _o.Version == null ? default(StringOffset) : builder.CreateString(_o.Version);
     var _players = default(VectorOffset);
     if (_o.Players != null) {
       var _players_len = _o.Players.Count;
-      Offset<JsonTest.StackBuffer.Player>[] _players_arr = null;
-      try {
-        Span<Offset<JsonTest.StackBuffer.Player>> __players = _players_len <= 64
-          ? stackalloc Offset<JsonTest.StackBuffer.Player>[_players_len]
-          : (_players_arr = ArrayPool<Offset<JsonTest.StackBuffer.Player>>.Shared.Rent(_players_len)).AsSpan(0, _players_len);
-        for (var _j = 0; _j < _players_len; ++_j) { __players[_j] = JsonTest.StackBuffer.Player.Pack(ref builder, _o.Players[_j]); }
-        _players = CreatePlayersVector(ref builder, __players);
-      } finally {
-        if (_players_arr != null) { ArrayPool<Offset<JsonTest.StackBuffer.Player>>.Shared.Return(_players_arr); }
-      }
+      Span<int> _players_buf = _players_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_players_len] : lengthyVectorSpace[.._players_len];
+      for (var _j = 0; _j < _players_len; ++_j) { _players_buf[_j] = JsonTest.StackBuffer.Player.Pack(ref builder, _o.Players[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _players_len, 4);
+      builder.AddOffsetSpan(_players_buf);
+      _players = builder.EndVector();
     }
     return CreateGameState(
       ref builder,

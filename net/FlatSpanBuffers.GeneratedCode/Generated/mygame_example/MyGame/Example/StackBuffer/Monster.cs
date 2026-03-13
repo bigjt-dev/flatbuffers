@@ -22,8 +22,8 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
   public static Monster GetRootAsMonster(ByteSpanBuffer _bb) { return GetRootAsMonster(_bb, new Monster()); }
   public static Monster GetRootAsMonster(ByteSpanBuffer _bb, Monster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool MonsterBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "MONS"); }
-  public static bool VerifyMonster(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("MONS", false, MyGame.Example.MonsterVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("MONS", sizePrefixed, MyGame.Example.MonsterVerify.Verify);
+  public static bool VerifyMonster(ByteSpanBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("MONS", false, MyGame.Example.MonsterVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("MONS", sizePrefixed, MyGame.Example.MonsterVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public Monster __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -158,6 +158,133 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
   public bool MutateNegativeInfinityDefault(float negative_infinity_default) { int o = __p.__offset(124); if (o != 0) { __p.bb.Put<float>(o + __p.bb_pos, negative_infinity_default); return true; } else { return false; } }
   public double DoubleInfDefault { get { int o = __p.__offset(126); return o != 0 ? __p.bb.Get<double>(o + __p.bb_pos) : (double)Double.PositiveInfinity; } }
   public bool MutateDoubleInfDefault(double double_inf_default) { int o = __p.__offset(126); if (o != 0) { __p.bb.Put<double>(o + __p.bb_pos, double_inf_default); return true; } else { return false; } }
+
+  public static Offset<MyGame.Example.StackBuffer.Monster> CreateMonster(ref FlatSpanBufferBuilder builder,
+      MyGame.Example.Vec3T pos = null,
+      short mana = 150,
+      short hp = 100,
+      StringOffset nameOffset = default(StringOffset),
+      VectorOffset inventoryOffset = default(VectorOffset),
+      MyGame.Example.Color color = MyGame.Example.Color.Blue,
+      MyGame.Example.Any test_type = MyGame.Example.Any.NONE,
+      int testOffset = 0,
+      VectorOffset test4Offset = default(VectorOffset),
+      VectorOffset testarrayofstringOffset = default(VectorOffset),
+      VectorOffset testarrayoftablesOffset = default(VectorOffset),
+      Offset<MyGame.Example.StackBuffer.Monster> enemyOffset = default(Offset<MyGame.Example.StackBuffer.Monster>),
+      VectorOffset testnestedflatbufferOffset = default(VectorOffset),
+      Offset<MyGame.Example.StackBuffer.Stat> testemptyOffset = default(Offset<MyGame.Example.StackBuffer.Stat>),
+      bool testbool = false,
+      int testhashs32_fnv1 = 0,
+      uint testhashu32_fnv1 = 0,
+      long testhashs64_fnv1 = 0,
+      ulong testhashu64_fnv1 = 0,
+      int testhashs32_fnv1a = 0,
+      uint testhashu32_fnv1a = 0,
+      long testhashs64_fnv1a = 0,
+      ulong testhashu64_fnv1a = 0,
+      VectorOffset testarrayofboolsOffset = default(VectorOffset),
+      float testf = 3.14159f,
+      float testf2 = 3.0f,
+      float testf3 = 0.0f,
+      VectorOffset testarrayofstring2Offset = default(VectorOffset),
+      VectorOffset testarrayofsortedstructOffset = default(VectorOffset),
+      VectorOffset flexOffset = default(VectorOffset),
+      VectorOffset test5Offset = default(VectorOffset),
+      VectorOffset vector_of_longsOffset = default(VectorOffset),
+      VectorOffset vector_of_doublesOffset = default(VectorOffset),
+      Offset<MyGame.StackBuffer.InParentNamespace> parent_namespace_testOffset = default(Offset<MyGame.StackBuffer.InParentNamespace>),
+      VectorOffset vector_of_referrablesOffset = default(VectorOffset),
+      ulong single_weak_reference = 0,
+      VectorOffset vector_of_weak_referencesOffset = default(VectorOffset),
+      VectorOffset vector_of_strong_referrablesOffset = default(VectorOffset),
+      ulong co_owning_reference = 0,
+      VectorOffset vector_of_co_owning_referencesOffset = default(VectorOffset),
+      ulong non_owning_reference = 0,
+      VectorOffset vector_of_non_owning_referencesOffset = default(VectorOffset),
+      MyGame.Example.AnyUniqueAliases any_unique_type = MyGame.Example.AnyUniqueAliases.NONE,
+      int any_uniqueOffset = 0,
+      MyGame.Example.AnyAmbiguousAliases any_ambiguous_type = MyGame.Example.AnyAmbiguousAliases.NONE,
+      int any_ambiguousOffset = 0,
+      VectorOffset vector_of_enumsOffset = default(VectorOffset),
+      MyGame.Example.Race signed_enum = MyGame.Example.Race.None,
+      VectorOffset testrequirednestedflatbufferOffset = default(VectorOffset),
+      VectorOffset scalar_key_sorted_tablesOffset = default(VectorOffset),
+      MyGame.Example.TestT native_inline = null,
+      MyGame.Example.LongEnum long_enum_non_enum_default = 0,
+      MyGame.Example.LongEnum long_enum_normal_default = MyGame.Example.LongEnum.LongOne,
+      float nan_default = Single.NaN,
+      float inf_default = Single.PositiveInfinity,
+      float positive_inf_default = Single.PositiveInfinity,
+      float infinity_default = Single.PositiveInfinity,
+      float positive_infinity_default = Single.PositiveInfinity,
+      float negative_inf_default = Single.NegativeInfinity,
+      float negative_infinity_default = Single.NegativeInfinity,
+      double double_inf_default = Double.PositiveInfinity) {
+    builder.StartTable(62);
+    Monster.AddDoubleInfDefault(ref builder, double_inf_default);
+    Monster.AddLongEnumNormalDefault(ref builder, long_enum_normal_default);
+    Monster.AddLongEnumNonEnumDefault(ref builder, long_enum_non_enum_default);
+    Monster.AddNonOwningReference(ref builder, non_owning_reference);
+    Monster.AddCoOwningReference(ref builder, co_owning_reference);
+    Monster.AddSingleWeakReference(ref builder, single_weak_reference);
+    Monster.AddTesthashu64Fnv1a(ref builder, testhashu64_fnv1a);
+    Monster.AddTesthashs64Fnv1a(ref builder, testhashs64_fnv1a);
+    Monster.AddTesthashu64Fnv1(ref builder, testhashu64_fnv1);
+    Monster.AddTesthashs64Fnv1(ref builder, testhashs64_fnv1);
+    Monster.AddNegativeInfinityDefault(ref builder, negative_infinity_default);
+    Monster.AddNegativeInfDefault(ref builder, negative_inf_default);
+    Monster.AddPositiveInfinityDefault(ref builder, positive_infinity_default);
+    Monster.AddInfinityDefault(ref builder, infinity_default);
+    Monster.AddPositiveInfDefault(ref builder, positive_inf_default);
+    Monster.AddInfDefault(ref builder, inf_default);
+    Monster.AddNanDefault(ref builder, nan_default);
+    Monster.AddNativeInline(ref builder, MyGame.Example.StackBuffer.Test.Pack(ref builder, native_inline));
+    Monster.AddScalarKeySortedTables(ref builder, scalar_key_sorted_tablesOffset);
+    Monster.AddTestrequirednestedflatbuffer(ref builder, testrequirednestedflatbufferOffset);
+    Monster.AddVectorOfEnums(ref builder, vector_of_enumsOffset);
+    Monster.AddAnyAmbiguous(ref builder, any_ambiguousOffset);
+    Monster.AddAnyUnique(ref builder, any_uniqueOffset);
+    Monster.AddVectorOfNonOwningReferences(ref builder, vector_of_non_owning_referencesOffset);
+    Monster.AddVectorOfCoOwningReferences(ref builder, vector_of_co_owning_referencesOffset);
+    Monster.AddVectorOfStrongReferrables(ref builder, vector_of_strong_referrablesOffset);
+    Monster.AddVectorOfWeakReferences(ref builder, vector_of_weak_referencesOffset);
+    Monster.AddVectorOfReferrables(ref builder, vector_of_referrablesOffset);
+    Monster.AddParentNamespaceTest(ref builder, parent_namespace_testOffset);
+    Monster.AddVectorOfDoubles(ref builder, vector_of_doublesOffset);
+    Monster.AddVectorOfLongs(ref builder, vector_of_longsOffset);
+    Monster.AddTest5(ref builder, test5Offset);
+    Monster.AddFlex(ref builder, flexOffset);
+    Monster.AddTestarrayofsortedstruct(ref builder, testarrayofsortedstructOffset);
+    Monster.AddTestarrayofstring2(ref builder, testarrayofstring2Offset);
+    Monster.AddTestf3(ref builder, testf3);
+    Monster.AddTestf2(ref builder, testf2);
+    Monster.AddTestf(ref builder, testf);
+    Monster.AddTestarrayofbools(ref builder, testarrayofboolsOffset);
+    Monster.AddTesthashu32Fnv1a(ref builder, testhashu32_fnv1a);
+    Monster.AddTesthashs32Fnv1a(ref builder, testhashs32_fnv1a);
+    Monster.AddTesthashu32Fnv1(ref builder, testhashu32_fnv1);
+    Monster.AddTesthashs32Fnv1(ref builder, testhashs32_fnv1);
+    Monster.AddTestempty(ref builder, testemptyOffset);
+    Monster.AddTestnestedflatbuffer(ref builder, testnestedflatbufferOffset);
+    Monster.AddEnemy(ref builder, enemyOffset);
+    Monster.AddTestarrayoftables(ref builder, testarrayoftablesOffset);
+    Monster.AddTestarrayofstring(ref builder, testarrayofstringOffset);
+    Monster.AddTest4(ref builder, test4Offset);
+    Monster.AddTest(ref builder, testOffset);
+    Monster.AddInventory(ref builder, inventoryOffset);
+    Monster.AddName(ref builder, nameOffset);
+    Monster.AddPos(ref builder, MyGame.Example.StackBuffer.Vec3.Pack(ref builder, pos));
+    Monster.AddHp(ref builder, hp);
+    Monster.AddMana(ref builder, mana);
+    Monster.AddSignedEnum(ref builder, signed_enum);
+    Monster.AddAnyAmbiguousType(ref builder, any_ambiguous_type);
+    Monster.AddAnyUniqueType(ref builder, any_unique_type);
+    Monster.AddTestbool(ref builder, testbool);
+    Monster.AddTestType(ref builder, test_type);
+    Monster.AddColor(ref builder, color);
+    return Monster.EndMonster(ref builder);
+  }
 
   public static void StartMonster(ref FlatSpanBufferBuilder builder) { builder.StartTable(62); }
   public static void AddPos(ref FlatSpanBufferBuilder builder, Offset<MyGame.Example.StackBuffer.Vec3> posOffset) { builder.AddStruct(0, posOffset, 0); }
@@ -699,6 +826,19 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
   }
   public static Offset<MyGame.Example.StackBuffer.Monster> Pack(ref FlatSpanBufferBuilder builder, MonsterT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StackBuffer.Monster>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.StackBuffer.Monster> Pack(ref FlatSpanBufferBuilder builder, MonsterT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.StackBuffer.Monster>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     var _inventory = default(VectorOffset);
     if (_o.Inventory != null) {
@@ -715,37 +855,27 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
     var _testarrayofstring = default(VectorOffset);
     if (_o.Testarrayofstring != null) {
       var _testarrayofstring_len = _o.Testarrayofstring.Count;
-      StringOffset[] _testarrayofstring_arr = null;
-      try {
-        Span<StringOffset> __testarrayofstring = _testarrayofstring_len <= 64
-          ? stackalloc StringOffset[_testarrayofstring_len]
-          : (_testarrayofstring_arr = ArrayPool<StringOffset>.Shared.Rent(_testarrayofstring_len)).AsSpan(0, _testarrayofstring_len);
-        for (var _j = 0; _j < _testarrayofstring_len; ++_j) { __testarrayofstring[_j] = builder.CreateString(_o.Testarrayofstring[_j]); }
-        _testarrayofstring = CreateTestarrayofstringVector(ref builder, __testarrayofstring);
-      } finally {
-        if (_testarrayofstring_arr != null) { ArrayPool<StringOffset>.Shared.Return(_testarrayofstring_arr); }
-      }
+      Span<int> _testarrayofstring_buf = _testarrayofstring_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_testarrayofstring_len] : lengthyVectorSpace[.._testarrayofstring_len];
+      for (var _j = 0; _j < _testarrayofstring_len; ++_j) { _testarrayofstring_buf[_j] = builder.CreateString(_o.Testarrayofstring[_j]).Value; }
+      builder.StartVector(4, _testarrayofstring_len, 4);
+      builder.AddOffsetSpan(_testarrayofstring_buf);
+      _testarrayofstring = builder.EndVector();
     }
     var _testarrayoftables = default(VectorOffset);
     if (_o.Testarrayoftables != null) {
       var _testarrayoftables_len = _o.Testarrayoftables.Count;
-      Offset<MyGame.Example.StackBuffer.Monster>[] _testarrayoftables_arr = null;
-      try {
-        Span<Offset<MyGame.Example.StackBuffer.Monster>> __testarrayoftables = _testarrayoftables_len <= 64
-          ? stackalloc Offset<MyGame.Example.StackBuffer.Monster>[_testarrayoftables_len]
-          : (_testarrayoftables_arr = ArrayPool<Offset<MyGame.Example.StackBuffer.Monster>>.Shared.Rent(_testarrayoftables_len)).AsSpan(0, _testarrayoftables_len);
-        for (var _j = 0; _j < _testarrayoftables_len; ++_j) { __testarrayoftables[_j] = MyGame.Example.StackBuffer.Monster.Pack(ref builder, _o.Testarrayoftables[_j]); }
-        _testarrayoftables = CreateTestarrayoftablesVector(ref builder, __testarrayoftables);
-      } finally {
-        if (_testarrayoftables_arr != null) { ArrayPool<Offset<MyGame.Example.StackBuffer.Monster>>.Shared.Return(_testarrayoftables_arr); }
-      }
+      Span<int> _testarrayoftables_buf = _testarrayoftables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_testarrayoftables_len] : lengthyVectorSpace[.._testarrayoftables_len];
+      for (var _j = 0; _j < _testarrayoftables_len; ++_j) { _testarrayoftables_buf[_j] = MyGame.Example.StackBuffer.Monster.Pack(ref builder, _o.Testarrayoftables[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _testarrayoftables_len, 4);
+      builder.AddOffsetSpan(_testarrayoftables_buf);
+      _testarrayoftables = builder.EndVector();
     }
-    var _enemy = _o.Enemy == null ? default(Offset<MyGame.Example.StackBuffer.Monster>) : MyGame.Example.StackBuffer.Monster.Pack(ref builder, _o.Enemy);
+    var _enemy = _o.Enemy == null ? default(Offset<MyGame.Example.StackBuffer.Monster>) : MyGame.Example.StackBuffer.Monster.Pack(ref builder, _o.Enemy, lengthyVectorSpace);
     var _testnestedflatbuffer = default(VectorOffset);
     if (_o.Testnestedflatbuffer != null) {
       _testnestedflatbuffer = CreateTestnestedflatbufferVector(ref builder, CollectionsMarshal.AsSpan(_o.Testnestedflatbuffer));
     }
-    var _testempty = _o.Testempty == null ? default(Offset<MyGame.Example.StackBuffer.Stat>) : MyGame.Example.StackBuffer.Stat.Pack(ref builder, _o.Testempty);
+    var _testempty = _o.Testempty == null ? default(Offset<MyGame.Example.StackBuffer.Stat>) : MyGame.Example.StackBuffer.Stat.Pack(ref builder, _o.Testempty, lengthyVectorSpace);
     var _testarrayofbools = default(VectorOffset);
     if (_o.Testarrayofbools != null) {
       _testarrayofbools = CreateTestarrayofboolsVector(ref builder, CollectionsMarshal.AsSpan(_o.Testarrayofbools));
@@ -753,16 +883,11 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
     var _testarrayofstring2 = default(VectorOffset);
     if (_o.Testarrayofstring2 != null) {
       var _testarrayofstring2_len = _o.Testarrayofstring2.Count;
-      StringOffset[] _testarrayofstring2_arr = null;
-      try {
-        Span<StringOffset> __testarrayofstring2 = _testarrayofstring2_len <= 64
-          ? stackalloc StringOffset[_testarrayofstring2_len]
-          : (_testarrayofstring2_arr = ArrayPool<StringOffset>.Shared.Rent(_testarrayofstring2_len)).AsSpan(0, _testarrayofstring2_len);
-        for (var _j = 0; _j < _testarrayofstring2_len; ++_j) { __testarrayofstring2[_j] = builder.CreateString(_o.Testarrayofstring2[_j]); }
-        _testarrayofstring2 = CreateTestarrayofstring2Vector(ref builder, __testarrayofstring2);
-      } finally {
-        if (_testarrayofstring2_arr != null) { ArrayPool<StringOffset>.Shared.Return(_testarrayofstring2_arr); }
-      }
+      Span<int> _testarrayofstring2_buf = _testarrayofstring2_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_testarrayofstring2_len] : lengthyVectorSpace[.._testarrayofstring2_len];
+      for (var _j = 0; _j < _testarrayofstring2_len; ++_j) { _testarrayofstring2_buf[_j] = builder.CreateString(_o.Testarrayofstring2[_j]).Value; }
+      builder.StartVector(4, _testarrayofstring2_len, 4);
+      builder.AddOffsetSpan(_testarrayofstring2_buf);
+      _testarrayofstring2 = builder.EndVector();
     }
     var _testarrayofsortedstruct = default(VectorOffset);
     if (_o.Testarrayofsortedstruct != null) {
@@ -788,20 +913,15 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
     if (_o.VectorOfDoubles != null) {
       _vector_of_doubles = CreateVectorOfDoublesVector(ref builder, CollectionsMarshal.AsSpan(_o.VectorOfDoubles));
     }
-    var _parent_namespace_test = _o.ParentNamespaceTest == null ? default(Offset<MyGame.StackBuffer.InParentNamespace>) : MyGame.StackBuffer.InParentNamespace.Pack(ref builder, _o.ParentNamespaceTest);
+    var _parent_namespace_test = _o.ParentNamespaceTest == null ? default(Offset<MyGame.StackBuffer.InParentNamespace>) : MyGame.StackBuffer.InParentNamespace.Pack(ref builder, _o.ParentNamespaceTest, lengthyVectorSpace);
     var _vector_of_referrables = default(VectorOffset);
     if (_o.VectorOfReferrables != null) {
       var _vector_of_referrables_len = _o.VectorOfReferrables.Count;
-      Offset<MyGame.Example.StackBuffer.Referrable>[] _vector_of_referrables_arr = null;
-      try {
-        Span<Offset<MyGame.Example.StackBuffer.Referrable>> __vector_of_referrables = _vector_of_referrables_len <= 64
-          ? stackalloc Offset<MyGame.Example.StackBuffer.Referrable>[_vector_of_referrables_len]
-          : (_vector_of_referrables_arr = ArrayPool<Offset<MyGame.Example.StackBuffer.Referrable>>.Shared.Rent(_vector_of_referrables_len)).AsSpan(0, _vector_of_referrables_len);
-        for (var _j = 0; _j < _vector_of_referrables_len; ++_j) { __vector_of_referrables[_j] = MyGame.Example.StackBuffer.Referrable.Pack(ref builder, _o.VectorOfReferrables[_j]); }
-        _vector_of_referrables = CreateVectorOfReferrablesVector(ref builder, __vector_of_referrables);
-      } finally {
-        if (_vector_of_referrables_arr != null) { ArrayPool<Offset<MyGame.Example.StackBuffer.Referrable>>.Shared.Return(_vector_of_referrables_arr); }
-      }
+      Span<int> _vector_of_referrables_buf = _vector_of_referrables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_vector_of_referrables_len] : lengthyVectorSpace[.._vector_of_referrables_len];
+      for (var _j = 0; _j < _vector_of_referrables_len; ++_j) { _vector_of_referrables_buf[_j] = MyGame.Example.StackBuffer.Referrable.Pack(ref builder, _o.VectorOfReferrables[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _vector_of_referrables_len, 4);
+      builder.AddOffsetSpan(_vector_of_referrables_buf);
+      _vector_of_referrables = builder.EndVector();
     }
     var _vector_of_weak_references = default(VectorOffset);
     if (_o.VectorOfWeakReferences != null) {
@@ -810,16 +930,11 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
     var _vector_of_strong_referrables = default(VectorOffset);
     if (_o.VectorOfStrongReferrables != null) {
       var _vector_of_strong_referrables_len = _o.VectorOfStrongReferrables.Count;
-      Offset<MyGame.Example.StackBuffer.Referrable>[] _vector_of_strong_referrables_arr = null;
-      try {
-        Span<Offset<MyGame.Example.StackBuffer.Referrable>> __vector_of_strong_referrables = _vector_of_strong_referrables_len <= 64
-          ? stackalloc Offset<MyGame.Example.StackBuffer.Referrable>[_vector_of_strong_referrables_len]
-          : (_vector_of_strong_referrables_arr = ArrayPool<Offset<MyGame.Example.StackBuffer.Referrable>>.Shared.Rent(_vector_of_strong_referrables_len)).AsSpan(0, _vector_of_strong_referrables_len);
-        for (var _j = 0; _j < _vector_of_strong_referrables_len; ++_j) { __vector_of_strong_referrables[_j] = MyGame.Example.StackBuffer.Referrable.Pack(ref builder, _o.VectorOfStrongReferrables[_j]); }
-        _vector_of_strong_referrables = CreateVectorOfStrongReferrablesVector(ref builder, __vector_of_strong_referrables);
-      } finally {
-        if (_vector_of_strong_referrables_arr != null) { ArrayPool<Offset<MyGame.Example.StackBuffer.Referrable>>.Shared.Return(_vector_of_strong_referrables_arr); }
-      }
+      Span<int> _vector_of_strong_referrables_buf = _vector_of_strong_referrables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_vector_of_strong_referrables_len] : lengthyVectorSpace[.._vector_of_strong_referrables_len];
+      for (var _j = 0; _j < _vector_of_strong_referrables_len; ++_j) { _vector_of_strong_referrables_buf[_j] = MyGame.Example.StackBuffer.Referrable.Pack(ref builder, _o.VectorOfStrongReferrables[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _vector_of_strong_referrables_len, 4);
+      builder.AddOffsetSpan(_vector_of_strong_referrables_buf);
+      _vector_of_strong_referrables = builder.EndVector();
     }
     var _vector_of_co_owning_references = default(VectorOffset);
     if (_o.VectorOfCoOwningReferences != null) {
@@ -844,80 +959,75 @@ public ref struct Monster : IFlatbufferSpanObject, IRootTable
     var _scalar_key_sorted_tables = default(VectorOffset);
     if (_o.ScalarKeySortedTables != null) {
       var _scalar_key_sorted_tables_len = _o.ScalarKeySortedTables.Count;
-      Offset<MyGame.Example.StackBuffer.Stat>[] _scalar_key_sorted_tables_arr = null;
-      try {
-        Span<Offset<MyGame.Example.StackBuffer.Stat>> __scalar_key_sorted_tables = _scalar_key_sorted_tables_len <= 64
-          ? stackalloc Offset<MyGame.Example.StackBuffer.Stat>[_scalar_key_sorted_tables_len]
-          : (_scalar_key_sorted_tables_arr = ArrayPool<Offset<MyGame.Example.StackBuffer.Stat>>.Shared.Rent(_scalar_key_sorted_tables_len)).AsSpan(0, _scalar_key_sorted_tables_len);
-        for (var _j = 0; _j < _scalar_key_sorted_tables_len; ++_j) { __scalar_key_sorted_tables[_j] = MyGame.Example.StackBuffer.Stat.Pack(ref builder, _o.ScalarKeySortedTables[_j]); }
-        _scalar_key_sorted_tables = CreateScalarKeySortedTablesVector(ref builder, __scalar_key_sorted_tables);
-      } finally {
-        if (_scalar_key_sorted_tables_arr != null) { ArrayPool<Offset<MyGame.Example.StackBuffer.Stat>>.Shared.Return(_scalar_key_sorted_tables_arr); }
-      }
+      Span<int> _scalar_key_sorted_tables_buf = _scalar_key_sorted_tables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_scalar_key_sorted_tables_len] : lengthyVectorSpace[.._scalar_key_sorted_tables_len];
+      for (var _j = 0; _j < _scalar_key_sorted_tables_len; ++_j) { _scalar_key_sorted_tables_buf[_j] = MyGame.Example.StackBuffer.Stat.Pack(ref builder, _o.ScalarKeySortedTables[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _scalar_key_sorted_tables_len, 4);
+      builder.AddOffsetSpan(_scalar_key_sorted_tables_buf);
+      _scalar_key_sorted_tables = builder.EndVector();
     }
-    StartMonster(ref builder);
-    AddPos(ref builder, MyGame.Example.StackBuffer.Vec3.Pack(ref builder, _o.Pos));
-    AddMana(ref builder, _o.Mana);
-    AddHp(ref builder, _o.Hp);
-    AddName(ref builder, _name);
-    AddInventory(ref builder, _inventory);
-    AddColor(ref builder, _o.Color);
-    AddTestType(ref builder, _test_type);
-    AddTest(ref builder, _test);
-    AddTest4(ref builder, _test4);
-    AddTestarrayofstring(ref builder, _testarrayofstring);
-    AddTestarrayoftables(ref builder, _testarrayoftables);
-    AddEnemy(ref builder, _enemy);
-    AddTestnestedflatbuffer(ref builder, _testnestedflatbuffer);
-    AddTestempty(ref builder, _testempty);
-    AddTestbool(ref builder, _o.Testbool);
-    AddTesthashs32Fnv1(ref builder, _o.Testhashs32Fnv1);
-    AddTesthashu32Fnv1(ref builder, _o.Testhashu32Fnv1);
-    AddTesthashs64Fnv1(ref builder, _o.Testhashs64Fnv1);
-    AddTesthashu64Fnv1(ref builder, _o.Testhashu64Fnv1);
-    AddTesthashs32Fnv1a(ref builder, _o.Testhashs32Fnv1a);
-    AddTesthashu32Fnv1a(ref builder, _o.Testhashu32Fnv1a);
-    AddTesthashs64Fnv1a(ref builder, _o.Testhashs64Fnv1a);
-    AddTesthashu64Fnv1a(ref builder, _o.Testhashu64Fnv1a);
-    AddTestarrayofbools(ref builder, _testarrayofbools);
-    AddTestf(ref builder, _o.Testf);
-    AddTestf2(ref builder, _o.Testf2);
-    AddTestf3(ref builder, _o.Testf3);
-    AddTestarrayofstring2(ref builder, _testarrayofstring2);
-    AddTestarrayofsortedstruct(ref builder, _testarrayofsortedstruct);
-    AddFlex(ref builder, _flex);
-    AddTest5(ref builder, _test5);
-    AddVectorOfLongs(ref builder, _vector_of_longs);
-    AddVectorOfDoubles(ref builder, _vector_of_doubles);
-    AddParentNamespaceTest(ref builder, _parent_namespace_test);
-    AddVectorOfReferrables(ref builder, _vector_of_referrables);
-    AddSingleWeakReference(ref builder, _o.SingleWeakReference);
-    AddVectorOfWeakReferences(ref builder, _vector_of_weak_references);
-    AddVectorOfStrongReferrables(ref builder, _vector_of_strong_referrables);
-    AddCoOwningReference(ref builder, _o.CoOwningReference);
-    AddVectorOfCoOwningReferences(ref builder, _vector_of_co_owning_references);
-    AddNonOwningReference(ref builder, _o.NonOwningReference);
-    AddVectorOfNonOwningReferences(ref builder, _vector_of_non_owning_references);
-    AddAnyUniqueType(ref builder, _any_unique_type);
-    AddAnyUnique(ref builder, _any_unique);
-    AddAnyAmbiguousType(ref builder, _any_ambiguous_type);
-    AddAnyAmbiguous(ref builder, _any_ambiguous);
-    AddVectorOfEnums(ref builder, _vector_of_enums);
-    AddSignedEnum(ref builder, _o.SignedEnum);
-    AddTestrequirednestedflatbuffer(ref builder, _testrequirednestedflatbuffer);
-    AddScalarKeySortedTables(ref builder, _scalar_key_sorted_tables);
-    AddNativeInline(ref builder, MyGame.Example.StackBuffer.Test.Pack(ref builder, _o.NativeInline));
-    AddLongEnumNonEnumDefault(ref builder, _o.LongEnumNonEnumDefault);
-    AddLongEnumNormalDefault(ref builder, _o.LongEnumNormalDefault);
-    AddNanDefault(ref builder, _o.NanDefault);
-    AddInfDefault(ref builder, _o.InfDefault);
-    AddPositiveInfDefault(ref builder, _o.PositiveInfDefault);
-    AddInfinityDefault(ref builder, _o.InfinityDefault);
-    AddPositiveInfinityDefault(ref builder, _o.PositiveInfinityDefault);
-    AddNegativeInfDefault(ref builder, _o.NegativeInfDefault);
-    AddNegativeInfinityDefault(ref builder, _o.NegativeInfinityDefault);
-    AddDoubleInfDefault(ref builder, _o.DoubleInfDefault);
-    return EndMonster(ref builder);
+    return CreateMonster(
+      ref builder,
+      _o.Pos,
+      _o.Mana,
+      _o.Hp,
+      _name,
+      _inventory,
+      _o.Color,
+      _test_type,
+      _test,
+      _test4,
+      _testarrayofstring,
+      _testarrayoftables,
+      _enemy,
+      _testnestedflatbuffer,
+      _testempty,
+      _o.Testbool,
+      _o.Testhashs32Fnv1,
+      _o.Testhashu32Fnv1,
+      _o.Testhashs64Fnv1,
+      _o.Testhashu64Fnv1,
+      _o.Testhashs32Fnv1a,
+      _o.Testhashu32Fnv1a,
+      _o.Testhashs64Fnv1a,
+      _o.Testhashu64Fnv1a,
+      _testarrayofbools,
+      _o.Testf,
+      _o.Testf2,
+      _o.Testf3,
+      _testarrayofstring2,
+      _testarrayofsortedstruct,
+      _flex,
+      _test5,
+      _vector_of_longs,
+      _vector_of_doubles,
+      _parent_namespace_test,
+      _vector_of_referrables,
+      _o.SingleWeakReference,
+      _vector_of_weak_references,
+      _vector_of_strong_referrables,
+      _o.CoOwningReference,
+      _vector_of_co_owning_references,
+      _o.NonOwningReference,
+      _vector_of_non_owning_references,
+      _any_unique_type,
+      _any_unique,
+      _any_ambiguous_type,
+      _any_ambiguous,
+      _vector_of_enums,
+      _o.SignedEnum,
+      _testrequirednestedflatbuffer,
+      _scalar_key_sorted_tables,
+      _o.NativeInline,
+      _o.LongEnumNonEnumDefault,
+      _o.LongEnumNormalDefault,
+      _o.NanDefault,
+      _o.InfDefault,
+      _o.PositiveInfDefault,
+      _o.InfinityDefault,
+      _o.PositiveInfinityDefault,
+      _o.NegativeInfDefault,
+      _o.NegativeInfinityDefault,
+      _o.DoubleInfDefault);
   }
 }
 

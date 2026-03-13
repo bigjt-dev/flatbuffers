@@ -55,6 +55,19 @@ public ref struct Transform : IFlatbufferSpanObject
   }
   public static Offset<ComprehensiveTest.StackBuffer.Transform> Pack(ref FlatSpanBufferBuilder builder, TransformT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.Transform>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.StackBuffer.Transform> Pack(ref FlatSpanBufferBuilder builder, TransformT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.Transform>);
     var _position_x = _o.Position.X;
     var _position_y = _o.Position.Y;
     var _position_z = _o.Position.Z;

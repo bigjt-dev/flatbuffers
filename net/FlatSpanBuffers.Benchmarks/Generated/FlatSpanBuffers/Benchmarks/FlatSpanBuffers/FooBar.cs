@@ -72,6 +72,19 @@ public struct FooBar : IFlatbufferObject
   }
   public static Offset<Benchmarks.FlatSpanBuffers.FooBar> Pack(FlatBufferBuilder builder, FooBarT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.FooBar>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<Benchmarks.FlatSpanBuffers.FooBar> Pack(FlatBufferBuilder builder, FooBarT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.FooBar>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     return CreateFooBar(
       builder,
@@ -82,7 +95,7 @@ public struct FooBar : IFlatbufferObject
   }
 }
 
-public class FooBarT
+public class FooBarT : IFlatBufferObjectT
 {
   public Benchmarks.FlatSpanBuffers.BarT Sibling { get; set; }
   public string Name { get; set; }
@@ -95,12 +108,22 @@ public class FooBarT
     this.Rating = 0.0;
     this.Postfix = 0;
   }
+  public void Reset() {
+    this.Sibling?.Reset();
+    this.Name = null;
+    this.Rating = 0.0;
+    this.Postfix = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class FooBarVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*Sibling*/, 32 /*Benchmarks.FlatSpanBuffers.Bar*/, 8, false)

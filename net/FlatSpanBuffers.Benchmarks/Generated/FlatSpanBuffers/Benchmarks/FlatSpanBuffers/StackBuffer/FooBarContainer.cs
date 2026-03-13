@@ -20,8 +20,8 @@ public ref struct FooBarContainer : IFlatbufferSpanObject, IRootTable
   public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
   public static FooBarContainer GetRootAsFooBarContainer(ByteSpanBuffer _bb) { return GetRootAsFooBarContainer(_bb, new FooBarContainer()); }
   public static FooBarContainer GetRootAsFooBarContainer(ByteSpanBuffer _bb, FooBarContainer obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
-  public static bool VerifyFooBarContainer(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("", false, Benchmarks.FlatSpanBuffers.FooBarContainerVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, Benchmarks.FlatSpanBuffers.FooBarContainerVerify.Verify);
+  public static bool VerifyFooBarContainer(ByteSpanBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("", false, Benchmarks.FlatSpanBuffers.FooBarContainerVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("", sizePrefixed, Benchmarks.FlatSpanBuffers.FooBarContainerVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public FooBarContainer __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -87,19 +87,27 @@ public ref struct FooBarContainer : IFlatbufferSpanObject, IRootTable
   }
   public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBarContainer> Pack(ref FlatSpanBufferBuilder builder, FooBarContainerT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBarContainer>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBarContainer> Pack(ref FlatSpanBufferBuilder builder, FooBarContainerT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBarContainer>);
     var _list = default(VectorOffset);
     if (_o.List != null) {
       var _list_len = _o.List.Count;
-      Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar>[] _list_arr = null;
-      try {
-        Span<Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar>> __list = _list_len <= 64
-          ? stackalloc Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar>[_list_len]
-          : (_list_arr = ArrayPool<Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar>>.Shared.Rent(_list_len)).AsSpan(0, _list_len);
-        for (var _j = 0; _j < _list_len; ++_j) { __list[_j] = Benchmarks.FlatSpanBuffers.StackBuffer.FooBar.Pack(ref builder, _o.List[_j]); }
-        _list = CreateListVector(ref builder, __list);
-      } finally {
-        if (_list_arr != null) { ArrayPool<Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar>>.Shared.Return(_list_arr); }
-      }
+      Span<int> _list_buf = _list_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_list_len] : lengthyVectorSpace[.._list_len];
+      for (var _j = 0; _j < _list_len; ++_j) { _list_buf[_j] = Benchmarks.FlatSpanBuffers.StackBuffer.FooBar.Pack(ref builder, _o.List[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _list_len, 4);
+      builder.AddOffsetSpan(_list_buf);
+      _list = builder.EndVector();
     }
     var _location = _o.Location == null ? default(StringOffset) : builder.CreateString(_o.Location);
     return CreateFooBarContainer(

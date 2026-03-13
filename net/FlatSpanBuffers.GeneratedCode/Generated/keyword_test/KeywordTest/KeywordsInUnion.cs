@@ -4,6 +4,15 @@
 
 namespace KeywordTest
 {
+using global::System;
+using global::System.Buffers;
+using global::System.Collections.Generic;
+using global::System.Runtime.InteropServices;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
+
 public enum KeywordsInUnion : byte
 {
   NONE = 0,
@@ -26,14 +35,14 @@ public class KeywordsInUnionUnion {
   public KeywordTest.KeywordsInTableT Asinternal() { return this.As<KeywordTest.KeywordsInTableT>(); }
   public static KeywordsInUnionUnion Frominternal(KeywordTest.KeywordsInTableT _internal) { return new KeywordsInUnionUnion{ Type = KeywordsInUnion.@internal, Value = _internal }; }
 
-  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, KeywordsInUnionUnion _o) {
+  public static int Pack(FlatBufferBuilder builder, KeywordsInUnionUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case KeywordsInUnion.@static: return KeywordTest.KeywordsInTable.Pack(builder, _o.Asstatic()).Value;
       case KeywordsInUnion.@internal: return KeywordTest.KeywordsInTable.Pack(builder, _o.Asinternal()).Value;
     }
   }
-  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, KeywordsInUnionUnion _o) {
+  public static int Pack(ref FlatSpanBufferBuilder builder, KeywordsInUnionUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case KeywordsInUnion.@static: return KeywordTest.StackBuffer.KeywordsInTable.Pack(ref builder, _o.Asstatic()).Value;
@@ -46,7 +55,7 @@ public class KeywordsInUnionUnion {
 
 public static class KeywordsInUnionVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((KeywordsInUnion)typeId)

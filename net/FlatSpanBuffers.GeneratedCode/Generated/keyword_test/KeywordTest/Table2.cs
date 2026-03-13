@@ -85,6 +85,19 @@ public struct Table2 : IFlatbufferObject
   }
   public static Offset<KeywordTest.Table2> Pack(FlatBufferBuilder builder, Table2T _o) {
     if (_o == null) return default(Offset<KeywordTest.Table2>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<KeywordTest.Table2> Pack(FlatBufferBuilder builder, Table2T _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<KeywordTest.Table2>);
     var _type_type = _o.Type == null ? KeywordTest.KeywordsInUnion.NONE : _o.Type.Type;
     var _type = _o.Type == null ? 0 : KeywordTest.KeywordsInUnionUnion.Pack(builder, _o.Type);
     return CreateTable2(
@@ -94,19 +107,26 @@ public struct Table2 : IFlatbufferObject
   }
 }
 
-public class Table2T
+public class Table2T : IFlatBufferObjectT
 {
   public KeywordTest.KeywordsInUnionUnion Type { get; set; }
 
   public Table2T() {
     this.Type = null;
   }
+  public void Reset() {
+    this.Type = null;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class Table2Verify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyField(tablePos, 4 /*TypeType*/, 1 /*KeywordTest.KeywordsInUnion*/, 1, false)

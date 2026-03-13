@@ -48,6 +48,19 @@ public struct StructOfStructsOfStructs : IFlatbufferObject
   }
   public static Offset<MyGame.Example.StructOfStructsOfStructs> Pack(FlatBufferBuilder builder, StructOfStructsOfStructsT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StructOfStructsOfStructs>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.StructOfStructsOfStructs> Pack(FlatBufferBuilder builder, StructOfStructsOfStructsT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.StructOfStructsOfStructs>);
     var _a_a_id = _o.A.A.Id;
     var _a_a_distance = _o.A.A.Distance;
     var _a_b_a = _o.A.B.A;
@@ -65,13 +78,20 @@ public struct StructOfStructsOfStructs : IFlatbufferObject
   }
 }
 
-public class StructOfStructsOfStructsT
+public class StructOfStructsOfStructsT : IFlatBufferObjectT
 {
   [System.Text.Json.Serialization.JsonPropertyName("a")]
   public MyGame.Example.StructOfStructsT A { get; set; }
 
   public StructOfStructsOfStructsT() {
     this.A = new MyGame.Example.StructOfStructsT();
+  }
+  public void Reset() {
+    this.A?.Reset();
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

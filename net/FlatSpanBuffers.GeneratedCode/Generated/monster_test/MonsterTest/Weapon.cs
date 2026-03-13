@@ -56,6 +56,19 @@ public struct Weapon : IFlatbufferObject
   }
   public static Offset<MonsterTest.Weapon> Pack(FlatBufferBuilder builder, WeaponT _o) {
     if (_o == null) return default(Offset<MonsterTest.Weapon>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MonsterTest.Weapon> Pack(FlatBufferBuilder builder, WeaponT _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MonsterTest.Weapon>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     return CreateWeapon(
       builder,
@@ -64,7 +77,7 @@ public struct Weapon : IFlatbufferObject
   }
 }
 
-public class WeaponT
+public class WeaponT : IFlatBufferObjectT
 {
   public string Name { get; set; }
   public short Damage { get; set; }
@@ -73,12 +86,20 @@ public class WeaponT
     this.Name = null;
     this.Damage = 0;
   }
+  public void Reset() {
+    this.Name = null;
+    this.Damage = 0;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
+  }
 }
 
 
 public static class WeaponVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, uint tablePos)
+  public static bool Verify(ref Verifier verifier, uint tablePos)
   {
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyString(tablePos, 4 /*Name*/, false)

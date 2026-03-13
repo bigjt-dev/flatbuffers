@@ -41,6 +41,37 @@ public ref struct Player : IFlatbufferSpanObject
   public RefStructNullable<ReadOnlySpan<int>> Scores { get { int o = __p.__offset(26); return o != 0 ? new RefStructNullable<ReadOnlySpan<int>>(__p.__vector_as_span<int>(26)) : default; } }
   public RefStructNullable<JsonTest.StackBuffer.Color> Color { get { int o = __p.__offset(28); return o != 0 ? new RefStructNullable<JsonTest.StackBuffer.Color>((new JsonTest.StackBuffer.Color()).__assign(o + __p.bb_pos, __p.bb)) : default; } }
 
+  public static Offset<JsonTest.StackBuffer.Player> CreatePlayer(ref FlatSpanBufferBuilder builder,
+      long id = 0,
+      StringOffset nameOffset = default(StringOffset),
+      int level = 1,
+      float health = 100.0f,
+      JsonTest.Vec2T position = null,
+      JsonTest.Status status = JsonTest.Status.Active,
+      JsonTest.Priority priorities = 0,
+      VectorOffset inventoryOffset = default(VectorOffset),
+      JsonTest.Equipment equipped_type = JsonTest.Equipment.NONE,
+      int equippedOffset = 0,
+      VectorOffset tagsOffset = default(VectorOffset),
+      VectorOffset scoresOffset = default(VectorOffset),
+      JsonTest.ColorT color = null) {
+    builder.StartTable(13);
+    Player.AddId(ref builder, id);
+    Player.AddColor(ref builder, JsonTest.StackBuffer.Color.Pack(ref builder, color));
+    Player.AddScores(ref builder, scoresOffset);
+    Player.AddTags(ref builder, tagsOffset);
+    Player.AddEquipped(ref builder, equippedOffset);
+    Player.AddInventory(ref builder, inventoryOffset);
+    Player.AddPosition(ref builder, JsonTest.StackBuffer.Vec2.Pack(ref builder, position));
+    Player.AddHealth(ref builder, health);
+    Player.AddLevel(ref builder, level);
+    Player.AddName(ref builder, nameOffset);
+    Player.AddEquippedType(ref builder, equipped_type);
+    Player.AddPriorities(ref builder, priorities);
+    Player.AddStatus(ref builder, status);
+    return Player.EndPlayer(ref builder);
+  }
+
   public static void StartPlayer(ref FlatSpanBufferBuilder builder) { builder.StartTable(13); }
   public static void AddId(ref FlatSpanBufferBuilder builder, long id) { builder.Add<long>(0, id, 0); }
   public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
@@ -173,56 +204,59 @@ public ref struct Player : IFlatbufferSpanObject
   }
   public static Offset<JsonTest.StackBuffer.Player> Pack(ref FlatSpanBufferBuilder builder, PlayerT _o) {
     if (_o == null) return default(Offset<JsonTest.StackBuffer.Player>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<JsonTest.StackBuffer.Player> Pack(ref FlatSpanBufferBuilder builder, PlayerT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<JsonTest.StackBuffer.Player>);
     var _name = _o.Name == null ? default(StringOffset) : builder.CreateString(_o.Name);
     var _inventory = default(VectorOffset);
     if (_o.Inventory != null) {
       var _inventory_len = _o.Inventory.Count;
-      Offset<JsonTest.StackBuffer.Item>[] _inventory_arr = null;
-      try {
-        Span<Offset<JsonTest.StackBuffer.Item>> __inventory = _inventory_len <= 64
-          ? stackalloc Offset<JsonTest.StackBuffer.Item>[_inventory_len]
-          : (_inventory_arr = ArrayPool<Offset<JsonTest.StackBuffer.Item>>.Shared.Rent(_inventory_len)).AsSpan(0, _inventory_len);
-        for (var _j = 0; _j < _inventory_len; ++_j) { __inventory[_j] = JsonTest.StackBuffer.Item.Pack(ref builder, _o.Inventory[_j]); }
-        _inventory = CreateInventoryVector(ref builder, __inventory);
-      } finally {
-        if (_inventory_arr != null) { ArrayPool<Offset<JsonTest.StackBuffer.Item>>.Shared.Return(_inventory_arr); }
-      }
+      Span<int> _inventory_buf = _inventory_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_inventory_len] : lengthyVectorSpace[.._inventory_len];
+      for (var _j = 0; _j < _inventory_len; ++_j) { _inventory_buf[_j] = JsonTest.StackBuffer.Item.Pack(ref builder, _o.Inventory[_j], lengthyVectorSpace).Value; }
+      builder.StartVector(4, _inventory_len, 4);
+      builder.AddOffsetSpan(_inventory_buf);
+      _inventory = builder.EndVector();
     }
     var _equipped_type = _o.Equipped == null ? JsonTest.Equipment.NONE : _o.Equipped.Type;
     var _equipped = _o.Equipped == null ? 0 : JsonTest.EquipmentUnion.Pack(ref builder, _o.Equipped);
     var _tags = default(VectorOffset);
     if (_o.Tags != null) {
       var _tags_len = _o.Tags.Count;
-      StringOffset[] _tags_arr = null;
-      try {
-        Span<StringOffset> __tags = _tags_len <= 64
-          ? stackalloc StringOffset[_tags_len]
-          : (_tags_arr = ArrayPool<StringOffset>.Shared.Rent(_tags_len)).AsSpan(0, _tags_len);
-        for (var _j = 0; _j < _tags_len; ++_j) { __tags[_j] = builder.CreateString(_o.Tags[_j]); }
-        _tags = CreateTagsVector(ref builder, __tags);
-      } finally {
-        if (_tags_arr != null) { ArrayPool<StringOffset>.Shared.Return(_tags_arr); }
-      }
+      Span<int> _tags_buf = _tags_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_tags_len] : lengthyVectorSpace[.._tags_len];
+      for (var _j = 0; _j < _tags_len; ++_j) { _tags_buf[_j] = builder.CreateString(_o.Tags[_j]).Value; }
+      builder.StartVector(4, _tags_len, 4);
+      builder.AddOffsetSpan(_tags_buf);
+      _tags = builder.EndVector();
     }
     var _scores = default(VectorOffset);
     if (_o.Scores != null) {
       _scores = CreateScoresVector(ref builder, CollectionsMarshal.AsSpan(_o.Scores));
     }
-    StartPlayer(ref builder);
-    AddId(ref builder, _o.Id);
-    AddName(ref builder, _name);
-    AddLevel(ref builder, _o.Level);
-    AddHealth(ref builder, _o.Health);
-    AddPosition(ref builder, JsonTest.StackBuffer.Vec2.Pack(ref builder, _o.Position));
-    AddStatus(ref builder, _o.Status);
-    AddPriorities(ref builder, _o.Priorities);
-    AddInventory(ref builder, _inventory);
-    AddEquippedType(ref builder, _equipped_type);
-    AddEquipped(ref builder, _equipped);
-    AddTags(ref builder, _tags);
-    AddScores(ref builder, _scores);
-    AddColor(ref builder, JsonTest.StackBuffer.Color.Pack(ref builder, _o.Color));
-    return EndPlayer(ref builder);
+    return CreatePlayer(
+      ref builder,
+      _o.Id,
+      _name,
+      _o.Level,
+      _o.Health,
+      _o.Position,
+      _o.Status,
+      _o.Priorities,
+      _inventory,
+      _equipped_type,
+      _equipped,
+      _tags,
+      _scores,
+      _o.Color);
   }
 }
 

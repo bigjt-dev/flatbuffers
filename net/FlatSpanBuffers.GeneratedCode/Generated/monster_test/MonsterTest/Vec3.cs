@@ -46,6 +46,19 @@ public struct Vec3 : IFlatbufferObject
   }
   public static Offset<MonsterTest.Vec3> Pack(FlatBufferBuilder builder, Vec3T _o) {
     if (_o == null) return default(Offset<MonsterTest.Vec3>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MonsterTest.Vec3> Pack(FlatBufferBuilder builder, Vec3T _o, Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MonsterTest.Vec3>);
     return CreateVec3(
       builder,
       _o.X,
@@ -54,7 +67,7 @@ public struct Vec3 : IFlatbufferObject
   }
 }
 
-public class Vec3T
+public class Vec3T : IFlatBufferObjectT
 {
   public float X { get; set; }
   public float Y { get; set; }
@@ -64,6 +77,15 @@ public class Vec3T
     this.X = 0.0f;
     this.Y = 0.0f;
     this.Z = 0.0f;
+  }
+  public void Reset() {
+    this.X = 0.0f;
+    this.Y = 0.0f;
+    this.Z = 0.0f;
+  }
+  public int GetMaxVectorLength() {
+    var _max = 0;
+    return _max;
   }
 }
 

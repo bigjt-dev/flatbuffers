@@ -21,8 +21,8 @@ public ref struct Movie : IFlatbufferSpanObject, IRootTable
   public static Movie GetRootAsMovie(ByteSpanBuffer _bb) { return GetRootAsMovie(_bb, new Movie()); }
   public static Movie GetRootAsMovie(ByteSpanBuffer _bb, Movie obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool MovieBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "MOVI"); }
-  public static bool VerifyMovie(ByteSpanBuffer _bb) {global::FlatSpanBuffers.Verifier verifier = new global::FlatSpanBuffers.Verifier(_bb); return verifier.VerifyBuffer("MOVI", false, MyGame.Example.MovieVerify.Verify); }
-  static bool IRootTable.Verify(ref global::FlatSpanBuffers.Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("MOVI", sizePrefixed, MyGame.Example.MovieVerify.Verify);
+  public static bool VerifyMovie(ByteSpanBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("MOVI", false, MyGame.Example.MovieVerify.Verify); }
+  static bool IRootTable.Verify(ref Verifier verifier, bool sizePrefixed) => verifier.VerifyBuffer("MOVI", sizePrefixed, MyGame.Example.MovieVerify.Verify);
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
   public Movie __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
@@ -197,35 +197,36 @@ public ref struct Movie : IFlatbufferSpanObject, IRootTable
   }
   public static Offset<MyGame.Example.StackBuffer.Movie> Pack(ref FlatSpanBufferBuilder builder, MovieT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StackBuffer.Movie>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<MyGame.Example.StackBuffer.Movie> Pack(ref FlatSpanBufferBuilder builder, MovieT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<MyGame.Example.StackBuffer.Movie>);
     var _main_character_type = _o.MainCharacter == null ? MyGame.Example.Character.NONE : _o.MainCharacter.Type;
     var _main_character = _o.MainCharacter == null ? 0 : MyGame.Example.CharacterUnion.Pack(ref builder, _o.MainCharacter);
     var _characters_type = default(VectorOffset);
     if (_o.Characters != null) {
       var _characters_type_len = _o.Characters.Count;
-      MyGame.Example.Character[] _characters_type_arr = null;
-      try {
-        Span<MyGame.Example.Character> __characters_type = _characters_type_len <= 256
-          ? stackalloc MyGame.Example.Character[_characters_type_len]
-          : (_characters_type_arr = ArrayPool<MyGame.Example.Character>.Shared.Rent(_characters_type_len)).AsSpan(0, _characters_type_len);
-        for (var _j = 0; _j < _characters_type_len; ++_j) { __characters_type[_j] = _o.Characters[_j].Type; }
-        _characters_type = CreateCharactersTypeVector(ref builder, __characters_type);
-      } finally {
-        if (_characters_type_arr != null) { ArrayPool<MyGame.Example.Character>.Shared.Return(_characters_type_arr); }
-      }
+      Span<MyGame.Example.Character> __characters_type = _characters_type_len <= 4096 ? stackalloc MyGame.Example.Character[_characters_type_len] : new MyGame.Example.Character[_characters_type_len];
+      for (var _j = 0; _j < _characters_type_len; ++_j) { __characters_type[_j] = _o.Characters[_j].Type; }
+      _characters_type = Movie.CreateCharactersTypeVectorBlock(ref builder, __characters_type);
     }
     var _characters = default(VectorOffset);
     if (_o.Characters != null) {
       var _characters_len = _o.Characters.Count;
-      int[] _characters_arr = null;
-      try {
-        Span<int> __characters = _characters_len <= 64
-          ? stackalloc int[_characters_len]
-          : (_characters_arr = ArrayPool<int>.Shared.Rent(_characters_len)).AsSpan(0, _characters_len);
-        for (var _j = 0; _j < _characters_len; ++_j) { __characters[_j] = MyGame.Example.CharacterUnion.Pack(ref builder,  _o.Characters[_j]); }
-        _characters = CreateCharactersVector(ref builder, __characters);
-      } finally {
-        if (_characters_arr != null) { ArrayPool<int>.Shared.Return(_characters_arr); }
-      }
+      Span<int> _characters_buf = _characters_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_characters_len] : lengthyVectorSpace[.._characters_len];
+      for (var _j = 0; _j < _characters_len; ++_j) { _characters_buf[_j] = MyGame.Example.CharacterUnion.Pack(ref builder,  _o.Characters[_j]); }
+      builder.StartVector(4, _characters_len, 4);
+      builder.AddOffsetSpan(_characters_buf);
+      _characters = builder.EndVector();
     }
     return CreateMovie(
       ref builder,

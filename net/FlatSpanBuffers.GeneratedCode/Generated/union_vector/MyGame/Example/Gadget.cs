@@ -4,6 +4,15 @@
 
 namespace MyGame.Example
 {
+using global::System;
+using global::System.Buffers;
+using global::System.Collections.Generic;
+using global::System.Runtime.InteropServices;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
+
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
 public enum Gadget : byte
 {
@@ -28,14 +37,14 @@ public class GadgetUnion {
   public MyGame.Example.HandFanT AsHandFan() { return this.As<MyGame.Example.HandFanT>(); }
   public static GadgetUnion FromHandFan(MyGame.Example.HandFanT _handfan) { return new GadgetUnion{ Type = Gadget.HandFan, Value = _handfan }; }
 
-  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, GadgetUnion _o) {
+  public static int Pack(FlatBufferBuilder builder, GadgetUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Gadget.FallingTub: return MyGame.Example.FallingTub.Pack(builder, _o.AsFallingTub()).Value;
       case Gadget.HandFan: return MyGame.Example.HandFan.Pack(builder, _o.AsHandFan()).Value;
     }
   }
-  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, GadgetUnion _o) {
+  public static int Pack(ref FlatSpanBufferBuilder builder, GadgetUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Gadget.FallingTub: return MyGame.Example.StackBuffer.FallingTub.Pack(ref builder, _o.AsFallingTub()).Value;
@@ -92,7 +101,7 @@ public class GadgetUnion_JsonConverter : System.Text.Json.Serialization.JsonConv
 
 public static class GadgetVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Gadget)typeId)

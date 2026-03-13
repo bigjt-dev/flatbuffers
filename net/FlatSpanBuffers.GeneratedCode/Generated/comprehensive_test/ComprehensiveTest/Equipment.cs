@@ -4,6 +4,15 @@
 
 namespace ComprehensiveTest
 {
+using global::System;
+using global::System.Buffers;
+using global::System.Collections.Generic;
+using global::System.Runtime.InteropServices;
+using global::FlatSpanBuffers;
+using global::FlatSpanBuffers.Operations;
+using global::FlatSpanBuffers.Utils;
+using global::FlatSpanBuffers.Vectors;
+
 public enum Equipment : byte
 {
   NONE = 0,
@@ -26,14 +35,14 @@ public class EquipmentUnion {
   public ComprehensiveTest.ArmorT AsArmor() { return this.As<ComprehensiveTest.ArmorT>(); }
   public static EquipmentUnion FromArmor(ComprehensiveTest.ArmorT _armor) { return new EquipmentUnion{ Type = Equipment.Armor, Value = _armor }; }
 
-  public static int Pack(global::FlatSpanBuffers.FlatBufferBuilder builder, EquipmentUnion _o) {
+  public static int Pack(FlatBufferBuilder builder, EquipmentUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Equipment.Weapon: return ComprehensiveTest.Weapon.Pack(builder, _o.AsWeapon()).Value;
       case Equipment.Armor: return ComprehensiveTest.Armor.Pack(builder, _o.AsArmor()).Value;
     }
   }
-  public static int Pack(ref global::FlatSpanBuffers.FlatSpanBufferBuilder builder, EquipmentUnion _o) {
+  public static int Pack(ref FlatSpanBufferBuilder builder, EquipmentUnion _o) {
     switch (_o.Type) {
       default: return 0;
       case Equipment.Weapon: return ComprehensiveTest.StackBuffer.Weapon.Pack(ref builder, _o.AsWeapon()).Value;
@@ -46,7 +55,7 @@ public class EquipmentUnion {
 
 public static class EquipmentVerify
 {
-  public static bool Verify(ref global::FlatSpanBuffers.Verifier verifier, byte typeId, uint tablePos)
+  public static bool Verify(ref Verifier verifier, byte typeId, uint tablePos)
   {
     bool result = true;
     switch((Equipment)typeId)

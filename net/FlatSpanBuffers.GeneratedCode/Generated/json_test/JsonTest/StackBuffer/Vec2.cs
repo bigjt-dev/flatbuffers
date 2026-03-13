@@ -40,6 +40,19 @@ public ref struct Vec2 : IFlatbufferSpanObject
   }
   public static Offset<JsonTest.StackBuffer.Vec2> Pack(ref FlatSpanBufferBuilder builder, Vec2T _o) {
     if (_o == null) return default(Offset<JsonTest.StackBuffer.Vec2>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<JsonTest.StackBuffer.Vec2> Pack(ref FlatSpanBufferBuilder builder, Vec2T _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<JsonTest.StackBuffer.Vec2>);
     return CreateVec2(
       ref builder,
       _o.X,

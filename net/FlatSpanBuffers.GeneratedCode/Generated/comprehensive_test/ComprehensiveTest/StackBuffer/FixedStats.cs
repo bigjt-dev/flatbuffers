@@ -42,6 +42,19 @@ public ref struct FixedStats : IFlatbufferSpanObject
   }
   public static Offset<ComprehensiveTest.StackBuffer.FixedStats> Pack(ref FlatSpanBufferBuilder builder, FixedStatsT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.FixedStats>);
+    var _maxVecLen = _o.GetMaxVectorLength();
+    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
+      try {
+        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
+      } finally {
+        ArrayPool<int>.Shared.Return(_pooledArr);
+      }
+    }
+    return Pack(ref builder, _o, Span<int>.Empty);
+  }
+  public static Offset<ComprehensiveTest.StackBuffer.FixedStats> Pack(ref FlatSpanBufferBuilder builder, FixedStatsT _o, scoped Span<int> lengthyVectorSpace) {
+    if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.FixedStats>);
     var _values = _o.Values;
     return CreateFixedStats(
       ref builder,
