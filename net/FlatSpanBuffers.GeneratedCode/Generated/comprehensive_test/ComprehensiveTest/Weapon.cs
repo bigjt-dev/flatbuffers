@@ -102,51 +102,51 @@ public struct Weapon : IFlatbufferObject
   }
 
   public static void StartWeapon(FlatBufferBuilder builder) { builder.StartTable(22); }
-  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset); }
   public static void AddDamage(FlatBufferBuilder builder, int damage) { builder.Add<int>(1, damage, 10); }
   public static void AddDurability(FlatBufferBuilder builder, float durability) { builder.Add<float>(2, durability, 100.0f); }
   public static void AddEnchanted(FlatBufferBuilder builder, bool enchanted) { builder.Add<bool>(3, enchanted, false); }
-  public static void AddTags(FlatBufferBuilder builder, VectorOffset tagsOffset) { builder.AddOffset(4, tagsOffset, 0); }
+  public static void AddTags(FlatBufferBuilder builder, VectorOffset tagsOffset) { builder.AddOffset(4, tagsOffset); }
   public static VectorOffset CreateTagsVectorBlock(FlatBufferBuilder builder, Span<StringOffset> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<StringOffset>(data); return builder.EndVector(); }
   public static VectorOffset CreateTagsVector(FlatBufferBuilder builder, Span<StringOffset> data) { return CreateTagsVectorBlock(builder, data); }
   public static void StartTagsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddDamageValues(FlatBufferBuilder builder, VectorOffset damageValuesOffset) { builder.AddOffset(5, damageValuesOffset, 0); }
+  public static void AddDamageValues(FlatBufferBuilder builder, VectorOffset damageValuesOffset) { builder.AddOffset(5, damageValuesOffset); }
   public static VectorOffset CreateDamageValuesVectorBlock(FlatBufferBuilder builder, Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<int>(data); return builder.EndVector(); }
   public static VectorOffset CreateDamageValuesVector(FlatBufferBuilder builder, Span<int> data) { return CreateDamageValuesVectorBlock(builder, data); }
   public static void StartDamageValuesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddModifiers(FlatBufferBuilder builder, VectorOffset modifiersOffset) { builder.AddOffset(6, modifiersOffset, 0); }
+  public static void AddModifiers(FlatBufferBuilder builder, VectorOffset modifiersOffset) { builder.AddOffset(6, modifiersOffset); }
   public static VectorOffset CreateModifiersVectorBlock(FlatBufferBuilder builder, Span<float> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<float>(data); return builder.EndVector(); }
   public static VectorOffset CreateModifiersVector(FlatBufferBuilder builder, Span<float> data) { return CreateModifiersVectorBlock(builder, data); }
   public static void StartModifiersVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddTransform(FlatBufferBuilder builder, Offset<ComprehensiveTest.Transform> transformOffset) { builder.AddStruct(7, transformOffset, 0); }
-  public static void AddHitPoints(FlatBufferBuilder builder, VectorOffset hitPointsOffset) { builder.AddOffset(8, hitPointsOffset, 0); }
+  public static void AddHitPoints(FlatBufferBuilder builder, VectorOffset hitPointsOffset) { builder.AddOffset(8, hitPointsOffset); }
   public static void StartHitPointsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(12, numElems, 4); }
   public static void AddRarity(FlatBufferBuilder builder, ComprehensiveTest.Color rarity) { builder.Add<sbyte>(9, (sbyte)rarity, 0); }
-  public static void AddValidColors(FlatBufferBuilder builder, VectorOffset validColorsOffset) { builder.AddOffset(10, validColorsOffset, 0); }
+  public static void AddValidColors(FlatBufferBuilder builder, VectorOffset validColorsOffset) { builder.AddOffset(10, validColorsOffset); }
   public static VectorOffset CreateValidColorsVectorBlock(FlatBufferBuilder builder, Span<ComprehensiveTest.Color> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<ComprehensiveTest.Color>(data); return builder.EndVector(); }
   public static VectorOffset CreateValidColorsVector(FlatBufferBuilder builder, Span<ComprehensiveTest.Color> data) { return CreateValidColorsVectorBlock(builder, data); }
   public static void StartValidColorsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
   public static void AddWeaponTypeType(FlatBufferBuilder builder, ComprehensiveTest.Equipment weaponTypeType) { builder.Add<byte>(11, (byte)weaponTypeType, 0); }
-  public static void AddWeaponType(FlatBufferBuilder builder, int weaponTypeOffset) { builder.AddOffset(12, weaponTypeOffset, 0); }
+  public static void AddWeaponType(FlatBufferBuilder builder, int weaponTypeOffset) { builder.AddOffset(12, weaponTypeOffset); }
   public static void AddWeaponEquipmentType(FlatBufferBuilder builder, ComprehensiveTest.Equipment weaponEquipmentType) { builder.Add<byte>(13, (byte)weaponEquipmentType, 0); }
-  public static void AddWeaponEquipment(FlatBufferBuilder builder, int weaponEquipmentOffset) { builder.AddOffset(14, weaponEquipmentOffset, 0); }
-  public static void AddCompatibleTypesType(FlatBufferBuilder builder, VectorOffset compatibleTypesTypeOffset) { builder.AddOffset(15, compatibleTypesTypeOffset, 0); }
+  public static void AddWeaponEquipment(FlatBufferBuilder builder, int weaponEquipmentOffset) { builder.AddOffset(14, weaponEquipmentOffset); }
+  public static void AddCompatibleTypesType(FlatBufferBuilder builder, VectorOffset compatibleTypesTypeOffset) { builder.AddOffset(15, compatibleTypesTypeOffset); }
   public static VectorOffset CreateCompatibleTypesTypeVectorBlock(FlatBufferBuilder builder, Span<ComprehensiveTest.Equipment> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<ComprehensiveTest.Equipment>(data); return builder.EndVector(); }
   public static VectorOffset CreateCompatibleTypesTypeVector(FlatBufferBuilder builder, Span<ComprehensiveTest.Equipment> data) { return CreateCompatibleTypesTypeVectorBlock(builder, data); }
   public static void StartCompatibleTypesTypeVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddCompatibleTypes(FlatBufferBuilder builder, VectorOffset compatibleTypesOffset) { builder.AddOffset(16, compatibleTypesOffset, 0); }
+  public static void AddCompatibleTypes(FlatBufferBuilder builder, VectorOffset compatibleTypesOffset) { builder.AddOffset(16, compatibleTypesOffset); }
   public static VectorOffset CreateCompatibleTypesVectorBlock(FlatBufferBuilder builder, Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan(data); return builder.EndVector(); }
   public static VectorOffset CreateCompatibleTypesVector(FlatBufferBuilder builder, Span<int> data) { return CreateCompatibleTypesVectorBlock(builder, data); }
   public static void StartCompatibleTypesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddCompatibleItemsType(FlatBufferBuilder builder, VectorOffset compatibleItemsTypeOffset) { builder.AddOffset(17, compatibleItemsTypeOffset, 0); }
+  public static void AddCompatibleItemsType(FlatBufferBuilder builder, VectorOffset compatibleItemsTypeOffset) { builder.AddOffset(17, compatibleItemsTypeOffset); }
   public static VectorOffset CreateCompatibleItemsTypeVectorBlock(FlatBufferBuilder builder, Span<ComprehensiveTest.Equipment> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<ComprehensiveTest.Equipment>(data); return builder.EndVector(); }
   public static VectorOffset CreateCompatibleItemsTypeVector(FlatBufferBuilder builder, Span<ComprehensiveTest.Equipment> data) { return CreateCompatibleItemsTypeVectorBlock(builder, data); }
   public static void StartCompatibleItemsTypeVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddCompatibleItems(FlatBufferBuilder builder, VectorOffset compatibleItemsOffset) { builder.AddOffset(18, compatibleItemsOffset, 0); }
+  public static void AddCompatibleItems(FlatBufferBuilder builder, VectorOffset compatibleItemsOffset) { builder.AddOffset(18, compatibleItemsOffset); }
   public static VectorOffset CreateCompatibleItemsVectorBlock(FlatBufferBuilder builder, Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan(data); return builder.EndVector(); }
   public static VectorOffset CreateCompatibleItemsVector(FlatBufferBuilder builder, Span<int> data) { return CreateCompatibleItemsVectorBlock(builder, data); }
   public static void StartCompatibleItemsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddMetadata(FlatBufferBuilder builder, VectorOffset metadataOffset) { builder.AddOffset(19, metadataOffset, 0); }
+  public static void AddMetadata(FlatBufferBuilder builder, VectorOffset metadataOffset) { builder.AddOffset(19, metadataOffset); }
   public static VectorOffset CreateMetadataVectorBlock(FlatBufferBuilder builder, Span<byte> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<byte>(data); return builder.EndVector(); }
   public static VectorOffset CreateMetadataVector(FlatBufferBuilder builder, Span<byte> data) { return CreateMetadataVectorBlock(builder, data); }
   public static void StartMetadataVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }

@@ -47,7 +47,7 @@ public struct FooBar : IFlatbufferObject
 
   public static void StartFooBar(FlatBufferBuilder builder) { builder.StartTable(4); }
   public static void AddSibling(FlatBufferBuilder builder, Offset<Benchmarks.FlatSpanBuffers.Bar> siblingOffset) { builder.AddStruct(0, siblingOffset, 0); }
-  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
   public static void AddRating(FlatBufferBuilder builder, double rating) { builder.Add<double>(2, rating, 0.0); }
   public static void AddPostfix(FlatBufferBuilder builder, byte postfix) { builder.Add<byte>(3, postfix, 0); }
   public static Offset<Benchmarks.FlatSpanBuffers.FooBar> EndFooBar(FlatBufferBuilder builder) {

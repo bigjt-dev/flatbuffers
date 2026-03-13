@@ -39,5 +39,6 @@ namespace FlatSpanBuffers
         void PadBytes(int offset, int count);
         void PutSpan<T>(int offset, scoped ReadOnlySpan<T> value) where T : unmanaged;
         public void PutStringUTF8(int offset, scoped ReadOnlySpan<char> value);
+        public void PutStringAscii(int offset, scoped ReadOnlySpan<char> value);
     }
 }

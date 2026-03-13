@@ -2011,18 +2011,16 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
           code += "builder.AddOffset(";
           code += NumToString(it - struct_def.fields.vec.begin()) + ", ";
           code += EscapeKeyword(argname);
-          if (!field.IsScalarOptional()) {
-            code += ", ";
-            code += GenDefaultValue(field, false);
-          }
         } else {
           // Use regular Add method for scalars and unions (unions store int
           // values)
-          code += "builder.Add" + GenMethod(field.value.type) + "(";
+          auto method = GenMethod(field.value.type);
+          code += "builder.Add" + method + "(";
           code += NumToString(it - struct_def.fields.vec.begin()) + ", ";
           code += SourceCastBasic(field.value.type, field.IsScalarOptional());
           code += EscapeKeyword(argname);
-          if (!field.IsScalarOptional()) {
+          // Offset fields have no default parameter
+          if (method != "Offset" && !field.IsScalarOptional()) {
             code += ", ";
             code += GenDefaultValue(field, false);
           }

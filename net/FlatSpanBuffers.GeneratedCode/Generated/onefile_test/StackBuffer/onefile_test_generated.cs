@@ -110,7 +110,7 @@ public ref struct TextMessage : IFlatbufferSpanObject, IRootTable
   }
 
   public static void StartTextMessage(ref FlatSpanBufferBuilder builder) { builder.StartTable(2); }
-  public static void AddText(ref FlatSpanBufferBuilder builder, StringOffset textOffset) { builder.AddOffset(0, textOffset, 0); }
+  public static void AddText(ref FlatSpanBufferBuilder builder, StringOffset textOffset) { builder.AddOffset(0, textOffset); }
   public static void AddPriority(ref FlatSpanBufferBuilder builder, OneFileTest.Priority priority) { builder.Add<sbyte>(1, (sbyte)priority, 0); }
   public static Offset<OneFileTest.StackBuffer.TextMessage> EndTextMessage(ref FlatSpanBufferBuilder builder) {
     int o = builder.EndTable();
@@ -161,7 +161,7 @@ public ref struct BinaryMessage : IFlatbufferSpanObject
   }
 
   public static void StartBinaryMessage(ref FlatSpanBufferBuilder builder) { builder.StartTable(2); }
-  public static void AddData(ref FlatSpanBufferBuilder builder, VectorOffset dataOffset) { builder.AddOffset(0, dataOffset, 0); }
+  public static void AddData(ref FlatSpanBufferBuilder builder, VectorOffset dataOffset) { builder.AddOffset(0, dataOffset); }
   public static VectorOffset CreateDataVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<byte> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<byte>(data); return builder.EndVector(); }
   public static VectorOffset CreateDataVector(ref FlatSpanBufferBuilder builder, scoped Span<byte> data) { return CreateDataVectorBlock(ref builder, data); }
   public static void StartDataVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
@@ -236,35 +236,35 @@ public ref struct Envelope : IFlatbufferSpanObject, IRootTable
 
   public static void StartEnvelope(ref FlatSpanBufferBuilder builder) { builder.StartTable(17); }
   public static void AddId(ref FlatSpanBufferBuilder builder, long id) { builder.Add<long>(0, id, 0); }
-  public static void AddSender(ref FlatSpanBufferBuilder builder, StringOffset senderOffset) { builder.AddOffset(1, senderOffset, 0); }
-  public static void AddRecipient(ref FlatSpanBufferBuilder builder, StringOffset recipientOffset) { builder.AddOffset(2, recipientOffset, 0); }
+  public static void AddSender(ref FlatSpanBufferBuilder builder, StringOffset senderOffset) { builder.AddOffset(1, senderOffset); }
+  public static void AddRecipient(ref FlatSpanBufferBuilder builder, StringOffset recipientOffset) { builder.AddOffset(2, recipientOffset); }
   public static void AddTimestamp(ref FlatSpanBufferBuilder builder, long timestamp) { builder.Add<long>(3, timestamp, 0); }
   public static void AddTtl(ref FlatSpanBufferBuilder builder, int ttl) { builder.Add<int>(4, ttl, 60); }
   public static void AddCompressed(ref FlatSpanBufferBuilder builder, bool compressed) { builder.Add<bool>(5, compressed, false); }
   public static void AddOrigin(ref FlatSpanBufferBuilder builder, Offset<OneFileTest.StackBuffer.Vec2> originOffset) { builder.AddStruct(6, originOffset, 0); }
   public static void AddColor(ref FlatSpanBufferBuilder builder, Offset<OneFileTest.StackBuffer.ColorRGBA> colorOffset) { builder.AddStruct(7, colorOffset, 0); }
-  public static void AddTags(ref FlatSpanBufferBuilder builder, VectorOffset tagsOffset) { builder.AddOffset(8, tagsOffset, 0); }
+  public static void AddTags(ref FlatSpanBufferBuilder builder, VectorOffset tagsOffset) { builder.AddOffset(8, tagsOffset); }
   public static VectorOffset CreateTagsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<StringOffset> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<StringOffset>(data); return builder.EndVector(); }
   public static VectorOffset CreateTagsVector(ref FlatSpanBufferBuilder builder, scoped Span<StringOffset> data) { return CreateTagsVectorBlock(ref builder, data); }
   public static void StartTagsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddScores(ref FlatSpanBufferBuilder builder, VectorOffset scoresOffset) { builder.AddOffset(9, scoresOffset, 0); }
+  public static void AddScores(ref FlatSpanBufferBuilder builder, VectorOffset scoresOffset) { builder.AddOffset(9, scoresOffset); }
   public static VectorOffset CreateScoresVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<int>(data); return builder.EndVector(); }
   public static VectorOffset CreateScoresVector(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { return CreateScoresVectorBlock(ref builder, data); }
   public static void StartScoresVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddWaypoints(ref FlatSpanBufferBuilder builder, VectorOffset waypointsOffset) { builder.AddOffset(10, waypointsOffset, 0); }
+  public static void AddWaypoints(ref FlatSpanBufferBuilder builder, VectorOffset waypointsOffset) { builder.AddOffset(10, waypointsOffset); }
   public static void StartWaypointsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(8, numElems, 4); }
   public static void AddPriority(ref FlatSpanBufferBuilder builder, OneFileTest.Priority priority) { builder.Add<sbyte>(11, (sbyte)priority, 1); }
   public static void AddPayloadType(ref FlatSpanBufferBuilder builder, OneFileTest.Payload payloadType) { builder.Add<byte>(12, (byte)payloadType, 0); }
-  public static void AddPayload(ref FlatSpanBufferBuilder builder, int payloadOffset) { builder.AddOffset(13, payloadOffset, 0); }
-  public static void AddAttachmentsType(ref FlatSpanBufferBuilder builder, VectorOffset attachmentsTypeOffset) { builder.AddOffset(14, attachmentsTypeOffset, 0); }
+  public static void AddPayload(ref FlatSpanBufferBuilder builder, int payloadOffset) { builder.AddOffset(13, payloadOffset); }
+  public static void AddAttachmentsType(ref FlatSpanBufferBuilder builder, VectorOffset attachmentsTypeOffset) { builder.AddOffset(14, attachmentsTypeOffset); }
   public static VectorOffset CreateAttachmentsTypeVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<OneFileTest.Payload> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<OneFileTest.Payload>(data); return builder.EndVector(); }
   public static VectorOffset CreateAttachmentsTypeVector(ref FlatSpanBufferBuilder builder, scoped Span<OneFileTest.Payload> data) { return CreateAttachmentsTypeVectorBlock(ref builder, data); }
   public static void StartAttachmentsTypeVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddAttachments(ref FlatSpanBufferBuilder builder, VectorOffset attachmentsOffset) { builder.AddOffset(15, attachmentsOffset, 0); }
+  public static void AddAttachments(ref FlatSpanBufferBuilder builder, VectorOffset attachmentsOffset) { builder.AddOffset(15, attachmentsOffset); }
   public static VectorOffset CreateAttachmentsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan(data); return builder.EndVector(); }
   public static VectorOffset CreateAttachmentsVector(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { return CreateAttachmentsVectorBlock(ref builder, data); }
   public static void StartAttachmentsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddNestedData(ref FlatSpanBufferBuilder builder, VectorOffset nestedDataOffset) { builder.AddOffset(16, nestedDataOffset, 0); }
+  public static void AddNestedData(ref FlatSpanBufferBuilder builder, VectorOffset nestedDataOffset) { builder.AddOffset(16, nestedDataOffset); }
   public static VectorOffset CreateNestedDataVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<byte> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<byte>(data); return builder.EndVector(); }
   public static VectorOffset CreateNestedDataVector(ref FlatSpanBufferBuilder builder, scoped Span<byte> data) { return CreateNestedDataVectorBlock(ref builder, data); }
   public static void StartNestedDataVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }

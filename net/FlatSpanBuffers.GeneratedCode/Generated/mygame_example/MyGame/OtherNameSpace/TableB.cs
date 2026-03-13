@@ -33,7 +33,7 @@ public struct TableB : IFlatbufferObject
   }
 
   public static void StartTableB(FlatBufferBuilder builder) { builder.StartTable(1); }
-  public static void AddA(FlatBufferBuilder builder, Offset<MyGame.OtherNameSpace.TableA> aOffset) { builder.AddOffset(0, aOffset, 0); }
+  public static void AddA(FlatBufferBuilder builder, Offset<MyGame.OtherNameSpace.TableA> aOffset) { builder.AddOffset(0, aOffset); }
   public static Offset<MyGame.OtherNameSpace.TableB> EndTableB(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<MyGame.OtherNameSpace.TableB>(o);

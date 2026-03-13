@@ -53,12 +53,12 @@ public ref struct Movie : IFlatbufferSpanObject, IRootTable
 
   public static void StartMovie(ref FlatSpanBufferBuilder builder) { builder.StartTable(4); }
   public static void AddMainCharacterType(ref FlatSpanBufferBuilder builder, MyGame.Example.Character mainCharacterType) { builder.Add<byte>(0, (byte)mainCharacterType, 0); }
-  public static void AddMainCharacter(ref FlatSpanBufferBuilder builder, int mainCharacterOffset) { builder.AddOffset(1, mainCharacterOffset, 0); }
-  public static void AddCharactersType(ref FlatSpanBufferBuilder builder, VectorOffset charactersTypeOffset) { builder.AddOffset(2, charactersTypeOffset, 0); }
+  public static void AddMainCharacter(ref FlatSpanBufferBuilder builder, int mainCharacterOffset) { builder.AddOffset(1, mainCharacterOffset); }
+  public static void AddCharactersType(ref FlatSpanBufferBuilder builder, VectorOffset charactersTypeOffset) { builder.AddOffset(2, charactersTypeOffset); }
   public static VectorOffset CreateCharactersTypeVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<MyGame.Example.Character> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<MyGame.Example.Character>(data); return builder.EndVector(); }
   public static VectorOffset CreateCharactersTypeVector(ref FlatSpanBufferBuilder builder, scoped Span<MyGame.Example.Character> data) { return CreateCharactersTypeVectorBlock(ref builder, data); }
   public static void StartCharactersTypeVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddCharacters(ref FlatSpanBufferBuilder builder, VectorOffset charactersOffset) { builder.AddOffset(3, charactersOffset, 0); }
+  public static void AddCharacters(ref FlatSpanBufferBuilder builder, VectorOffset charactersOffset) { builder.AddOffset(3, charactersOffset); }
   public static VectorOffset CreateCharactersVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan(data); return builder.EndVector(); }
   public static VectorOffset CreateCharactersVector(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { return CreateCharactersVectorBlock(ref builder, data); }
   public static void StartCharactersVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }

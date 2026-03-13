@@ -41,7 +41,7 @@ public struct Item : IFlatbufferObject
 
   public static void StartItem(FlatBufferBuilder builder) { builder.StartTable(3); }
   public static void AddId(FlatBufferBuilder builder, int id) { builder.Add<int>(0, id, 0); }
-  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
   public static void AddValue(FlatBufferBuilder builder, float value) { builder.Add<float>(2, value, 0.0f); }
   public static Offset<JsonTest.Item> EndItem(FlatBufferBuilder builder) {
     int o = builder.EndTable();

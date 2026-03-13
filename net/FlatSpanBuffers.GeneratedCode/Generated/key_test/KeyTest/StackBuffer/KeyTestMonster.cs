@@ -39,7 +39,7 @@ public ref struct KeyTestMonster : IFlatbufferSpanObject, IRootTable
   }
 
   public static void StartKeyTestMonster(ref FlatSpanBufferBuilder builder) { builder.StartTable(2); }
-  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset, 0); }
+  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset); }
   public static void AddHp(ref FlatSpanBufferBuilder builder, int hp) { builder.Add<int>(1, hp, 0); }
   public static Offset<KeyTest.StackBuffer.KeyTestMonster> EndKeyTestMonster(ref FlatSpanBufferBuilder builder) {
     int o = builder.EndTable();

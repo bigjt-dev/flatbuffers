@@ -47,10 +47,10 @@ public ref struct GameSession : IFlatbufferSpanObject, IRootTable
   }
 
   public static void StartGameSession(ref FlatSpanBufferBuilder builder) { builder.StartTable(5); }
-  public static void AddSessionId(ref FlatSpanBufferBuilder builder, StringOffset sessionIdOffset) { builder.AddOffset(0, sessionIdOffset, 0); }
+  public static void AddSessionId(ref FlatSpanBufferBuilder builder, StringOffset sessionIdOffset) { builder.AddOffset(0, sessionIdOffset); }
   public static void AddPlayerCount(ref FlatSpanBufferBuilder builder, int playerCount) { builder.Add<int>(1, playerCount, 0); }
   public static void AddStartTime(ref FlatSpanBufferBuilder builder, long startTime) { builder.Add<long>(2, startTime, 0); }
-  public static void AddPlayers(ref FlatSpanBufferBuilder builder, VectorOffset playersOffset) { builder.AddOffset(4, playersOffset, 0); }
+  public static void AddPlayers(ref FlatSpanBufferBuilder builder, VectorOffset playersOffset) { builder.AddOffset(4, playersOffset); }
   public static VectorOffset CreatePlayersVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<Offset<ComprehensiveTest.StackBuffer.Player>> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<Offset<ComprehensiveTest.StackBuffer.Player>>(data); return builder.EndVector(); }
   public static VectorOffset CreatePlayersVector(ref FlatSpanBufferBuilder builder, scoped Span<Offset<ComprehensiveTest.StackBuffer.Player>> data) { return CreatePlayersVectorBlock(ref builder, data); }
   public static void StartPlayersVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }

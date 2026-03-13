@@ -39,7 +39,7 @@ public ref struct Weapon : IFlatbufferSpanObject
   }
 
   public static void StartWeapon(ref FlatSpanBufferBuilder builder) { builder.StartTable(2); }
-  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset, 0); }
+  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset); }
   public static void AddDamage(ref FlatSpanBufferBuilder builder, short damage) { builder.Add<short>(1, damage, 0); }
   public static Offset<MonsterTest.StackBuffer.Weapon> EndWeapon(ref FlatSpanBufferBuilder builder) {
     int o = builder.EndTable();

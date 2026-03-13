@@ -73,19 +73,19 @@ public struct Monster : IFlatbufferObject, IRootTable
   public static void AddPos(FlatBufferBuilder builder, Offset<MonsterTest.Vec3> posOffset) { builder.AddStruct(0, posOffset, 0); }
   public static void AddMana(FlatBufferBuilder builder, short mana) { builder.Add<short>(1, mana, 150); }
   public static void AddHp(FlatBufferBuilder builder, short hp) { builder.Add<short>(2, hp, 100); }
-  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(3, nameOffset, 0); }
-  public static void AddInventory(FlatBufferBuilder builder, VectorOffset inventoryOffset) { builder.AddOffset(5, inventoryOffset, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(3, nameOffset); }
+  public static void AddInventory(FlatBufferBuilder builder, VectorOffset inventoryOffset) { builder.AddOffset(5, inventoryOffset); }
   public static VectorOffset CreateInventoryVectorBlock(FlatBufferBuilder builder, Span<byte> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<byte>(data); return builder.EndVector(); }
   public static VectorOffset CreateInventoryVector(FlatBufferBuilder builder, Span<byte> data) { return CreateInventoryVectorBlock(builder, data); }
   public static void StartInventoryVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
   public static void AddColor(FlatBufferBuilder builder, MonsterTest.Color color) { builder.Add<sbyte>(6, (sbyte)color, 2); }
-  public static void AddWeapons(FlatBufferBuilder builder, VectorOffset weaponsOffset) { builder.AddOffset(7, weaponsOffset, 0); }
+  public static void AddWeapons(FlatBufferBuilder builder, VectorOffset weaponsOffset) { builder.AddOffset(7, weaponsOffset); }
   public static VectorOffset CreateWeaponsVectorBlock(FlatBufferBuilder builder, Span<Offset<MonsterTest.Weapon>> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<Offset<MonsterTest.Weapon>>(data); return builder.EndVector(); }
   public static VectorOffset CreateWeaponsVector(FlatBufferBuilder builder, Span<Offset<MonsterTest.Weapon>> data) { return CreateWeaponsVectorBlock(builder, data); }
   public static void StartWeaponsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddEquippedType(FlatBufferBuilder builder, MonsterTest.Equipment equippedType) { builder.Add<byte>(8, (byte)equippedType, 0); }
-  public static void AddEquipped(FlatBufferBuilder builder, int equippedOffset) { builder.AddOffset(9, equippedOffset, 0); }
-  public static void AddPath(FlatBufferBuilder builder, VectorOffset pathOffset) { builder.AddOffset(10, pathOffset, 0); }
+  public static void AddEquipped(FlatBufferBuilder builder, int equippedOffset) { builder.AddOffset(9, equippedOffset); }
+  public static void AddPath(FlatBufferBuilder builder, VectorOffset pathOffset) { builder.AddOffset(10, pathOffset); }
   public static void StartPathVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(12, numElems, 4); }
   public static Offset<MonsterTest.Monster> EndMonster(FlatBufferBuilder builder) {
     int o = builder.EndTable();

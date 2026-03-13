@@ -313,7 +313,7 @@ namespace FlatSpanBuffers
         public void AddOffset(ref TBuffer buffer, int off)
         {
             Prep(ref buffer, sizeof(int), 0); // Ensure alignment is already done.
-            int offset = off != 0 ? GetOffset(ref buffer) - off + sizeof(int) : 0;
+            int offset = GetOffset(ref buffer) - off + sizeof(int);
             buffer.Put<int>(_space -= sizeof(int), offset);
         }
 
@@ -337,8 +337,7 @@ namespace FlatSpanBuffers
         {
             ValidateNotNested();
             _vectorNumElems = count;
-            Prep(ref buffer, sizeof(int), elemSize * count);
-            Prep(ref buffer, alignment, elemSize * count); // Just in case alignment > int.
+            Prep(ref buffer, Math.Max(sizeof(int), alignment), elemSize * count);
         }
 
         public VectorOffset EndVector(ref TBuffer buffer)
@@ -348,25 +347,24 @@ namespace FlatSpanBuffers
         }
 
         /// <summary>
-        /// Adds a buffer offset to the Table at index `o` in its vtable using an offset value and default value
+        /// Adds a buffer offset to the Table at index `o` in its vtable, skipping if x is 0 (default/absent).
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddOffsetToTable(ref TBuffer buffer, Span<int> vtable, int o, int x, int d)
+        public void AddOffsetToTable(ref TBuffer buffer, Span<int> vtable, int o, int x)
         {
-            if (x != d)
+            if (x != 0)
             {
                 AddOffset(ref buffer, x);
                 SetVtableSlot(ref buffer, vtable, o);
             }
         }
 
+        // Assumes StartVector/Prep has been called to reserve space for these elements
         public void AddOffsetSpan(ref TBuffer buffer, scoped ReadOnlySpan<int> offsets)
         {
             if (offsets.IsEmpty)
                 return;
 
-            // Prepare space for all offsets
-            Prep(ref buffer, sizeof(int), (offsets.Length - 1) * sizeof(int));
             for (var i = offsets.Length - 1; i >= 0; i--)
             {
                 int adjustedOffset = GetOffset(ref buffer) - offsets[i] + sizeof(int);
@@ -374,14 +372,13 @@ namespace FlatSpanBuffers
             }
         }
 
+        // Assumes StartVector/Prep has been called to reserve space for these elements
         public void AddOffsetSpan<TOffset>(ref TBuffer buffer, scoped ReadOnlySpan<TOffset> offsets)
             where TOffset : IFlatBufferOffset
         {
             if (offsets.IsEmpty)
                 return;
 
-            // Prepare space for all offsets
-            Prep(ref buffer, sizeof(int), (offsets.Length - 1) * sizeof(int));
             for (var i = offsets.Length - 1; i >= 0; i--)
             {
                 int adjustedOffset = GetOffset(ref buffer) - offsets[i].Value + sizeof(int);
@@ -392,7 +389,6 @@ namespace FlatSpanBuffers
         public VectorOffset CreateVectorOfTables<T>(ref TBuffer buffer, scoped ReadOnlySpan<Offset<T>> offsets)
             where T : struct, allows ref struct
         {
-            ValidateNotNested();
             StartVector(ref buffer, sizeof(int), offsets.Length, sizeof(int));
             AddOffsetSpan(ref buffer, offsets);
             return EndVector(ref buffer);
@@ -403,13 +399,24 @@ namespace FlatSpanBuffers
         /// </summary>
         public StringOffset CreateString(ref TBuffer buffer, scoped ReadOnlySpan<char> s)
         {
-            ValidateNotNested();
             if (s.IsEmpty)
                 return new StringOffset(0);
 
-            Add<byte>(ref buffer, 0);
-            var utf8StringLength = Encoding.UTF8.GetByteCount(s);
-            StartVector(ref buffer, 1, utf8StringLength, 1);
+            if (Ascii.IsValid(s))
+            {
+                int len = s.Length;
+                // len + 1, make room for null terminator
+                StartVector(ref buffer, sizeof(byte), len + 1, sizeof(byte));
+                _vectorNumElems = len;
+                buffer.Put<byte>(_space -= sizeof(byte), 0);
+                buffer.PutStringAscii(_space -= len, s);
+                return new StringOffset(EndVector(ref buffer).Value);
+            }
+
+            int utf8StringLength = Encoding.UTF8.GetByteCount(s);
+            StartVector(ref buffer, sizeof(byte), utf8StringLength + 1, sizeof(byte));
+            _vectorNumElems = utf8StringLength;
+            buffer.Put<byte>(_space -= sizeof(byte), 0);
             buffer.PutStringUTF8(_space -= utf8StringLength, s);
             return new StringOffset(EndVector(ref buffer).Value);
         }
@@ -419,12 +426,12 @@ namespace FlatSpanBuffers
         /// </summary>
         public StringOffset CreateUTF8String(ref TBuffer buffer, scoped ReadOnlySpan<byte> s)
         {
-            ValidateNotNested();
             if (s.IsEmpty)
                 return new StringOffset(0);
 
-            Add<byte>(ref buffer, 0);
-            StartVector(ref buffer, 1, s.Length, 1);
+            StartVector(ref buffer, sizeof(byte), s.Length + 1, sizeof(byte));
+            _vectorNumElems = s.Length;
+            buffer.Put<byte>(_space -= 1, 0);
             buffer.PutSpan(_space -= s.Length, s);
             return new StringOffset(EndVector(ref buffer).Value);
         }

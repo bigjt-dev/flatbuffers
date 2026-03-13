@@ -63,31 +63,31 @@ public ref struct VectorContainer : IFlatbufferSpanObject
   }
 
   public static void StartVectorContainer(ref FlatSpanBufferBuilder builder) { builder.StartTable(7); }
-  public static void AddBytes(ref FlatSpanBufferBuilder builder, VectorOffset bytesOffset) { builder.AddOffset(0, bytesOffset, 0); }
+  public static void AddBytes(ref FlatSpanBufferBuilder builder, VectorOffset bytesOffset) { builder.AddOffset(0, bytesOffset); }
   public static VectorOffset CreateBytesVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<byte> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<byte>(data); return builder.EndVector(); }
   public static VectorOffset CreateBytesVector(ref FlatSpanBufferBuilder builder, scoped Span<byte> data) { return CreateBytesVectorBlock(ref builder, data); }
   public static void StartBytesVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddShorts(ref FlatSpanBufferBuilder builder, VectorOffset shortsOffset) { builder.AddOffset(1, shortsOffset, 0); }
+  public static void AddShorts(ref FlatSpanBufferBuilder builder, VectorOffset shortsOffset) { builder.AddOffset(1, shortsOffset); }
   public static VectorOffset CreateShortsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<short> data) { builder.StartVector(2, data.Length, 2); builder.AddSpan<short>(data); return builder.EndVector(); }
   public static VectorOffset CreateShortsVector(ref FlatSpanBufferBuilder builder, scoped Span<short> data) { return CreateShortsVectorBlock(ref builder, data); }
   public static void StartShortsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(2, numElems, 2); }
-  public static void AddInts(ref FlatSpanBufferBuilder builder, VectorOffset intsOffset) { builder.AddOffset(2, intsOffset, 0); }
+  public static void AddInts(ref FlatSpanBufferBuilder builder, VectorOffset intsOffset) { builder.AddOffset(2, intsOffset); }
   public static VectorOffset CreateIntsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<int>(data); return builder.EndVector(); }
   public static VectorOffset CreateIntsVector(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { return CreateIntsVectorBlock(ref builder, data); }
   public static void StartIntsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddLongs(ref FlatSpanBufferBuilder builder, VectorOffset longsOffset) { builder.AddOffset(3, longsOffset, 0); }
+  public static void AddLongs(ref FlatSpanBufferBuilder builder, VectorOffset longsOffset) { builder.AddOffset(3, longsOffset); }
   public static VectorOffset CreateLongsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<long> data) { builder.StartVector(8, data.Length, 8); builder.AddSpan<long>(data); return builder.EndVector(); }
   public static VectorOffset CreateLongsVector(ref FlatSpanBufferBuilder builder, scoped Span<long> data) { return CreateLongsVectorBlock(ref builder, data); }
   public static void StartLongsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(8, numElems, 8); }
-  public static void AddFloats(ref FlatSpanBufferBuilder builder, VectorOffset floatsOffset) { builder.AddOffset(4, floatsOffset, 0); }
+  public static void AddFloats(ref FlatSpanBufferBuilder builder, VectorOffset floatsOffset) { builder.AddOffset(4, floatsOffset); }
   public static VectorOffset CreateFloatsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<float> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<float>(data); return builder.EndVector(); }
   public static VectorOffset CreateFloatsVector(ref FlatSpanBufferBuilder builder, scoped Span<float> data) { return CreateFloatsVectorBlock(ref builder, data); }
   public static void StartFloatsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddDoubles(ref FlatSpanBufferBuilder builder, VectorOffset doublesOffset) { builder.AddOffset(5, doublesOffset, 0); }
+  public static void AddDoubles(ref FlatSpanBufferBuilder builder, VectorOffset doublesOffset) { builder.AddOffset(5, doublesOffset); }
   public static VectorOffset CreateDoublesVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<double> data) { builder.StartVector(8, data.Length, 8); builder.AddSpan<double>(data); return builder.EndVector(); }
   public static VectorOffset CreateDoublesVector(ref FlatSpanBufferBuilder builder, scoped Span<double> data) { return CreateDoublesVectorBlock(ref builder, data); }
   public static void StartDoublesVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(8, numElems, 8); }
-  public static void AddStrings(ref FlatSpanBufferBuilder builder, VectorOffset stringsOffset) { builder.AddOffset(6, stringsOffset, 0); }
+  public static void AddStrings(ref FlatSpanBufferBuilder builder, VectorOffset stringsOffset) { builder.AddOffset(6, stringsOffset); }
   public static VectorOffset CreateStringsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<StringOffset> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<StringOffset>(data); return builder.EndVector(); }
   public static VectorOffset CreateStringsVector(ref FlatSpanBufferBuilder builder, scoped Span<StringOffset> data) { return CreateStringsVectorBlock(ref builder, data); }
   public static void StartStringsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }

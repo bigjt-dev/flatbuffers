@@ -48,13 +48,13 @@ public struct FooBarContainer : IFlatbufferObject, IRootTable
   }
 
   public static void StartFooBarContainer(FlatBufferBuilder builder) { builder.StartTable(4); }
-  public static void AddList(FlatBufferBuilder builder, VectorOffset listOffset) { builder.AddOffset(0, listOffset, 0); }
+  public static void AddList(FlatBufferBuilder builder, VectorOffset listOffset) { builder.AddOffset(0, listOffset); }
   public static VectorOffset CreateListVectorBlock(FlatBufferBuilder builder, Span<Offset<Benchmarks.FlatSpanBuffers.FooBar>> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<Offset<Benchmarks.FlatSpanBuffers.FooBar>>(data); return builder.EndVector(); }
   public static VectorOffset CreateListVector(FlatBufferBuilder builder, Span<Offset<Benchmarks.FlatSpanBuffers.FooBar>> data) { return CreateListVectorBlock(builder, data); }
   public static void StartListVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddInitialized(FlatBufferBuilder builder, bool initialized) { builder.Add<bool>(1, initialized, false); }
   public static void AddFruit(FlatBufferBuilder builder, Benchmarks.FlatSpanBuffers.Fruit fruit) { builder.Add<short>(2, (short)fruit, 0); }
-  public static void AddLocation(FlatBufferBuilder builder, StringOffset locationOffset) { builder.AddOffset(3, locationOffset, 0); }
+  public static void AddLocation(FlatBufferBuilder builder, StringOffset locationOffset) { builder.AddOffset(3, locationOffset); }
   public static Offset<Benchmarks.FlatSpanBuffers.FooBarContainer> EndFooBarContainer(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<Benchmarks.FlatSpanBuffers.FooBarContainer>(o);

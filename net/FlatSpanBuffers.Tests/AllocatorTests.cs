@@ -73,7 +73,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = builder.CreateVectorOfTables<Monster>(monsters);
             
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
             
@@ -113,7 +113,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = builder.CreateVectorOfTables<Monster>(monsters);
             
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
             
@@ -251,7 +251,7 @@ namespace FlatSpanBuffers.Tests
             
             var vectorOffset = builder.CreateVectorOfTables<Monster>(monsters);
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
             

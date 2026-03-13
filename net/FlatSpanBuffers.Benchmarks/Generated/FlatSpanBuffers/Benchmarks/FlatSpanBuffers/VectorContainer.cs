@@ -63,31 +63,31 @@ public struct VectorContainer : IFlatbufferObject
   }
 
   public static void StartVectorContainer(FlatBufferBuilder builder) { builder.StartTable(7); }
-  public static void AddBytes(FlatBufferBuilder builder, VectorOffset bytesOffset) { builder.AddOffset(0, bytesOffset, 0); }
+  public static void AddBytes(FlatBufferBuilder builder, VectorOffset bytesOffset) { builder.AddOffset(0, bytesOffset); }
   public static VectorOffset CreateBytesVectorBlock(FlatBufferBuilder builder, Span<byte> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<byte>(data); return builder.EndVector(); }
   public static VectorOffset CreateBytesVector(FlatBufferBuilder builder, Span<byte> data) { return CreateBytesVectorBlock(builder, data); }
   public static void StartBytesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddShorts(FlatBufferBuilder builder, VectorOffset shortsOffset) { builder.AddOffset(1, shortsOffset, 0); }
+  public static void AddShorts(FlatBufferBuilder builder, VectorOffset shortsOffset) { builder.AddOffset(1, shortsOffset); }
   public static VectorOffset CreateShortsVectorBlock(FlatBufferBuilder builder, Span<short> data) { builder.StartVector(2, data.Length, 2); builder.AddSpan<short>(data); return builder.EndVector(); }
   public static VectorOffset CreateShortsVector(FlatBufferBuilder builder, Span<short> data) { return CreateShortsVectorBlock(builder, data); }
   public static void StartShortsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(2, numElems, 2); }
-  public static void AddInts(FlatBufferBuilder builder, VectorOffset intsOffset) { builder.AddOffset(2, intsOffset, 0); }
+  public static void AddInts(FlatBufferBuilder builder, VectorOffset intsOffset) { builder.AddOffset(2, intsOffset); }
   public static VectorOffset CreateIntsVectorBlock(FlatBufferBuilder builder, Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<int>(data); return builder.EndVector(); }
   public static VectorOffset CreateIntsVector(FlatBufferBuilder builder, Span<int> data) { return CreateIntsVectorBlock(builder, data); }
   public static void StartIntsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddLongs(FlatBufferBuilder builder, VectorOffset longsOffset) { builder.AddOffset(3, longsOffset, 0); }
+  public static void AddLongs(FlatBufferBuilder builder, VectorOffset longsOffset) { builder.AddOffset(3, longsOffset); }
   public static VectorOffset CreateLongsVectorBlock(FlatBufferBuilder builder, Span<long> data) { builder.StartVector(8, data.Length, 8); builder.AddSpan<long>(data); return builder.EndVector(); }
   public static VectorOffset CreateLongsVector(FlatBufferBuilder builder, Span<long> data) { return CreateLongsVectorBlock(builder, data); }
   public static void StartLongsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(8, numElems, 8); }
-  public static void AddFloats(FlatBufferBuilder builder, VectorOffset floatsOffset) { builder.AddOffset(4, floatsOffset, 0); }
+  public static void AddFloats(FlatBufferBuilder builder, VectorOffset floatsOffset) { builder.AddOffset(4, floatsOffset); }
   public static VectorOffset CreateFloatsVectorBlock(FlatBufferBuilder builder, Span<float> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<float>(data); return builder.EndVector(); }
   public static VectorOffset CreateFloatsVector(FlatBufferBuilder builder, Span<float> data) { return CreateFloatsVectorBlock(builder, data); }
   public static void StartFloatsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddDoubles(FlatBufferBuilder builder, VectorOffset doublesOffset) { builder.AddOffset(5, doublesOffset, 0); }
+  public static void AddDoubles(FlatBufferBuilder builder, VectorOffset doublesOffset) { builder.AddOffset(5, doublesOffset); }
   public static VectorOffset CreateDoublesVectorBlock(FlatBufferBuilder builder, Span<double> data) { builder.StartVector(8, data.Length, 8); builder.AddSpan<double>(data); return builder.EndVector(); }
   public static VectorOffset CreateDoublesVector(FlatBufferBuilder builder, Span<double> data) { return CreateDoublesVectorBlock(builder, data); }
   public static void StartDoublesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(8, numElems, 8); }
-  public static void AddStrings(FlatBufferBuilder builder, VectorOffset stringsOffset) { builder.AddOffset(6, stringsOffset, 0); }
+  public static void AddStrings(FlatBufferBuilder builder, VectorOffset stringsOffset) { builder.AddOffset(6, stringsOffset); }
   public static VectorOffset CreateStringsVectorBlock(FlatBufferBuilder builder, Span<StringOffset> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<StringOffset>(data); return builder.EndVector(); }
   public static VectorOffset CreateStringsVector(FlatBufferBuilder builder, Span<StringOffset> data) { return CreateStringsVectorBlock(builder, data); }
   public static void StartStringsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }

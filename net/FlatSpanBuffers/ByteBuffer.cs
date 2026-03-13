@@ -85,6 +85,8 @@ namespace FlatSpanBuffers
             => BufferOperations.WriteSpan(_buffer, offset, value);
         public void PutStringUTF8(int offset, scoped ReadOnlySpan<char> value)
             => Encoding.UTF8.GetBytes(value, _buffer.AsSpan(offset));
+        public void PutStringAscii(int offset, scoped ReadOnlySpan<char> value)
+            => Encoding.ASCII.GetBytes(value, _buffer.AsSpan(offset));
         public byte Get(int index)
             => _buffer[index];
         public sbyte GetSbyte(int index)

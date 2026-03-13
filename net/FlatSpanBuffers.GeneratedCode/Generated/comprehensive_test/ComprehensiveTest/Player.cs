@@ -84,33 +84,33 @@ public struct Player : IFlatbufferObject
 
   public static void StartPlayer(FlatBufferBuilder builder) { builder.StartTable(16); }
   public static void AddId(FlatBufferBuilder builder, int id) { builder.Add<int>(0, id, 0); }
-  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
   public static void AddLevel(FlatBufferBuilder builder, int level) { builder.Add<int>(2, level, 1); }
   public static void AddExperience(FlatBufferBuilder builder, long experience) { builder.Add<long>(3, experience, 0); }
   public static void AddHealth(FlatBufferBuilder builder, float health) { builder.Add<float>(4, health, 100.0f); }
   public static void AddMana(FlatBufferBuilder builder, float mana) { builder.Add<float>(5, mana, 50.0f); }
-  public static void AddInventoryType(FlatBufferBuilder builder, VectorOffset inventoryTypeOffset) { builder.AddOffset(6, inventoryTypeOffset, 0); }
+  public static void AddInventoryType(FlatBufferBuilder builder, VectorOffset inventoryTypeOffset) { builder.AddOffset(6, inventoryTypeOffset); }
   public static VectorOffset CreateInventoryTypeVectorBlock(FlatBufferBuilder builder, Span<ComprehensiveTest.Equipment> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<ComprehensiveTest.Equipment>(data); return builder.EndVector(); }
   public static VectorOffset CreateInventoryTypeVector(FlatBufferBuilder builder, Span<ComprehensiveTest.Equipment> data) { return CreateInventoryTypeVectorBlock(builder, data); }
   public static void StartInventoryTypeVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddInventory(FlatBufferBuilder builder, VectorOffset inventoryOffset) { builder.AddOffset(7, inventoryOffset, 0); }
+  public static void AddInventory(FlatBufferBuilder builder, VectorOffset inventoryOffset) { builder.AddOffset(7, inventoryOffset); }
   public static VectorOffset CreateInventoryVectorBlock(FlatBufferBuilder builder, Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan(data); return builder.EndVector(); }
   public static VectorOffset CreateInventoryVector(FlatBufferBuilder builder, Span<int> data) { return CreateInventoryVectorBlock(builder, data); }
   public static void StartInventoryVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddSkills(FlatBufferBuilder builder, VectorOffset skillsOffset) { builder.AddOffset(8, skillsOffset, 0); }
+  public static void AddSkills(FlatBufferBuilder builder, VectorOffset skillsOffset) { builder.AddOffset(8, skillsOffset); }
   public static VectorOffset CreateSkillsVectorBlock(FlatBufferBuilder builder, Span<StringOffset> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<StringOffset>(data); return builder.EndVector(); }
   public static VectorOffset CreateSkillsVector(FlatBufferBuilder builder, Span<StringOffset> data) { return CreateSkillsVectorBlock(builder, data); }
   public static void StartSkillsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddStats(FlatBufferBuilder builder, VectorOffset statsOffset) { builder.AddOffset(9, statsOffset, 0); }
+  public static void AddStats(FlatBufferBuilder builder, VectorOffset statsOffset) { builder.AddOffset(9, statsOffset); }
   public static VectorOffset CreateStatsVectorBlock(FlatBufferBuilder builder, Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<int>(data); return builder.EndVector(); }
   public static VectorOffset CreateStatsVector(FlatBufferBuilder builder, Span<int> data) { return CreateStatsVectorBlock(builder, data); }
   public static void StartStatsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddSpawnPoint(FlatBufferBuilder builder, Offset<ComprehensiveTest.Vec3> spawnPointOffset) { builder.AddStruct(10, spawnPointOffset, 0); }
   public static void AddStatus(FlatBufferBuilder builder, ComprehensiveTest.Status status) { builder.Add<int>(11, (int)status, 0); }
   public static void AddEquippedTypeType(FlatBufferBuilder builder, ComprehensiveTest.Equipment equippedTypeType) { builder.Add<byte>(12, (byte)equippedTypeType, 0); }
-  public static void AddEquippedType(FlatBufferBuilder builder, int equippedTypeOffset) { builder.AddOffset(13, equippedTypeOffset, 0); }
+  public static void AddEquippedType(FlatBufferBuilder builder, int equippedTypeOffset) { builder.AddOffset(13, equippedTypeOffset); }
   public static void AddEquippedItemType(FlatBufferBuilder builder, ComprehensiveTest.Equipment equippedItemType) { builder.Add<byte>(14, (byte)equippedItemType, 0); }
-  public static void AddEquippedItem(FlatBufferBuilder builder, int equippedItemOffset) { builder.AddOffset(15, equippedItemOffset, 0); }
+  public static void AddEquippedItem(FlatBufferBuilder builder, int equippedItemOffset) { builder.AddOffset(15, equippedItemOffset); }
   public static Offset<ComprehensiveTest.Player> EndPlayer(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     builder.Required(o, 6);  // name

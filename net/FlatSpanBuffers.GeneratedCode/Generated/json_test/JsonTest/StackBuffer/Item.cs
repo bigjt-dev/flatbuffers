@@ -41,7 +41,7 @@ public ref struct Item : IFlatbufferSpanObject
 
   public static void StartItem(ref FlatSpanBufferBuilder builder) { builder.StartTable(3); }
   public static void AddId(ref FlatSpanBufferBuilder builder, int id) { builder.Add<int>(0, id, 0); }
-  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset, 0); }
+  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
   public static void AddValue(ref FlatSpanBufferBuilder builder, float value) { builder.Add<float>(2, value, 0.0f); }
   public static Offset<JsonTest.StackBuffer.Item> EndItem(ref FlatSpanBufferBuilder builder) {
     int o = builder.EndTable();

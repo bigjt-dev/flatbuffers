@@ -47,10 +47,10 @@ public struct GameSession : IFlatbufferObject, IRootTable
   }
 
   public static void StartGameSession(FlatBufferBuilder builder) { builder.StartTable(5); }
-  public static void AddSessionId(FlatBufferBuilder builder, StringOffset sessionIdOffset) { builder.AddOffset(0, sessionIdOffset, 0); }
+  public static void AddSessionId(FlatBufferBuilder builder, StringOffset sessionIdOffset) { builder.AddOffset(0, sessionIdOffset); }
   public static void AddPlayerCount(FlatBufferBuilder builder, int playerCount) { builder.Add<int>(1, playerCount, 0); }
   public static void AddStartTime(FlatBufferBuilder builder, long startTime) { builder.Add<long>(2, startTime, 0); }
-  public static void AddPlayers(FlatBufferBuilder builder, VectorOffset playersOffset) { builder.AddOffset(4, playersOffset, 0); }
+  public static void AddPlayers(FlatBufferBuilder builder, VectorOffset playersOffset) { builder.AddOffset(4, playersOffset); }
   public static VectorOffset CreatePlayersVectorBlock(FlatBufferBuilder builder, Span<Offset<ComprehensiveTest.Player>> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<Offset<ComprehensiveTest.Player>>(data); return builder.EndVector(); }
   public static VectorOffset CreatePlayersVector(FlatBufferBuilder builder, Span<Offset<ComprehensiveTest.Player>> data) { return CreatePlayersVectorBlock(builder, data); }
   public static void StartPlayersVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }

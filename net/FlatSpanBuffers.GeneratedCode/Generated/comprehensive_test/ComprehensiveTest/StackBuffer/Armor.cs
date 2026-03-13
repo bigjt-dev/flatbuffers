@@ -30,7 +30,7 @@ public ref struct Armor : IFlatbufferSpanObject
   public RefStructNullable<ComprehensiveTest.StackBuffer.Transform> Transform { get { int o = __p.__offset(10); return o != 0 ? new RefStructNullable<ComprehensiveTest.StackBuffer.Transform>((new ComprehensiveTest.StackBuffer.Transform()).__assign(o + __p.bb_pos, __p.bb)) : default; } }
 
   public static void StartArmor(ref FlatSpanBufferBuilder builder) { builder.StartTable(4); }
-  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset, 0); }
+  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset); }
   public static void AddDefense(ref FlatSpanBufferBuilder builder, int defense) { builder.Add<int>(1, defense, 5); }
   public static void AddWeight(ref FlatSpanBufferBuilder builder, float weight) { builder.Add<float>(2, weight, 1.0f); }
   public static void AddTransform(ref FlatSpanBufferBuilder builder, Offset<ComprehensiveTest.StackBuffer.Transform> transformOffset) { builder.AddStruct(3, transformOffset, 0); }

@@ -37,7 +37,7 @@ public struct Armor : IFlatbufferObject
   }
 
   public static void StartArmor(FlatBufferBuilder builder) { builder.StartTable(2); }
-  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset); }
   public static void AddDefense(FlatBufferBuilder builder, int defense) { builder.Add<int>(1, defense, 0); }
   public static Offset<JsonTest.Armor> EndArmor(FlatBufferBuilder builder) {
     int o = builder.EndTable();

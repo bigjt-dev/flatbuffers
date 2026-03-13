@@ -90,11 +90,11 @@ public struct TypeAliases : IFlatbufferObject
   public static void AddU64(FlatBufferBuilder builder, ulong u64) { builder.Add<ulong>(7, u64, 0); }
   public static void AddF32(FlatBufferBuilder builder, float f32) { builder.Add<float>(8, f32, 0.0f); }
   public static void AddF64(FlatBufferBuilder builder, double f64) { builder.Add<double>(9, f64, 0.0); }
-  public static void AddV8(FlatBufferBuilder builder, VectorOffset v8Offset) { builder.AddOffset(10, v8Offset, 0); }
+  public static void AddV8(FlatBufferBuilder builder, VectorOffset v8Offset) { builder.AddOffset(10, v8Offset); }
   public static VectorOffset CreateV8VectorBlock(FlatBufferBuilder builder, Span<sbyte> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<sbyte>(data); return builder.EndVector(); }
   public static VectorOffset CreateV8Vector(FlatBufferBuilder builder, Span<sbyte> data) { return CreateV8VectorBlock(builder, data); }
   public static void StartV8Vector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddVf64(FlatBufferBuilder builder, VectorOffset vf64Offset) { builder.AddOffset(11, vf64Offset, 0); }
+  public static void AddVf64(FlatBufferBuilder builder, VectorOffset vf64Offset) { builder.AddOffset(11, vf64Offset); }
   public static VectorOffset CreateVf64VectorBlock(FlatBufferBuilder builder, Span<double> data) { builder.StartVector(8, data.Length, 8); builder.AddSpan<double>(data); return builder.EndVector(); }
   public static VectorOffset CreateVf64Vector(FlatBufferBuilder builder, Span<double> data) { return CreateVf64VectorBlock(builder, data); }
   public static void StartVf64Vector(FlatBufferBuilder builder, int numElems) { builder.StartVector(8, numElems, 8); }

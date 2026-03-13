@@ -39,7 +39,7 @@ public struct Table2 : IFlatbufferObject
 
   public static void StartTable2(FlatBufferBuilder builder) { builder.StartTable(2); }
   public static void AddTypeType(FlatBufferBuilder builder, KeywordTest.KeywordsInUnion typeType) { builder.Add<byte>(0, (byte)typeType, 0); }
-  public static void AddType(FlatBufferBuilder builder, int typeOffset) { builder.AddOffset(1, typeOffset, 0); }
+  public static void AddType(FlatBufferBuilder builder, int typeOffset) { builder.AddOffset(1, typeOffset); }
   public static Offset<KeywordTest.Table2> EndTable2(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<KeywordTest.Table2>(o);

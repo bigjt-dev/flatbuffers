@@ -53,12 +53,12 @@ public struct Movie : IFlatbufferObject, IRootTable
 
   public static void StartMovie(FlatBufferBuilder builder) { builder.StartTable(4); }
   public static void AddMainCharacterType(FlatBufferBuilder builder, MyGame.Example.Character mainCharacterType) { builder.Add<byte>(0, (byte)mainCharacterType, 0); }
-  public static void AddMainCharacter(FlatBufferBuilder builder, int mainCharacterOffset) { builder.AddOffset(1, mainCharacterOffset, 0); }
-  public static void AddCharactersType(FlatBufferBuilder builder, VectorOffset charactersTypeOffset) { builder.AddOffset(2, charactersTypeOffset, 0); }
+  public static void AddMainCharacter(FlatBufferBuilder builder, int mainCharacterOffset) { builder.AddOffset(1, mainCharacterOffset); }
+  public static void AddCharactersType(FlatBufferBuilder builder, VectorOffset charactersTypeOffset) { builder.AddOffset(2, charactersTypeOffset); }
   public static VectorOffset CreateCharactersTypeVectorBlock(FlatBufferBuilder builder, Span<MyGame.Example.Character> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<MyGame.Example.Character>(data); return builder.EndVector(); }
   public static VectorOffset CreateCharactersTypeVector(FlatBufferBuilder builder, Span<MyGame.Example.Character> data) { return CreateCharactersTypeVectorBlock(builder, data); }
   public static void StartCharactersTypeVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddCharacters(FlatBufferBuilder builder, VectorOffset charactersOffset) { builder.AddOffset(3, charactersOffset, 0); }
+  public static void AddCharacters(FlatBufferBuilder builder, VectorOffset charactersOffset) { builder.AddOffset(3, charactersOffset); }
   public static VectorOffset CreateCharactersVectorBlock(FlatBufferBuilder builder, Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan(data); return builder.EndVector(); }
   public static VectorOffset CreateCharactersVector(FlatBufferBuilder builder, Span<int> data) { return CreateCharactersVectorBlock(builder, data); }
   public static void StartCharactersVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }

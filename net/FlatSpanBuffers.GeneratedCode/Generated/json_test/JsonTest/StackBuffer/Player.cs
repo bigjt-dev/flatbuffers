@@ -43,23 +43,23 @@ public ref struct Player : IFlatbufferSpanObject
 
   public static void StartPlayer(ref FlatSpanBufferBuilder builder) { builder.StartTable(13); }
   public static void AddId(ref FlatSpanBufferBuilder builder, long id) { builder.Add<long>(0, id, 0); }
-  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset, 0); }
+  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
   public static void AddLevel(ref FlatSpanBufferBuilder builder, int level) { builder.Add<int>(2, level, 1); }
   public static void AddHealth(ref FlatSpanBufferBuilder builder, float health) { builder.Add<float>(3, health, 100.0f); }
   public static void AddPosition(ref FlatSpanBufferBuilder builder, Offset<JsonTest.StackBuffer.Vec2> positionOffset) { builder.AddStruct(4, positionOffset, 0); }
   public static void AddStatus(ref FlatSpanBufferBuilder builder, JsonTest.Status status) { builder.Add<sbyte>(5, (sbyte)status, 1); }
   public static void AddPriorities(ref FlatSpanBufferBuilder builder, JsonTest.Priority priorities) { builder.Add<byte>(6, (byte)priorities, 0); }
-  public static void AddInventory(ref FlatSpanBufferBuilder builder, VectorOffset inventoryOffset) { builder.AddOffset(7, inventoryOffset, 0); }
+  public static void AddInventory(ref FlatSpanBufferBuilder builder, VectorOffset inventoryOffset) { builder.AddOffset(7, inventoryOffset); }
   public static VectorOffset CreateInventoryVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<Offset<JsonTest.StackBuffer.Item>> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<Offset<JsonTest.StackBuffer.Item>>(data); return builder.EndVector(); }
   public static VectorOffset CreateInventoryVector(ref FlatSpanBufferBuilder builder, scoped Span<Offset<JsonTest.StackBuffer.Item>> data) { return CreateInventoryVectorBlock(ref builder, data); }
   public static void StartInventoryVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddEquippedType(ref FlatSpanBufferBuilder builder, JsonTest.Equipment equippedType) { builder.Add<byte>(8, (byte)equippedType, 0); }
-  public static void AddEquipped(ref FlatSpanBufferBuilder builder, int equippedOffset) { builder.AddOffset(9, equippedOffset, 0); }
-  public static void AddTags(ref FlatSpanBufferBuilder builder, VectorOffset tagsOffset) { builder.AddOffset(10, tagsOffset, 0); }
+  public static void AddEquipped(ref FlatSpanBufferBuilder builder, int equippedOffset) { builder.AddOffset(9, equippedOffset); }
+  public static void AddTags(ref FlatSpanBufferBuilder builder, VectorOffset tagsOffset) { builder.AddOffset(10, tagsOffset); }
   public static VectorOffset CreateTagsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<StringOffset> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<StringOffset>(data); return builder.EndVector(); }
   public static VectorOffset CreateTagsVector(ref FlatSpanBufferBuilder builder, scoped Span<StringOffset> data) { return CreateTagsVectorBlock(ref builder, data); }
   public static void StartTagsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddScores(ref FlatSpanBufferBuilder builder, VectorOffset scoresOffset) { builder.AddOffset(11, scoresOffset, 0); }
+  public static void AddScores(ref FlatSpanBufferBuilder builder, VectorOffset scoresOffset) { builder.AddOffset(11, scoresOffset); }
   public static VectorOffset CreateScoresVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<int>(data); return builder.EndVector(); }
   public static VectorOffset CreateScoresVector(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { return CreateScoresVectorBlock(ref builder, data); }
   public static void StartScoresVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }

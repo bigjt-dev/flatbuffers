@@ -41,7 +41,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = KeyTestMonster.CreateSortedVectorOfKeyTestMonster(builder, offsets);
 
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
 
@@ -80,7 +80,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = KeyTestMonster.CreateSortedVectorOfKeyTestMonster(builder, offsets);
 
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
 
@@ -112,7 +112,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = KeyTestWeapon.CreateSortedVectorOfKeyTestWeapon(builder, offsets);
 
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
 
@@ -156,7 +156,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = KeyTestWeapon.CreateSortedVectorOfKeyTestWeapon(builder, offsets);
 
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
 
@@ -181,7 +181,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = builder.CreateVectorOfTables<KeyTestMonster>(new Offset<KeyTestMonster>[0]);
 
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
 
@@ -206,7 +206,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = KeyTestMonster.CreateSortedVectorOfKeyTestMonster(builder, offsets);
 
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
 
@@ -241,7 +241,7 @@ namespace FlatSpanBuffers.Tests
 
             // Finish the buffer
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
 
@@ -284,7 +284,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = KeyTestMonster.CreateSortedVectorOfKeyTestMonster(builder, offsets);
 
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
 
@@ -316,7 +316,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = SpanKeyTest.KeyTestMonster.CreateSortedVectorOfKeyTestMonster(ref builder, offsets);
 
             builder.StartTable(1);
-            builder.AddOffset(0, vectorOffset.Value, 0);
+            builder.AddOffset(0, vectorOffset.Value);
             var rootOffset = builder.EndTable();
             builder.Finish(rootOffset);
 

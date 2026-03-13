@@ -43,7 +43,7 @@ public struct Armor : IFlatbufferObject
   }
 
   public static void StartArmor(FlatBufferBuilder builder) { builder.StartTable(4); }
-  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset); }
   public static void AddDefense(FlatBufferBuilder builder, int defense) { builder.Add<int>(1, defense, 5); }
   public static void AddWeight(FlatBufferBuilder builder, float weight) { builder.Add<float>(2, weight, 1.0f); }
   public static void AddTransform(FlatBufferBuilder builder, Offset<ComprehensiveTest.Transform> transformOffset) { builder.AddStruct(3, transformOffset, 0); }

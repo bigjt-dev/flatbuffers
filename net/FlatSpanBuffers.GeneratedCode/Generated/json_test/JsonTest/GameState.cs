@@ -47,8 +47,8 @@ public struct GameState : IFlatbufferObject, IRootTable
   }
 
   public static void StartGameState(FlatBufferBuilder builder) { builder.StartTable(4); }
-  public static void AddVersion(FlatBufferBuilder builder, StringOffset versionOffset) { builder.AddOffset(0, versionOffset, 0); }
-  public static void AddPlayers(FlatBufferBuilder builder, VectorOffset playersOffset) { builder.AddOffset(1, playersOffset, 0); }
+  public static void AddVersion(FlatBufferBuilder builder, StringOffset versionOffset) { builder.AddOffset(0, versionOffset); }
+  public static void AddPlayers(FlatBufferBuilder builder, VectorOffset playersOffset) { builder.AddOffset(1, playersOffset); }
   public static VectorOffset CreatePlayersVectorBlock(FlatBufferBuilder builder, Span<Offset<JsonTest.Player>> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<Offset<JsonTest.Player>>(data); return builder.EndVector(); }
   public static VectorOffset CreatePlayersVector(FlatBufferBuilder builder, Span<Offset<JsonTest.Player>> data) { return CreatePlayersVectorBlock(builder, data); }
   public static void StartPlayersVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }

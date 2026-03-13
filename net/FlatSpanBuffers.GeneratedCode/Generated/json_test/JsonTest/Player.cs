@@ -74,23 +74,23 @@ public struct Player : IFlatbufferObject
 
   public static void StartPlayer(FlatBufferBuilder builder) { builder.StartTable(13); }
   public static void AddId(FlatBufferBuilder builder, long id) { builder.Add<long>(0, id, 0); }
-  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
   public static void AddLevel(FlatBufferBuilder builder, int level) { builder.Add<int>(2, level, 1); }
   public static void AddHealth(FlatBufferBuilder builder, float health) { builder.Add<float>(3, health, 100.0f); }
   public static void AddPosition(FlatBufferBuilder builder, Offset<JsonTest.Vec2> positionOffset) { builder.AddStruct(4, positionOffset, 0); }
   public static void AddStatus(FlatBufferBuilder builder, JsonTest.Status status) { builder.Add<sbyte>(5, (sbyte)status, 1); }
   public static void AddPriorities(FlatBufferBuilder builder, JsonTest.Priority priorities) { builder.Add<byte>(6, (byte)priorities, 0); }
-  public static void AddInventory(FlatBufferBuilder builder, VectorOffset inventoryOffset) { builder.AddOffset(7, inventoryOffset, 0); }
+  public static void AddInventory(FlatBufferBuilder builder, VectorOffset inventoryOffset) { builder.AddOffset(7, inventoryOffset); }
   public static VectorOffset CreateInventoryVectorBlock(FlatBufferBuilder builder, Span<Offset<JsonTest.Item>> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<Offset<JsonTest.Item>>(data); return builder.EndVector(); }
   public static VectorOffset CreateInventoryVector(FlatBufferBuilder builder, Span<Offset<JsonTest.Item>> data) { return CreateInventoryVectorBlock(builder, data); }
   public static void StartInventoryVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddEquippedType(FlatBufferBuilder builder, JsonTest.Equipment equippedType) { builder.Add<byte>(8, (byte)equippedType, 0); }
-  public static void AddEquipped(FlatBufferBuilder builder, int equippedOffset) { builder.AddOffset(9, equippedOffset, 0); }
-  public static void AddTags(FlatBufferBuilder builder, VectorOffset tagsOffset) { builder.AddOffset(10, tagsOffset, 0); }
+  public static void AddEquipped(FlatBufferBuilder builder, int equippedOffset) { builder.AddOffset(9, equippedOffset); }
+  public static void AddTags(FlatBufferBuilder builder, VectorOffset tagsOffset) { builder.AddOffset(10, tagsOffset); }
   public static VectorOffset CreateTagsVectorBlock(FlatBufferBuilder builder, Span<StringOffset> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<StringOffset>(data); return builder.EndVector(); }
   public static VectorOffset CreateTagsVector(FlatBufferBuilder builder, Span<StringOffset> data) { return CreateTagsVectorBlock(builder, data); }
   public static void StartTagsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddScores(FlatBufferBuilder builder, VectorOffset scoresOffset) { builder.AddOffset(11, scoresOffset, 0); }
+  public static void AddScores(FlatBufferBuilder builder, VectorOffset scoresOffset) { builder.AddOffset(11, scoresOffset); }
   public static VectorOffset CreateScoresVectorBlock(FlatBufferBuilder builder, Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<int>(data); return builder.EndVector(); }
   public static VectorOffset CreateScoresVector(FlatBufferBuilder builder, Span<int> data) { return CreateScoresVectorBlock(builder, data); }
   public static void StartScoresVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }

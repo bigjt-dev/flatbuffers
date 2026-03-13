@@ -72,15 +72,15 @@ namespace FlatSpanBuffers.Tests
             var str3 = builder.CreateString("cherry");
             
             builder.StartTable(1);
-            builder.AddOffset(0, str1.Value, 0);
+            builder.AddOffset(0, str1.Value);
             var offset1 = builder.EndTable();
             
             builder.StartTable(1);
-            builder.AddOffset(0, str2.Value, 0);
+            builder.AddOffset(0, str2.Value);
             var offset2 = builder.EndTable();
             
             builder.StartTable(1);
-            builder.AddOffset(0, str3.Value, 0);
+            builder.AddOffset(0, str3.Value);
             var offset3 = builder.EndTable();
             
             var offsets = new Offset<TestTable>[] {
@@ -146,7 +146,7 @@ namespace FlatSpanBuffers.Tests
             {
                 var str = builder.CreateString(value);
                 builder.StartTable(1);
-                builder.AddOffset(0, str.Value, 0);
+                builder.AddOffset(0, str.Value);
                 offsets.Add(new Offset<TestTable>(builder.EndTable()));
             }
             

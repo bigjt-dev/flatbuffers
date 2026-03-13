@@ -152,9 +152,11 @@ namespace FlatSpanBuffers.Tests
             builder.CreateString("moop");
             expected =
             [
-                0, 0, 0, 0,
-                0, 0, 0, 0,
-                0, 0, 0, 0,  // Padding to 32 bytes
+                // Removed extra padding here.
+                // string Prep() is done in one shot now, less padding added.
+                // 0, 0, 0, 0,
+                // 0, 0, 0, 0,
+                // 0, 0, 0, 0,  // Padding to 32 bytes
                 4, 0, 0, 0,
                 (byte)'m', (byte)'o', (byte)'o', (byte)'p',
                 0, 0, 0, 0, // zero terminator with 3 byte pad
@@ -191,15 +193,12 @@ namespace FlatSpanBuffers.Tests
             builder.CreateString("\x04\x05\x06\x07");
             expected =
             [
-                0, 0, 0, 0,
-                0, 0, 0, 0,
-                0, 0, 0, 0,  // Padding to 32 bytes
                 4, 0, 0, 0,
                 0x04, 0x05, 0x06, 0x07,
                 0, 0, 0, 0, // zero terminator with 3 byte pad
                 3, 0, 0, 0,
                 0x01, 0x02, 0x03, 0
-            ]; // No padding
+            ];
             Assert.SpanEqual<byte>(expected, builder.DataBuffer.ToSpan(0, expected.Length));
         }
 
@@ -394,7 +393,7 @@ namespace FlatSpanBuffers.Tests
 
             builder.StartTable(1);
 
-            builder.AddOffset(0, vecEnd.Value, 0);
+            builder.AddOffset(0, vecEnd.Value);
             builder.EndTable();
             byte[] expected =
             [
@@ -427,7 +426,7 @@ namespace FlatSpanBuffers.Tests
 
             builder.StartTable(2);
             builder.Add<short>(0, 55, 0);
-            builder.AddOffset(1, vecEnd.Value, 0);
+            builder.AddOffset(1, vecEnd.Value);
             builder.EndTable();
             byte[] expected =
             [
@@ -464,7 +463,7 @@ namespace FlatSpanBuffers.Tests
             var vecEnd = builder.EndVector();
 
             builder.StartTable(2);
-            builder.AddOffset(1, vecEnd.Value, 0);
+            builder.AddOffset(1, vecEnd.Value);
             builder.Add<short>(0, 55, 0);
             builder.EndTable();
             byte[] expected =
@@ -546,7 +545,7 @@ namespace FlatSpanBuffers.Tests
             var vecEnd = builder.EndVector();
 
             builder.StartTable(1);
-            builder.AddOffset(0, vecEnd.Value, 0);
+            builder.AddOffset(0, vecEnd.Value);
             builder.EndTable();
 
             byte[] expected =
@@ -623,8 +622,8 @@ namespace FlatSpanBuffers.Tests
             var str1 = builder.CreateString("foo");
             var str2 = builder.CreateString("foobar");
             builder.StartTable(2);
-            builder.AddOffset(0, str1.Value, 0);
-            builder.AddOffset(1, str2.Value, 0);
+            builder.AddOffset(0, str1.Value);
+            builder.AddOffset(1, str2.Value);
             var off = builder.EndTable();
             builder.Finish(off);
 
@@ -672,7 +671,7 @@ namespace FlatSpanBuffers.Tests
             //builder.AddOffset(str2.Value);
             var vec = builder.EndVector();
             builder.StartTable(1);
-            builder.AddOffset(0, vec.Value, 0);
+            builder.AddOffset(0, vec.Value);
             var off = builder.EndTable();
             builder.Finish(off);
 

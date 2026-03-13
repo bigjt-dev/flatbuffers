@@ -290,20 +290,18 @@ namespace FlatSpanBuffers
         /// Adds a buffer offset to the Table at index `o` in its vtable using the value `x` and default `d`
         /// </summary>
         /// <param name="o">The index into the vtable</param>
-        /// <param name="x">The value to put into the buffer. If the value is equal to the default
-        /// the value will be skipped.</param>
-        /// <param name="d">`d` is always 0.</param>
+        /// <param name="x">The value to put into the buffer. Skipped if 0 (default/absent).</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddOffset(int o, int x, int d)
+        public void AddOffset(int o, int x)
         {
-            _builder.AddOffsetToTable(ref _bb, _vtable, o, x, d);
+            _builder.AddOffsetToTable(ref _bb, _vtable, o, x);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddOffset<TOffset>(int o, TOffset x, int d)
+        public void AddOffset<TOffset>(int o, TOffset x)
             where TOffset : IFlatBufferOffset
         {
-            _builder.AddOffsetToTable(ref _bb, _vtable, o, x.Value, d);
+            _builder.AddOffsetToTable(ref _bb, _vtable, o, x.Value);
         }
 
         /// <summary>

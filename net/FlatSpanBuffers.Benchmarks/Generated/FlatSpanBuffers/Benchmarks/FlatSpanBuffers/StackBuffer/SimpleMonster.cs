@@ -63,7 +63,7 @@ public ref struct SimpleMonster : IFlatbufferSpanObject
   }
 
   public static void StartSimpleMonster(ref FlatSpanBufferBuilder builder) { builder.StartTable(8); }
-  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset, 0); }
+  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset); }
   public static void AddHp(ref FlatSpanBufferBuilder builder, short hp) { builder.Add<short>(1, hp, 100); }
   public static void AddMana(ref FlatSpanBufferBuilder builder, short mana) { builder.Add<short>(2, mana, 150); }
   public static void AddColor(ref FlatSpanBufferBuilder builder, byte color) { builder.Add<byte>(3, color, 2); }

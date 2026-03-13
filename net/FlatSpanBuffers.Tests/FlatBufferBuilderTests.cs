@@ -190,7 +190,7 @@ namespace FlatSpanBuffers.Tests
             var vectorOffset = fbb.EndVector();
 
             fbb.StartTable(1);
-            fbb.AddOffset(0, vectorOffset.Value, 0);
+            fbb.AddOffset(0, vectorOffset.Value);
             var rootTable = fbb.EndTable();
             fbb.Finish(rootTable);
 
@@ -305,7 +305,7 @@ namespace FlatSpanBuffers.Tests
 
             // Create a wrapper table containing all the sub-tables
             fbb.StartTable(1);
-            fbb.AddOffset(0, tableVector.Value, 0);
+            fbb.AddOffset(0, tableVector.Value);
             var rootTable = fbb.EndTable();
             fbb.Finish(rootTable);
 
@@ -363,7 +363,7 @@ namespace FlatSpanBuffers.Tests
             var tableVector = fbb.EndVector();
 
             fbb.StartTable(1);
-            fbb.AddOffset(0, tableVector.Value, 0);
+            fbb.AddOffset(0, tableVector.Value);
             var rootTable = fbb.EndTable();
             fbb.Finish(rootTable);
 

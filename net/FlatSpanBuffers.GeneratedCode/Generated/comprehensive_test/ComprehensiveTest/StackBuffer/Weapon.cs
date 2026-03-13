@@ -53,51 +53,51 @@ public ref struct Weapon : IFlatbufferSpanObject
   public RefStructNullable<ComprehensiveTest.StackBuffer.PositionHistory> PositionHistory { get { int o = __p.__offset(46); return o != 0 ? new RefStructNullable<ComprehensiveTest.StackBuffer.PositionHistory>((new ComprehensiveTest.StackBuffer.PositionHistory()).__assign(o + __p.bb_pos, __p.bb)) : default; } }
 
   public static void StartWeapon(ref FlatSpanBufferBuilder builder) { builder.StartTable(22); }
-  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset, 0); }
+  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset); }
   public static void AddDamage(ref FlatSpanBufferBuilder builder, int damage) { builder.Add<int>(1, damage, 10); }
   public static void AddDurability(ref FlatSpanBufferBuilder builder, float durability) { builder.Add<float>(2, durability, 100.0f); }
   public static void AddEnchanted(ref FlatSpanBufferBuilder builder, bool enchanted) { builder.Add<bool>(3, enchanted, false); }
-  public static void AddTags(ref FlatSpanBufferBuilder builder, VectorOffset tagsOffset) { builder.AddOffset(4, tagsOffset, 0); }
+  public static void AddTags(ref FlatSpanBufferBuilder builder, VectorOffset tagsOffset) { builder.AddOffset(4, tagsOffset); }
   public static VectorOffset CreateTagsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<StringOffset> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan<StringOffset>(data); return builder.EndVector(); }
   public static VectorOffset CreateTagsVector(ref FlatSpanBufferBuilder builder, scoped Span<StringOffset> data) { return CreateTagsVectorBlock(ref builder, data); }
   public static void StartTagsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddDamageValues(ref FlatSpanBufferBuilder builder, VectorOffset damageValuesOffset) { builder.AddOffset(5, damageValuesOffset, 0); }
+  public static void AddDamageValues(ref FlatSpanBufferBuilder builder, VectorOffset damageValuesOffset) { builder.AddOffset(5, damageValuesOffset); }
   public static VectorOffset CreateDamageValuesVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<int>(data); return builder.EndVector(); }
   public static VectorOffset CreateDamageValuesVector(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { return CreateDamageValuesVectorBlock(ref builder, data); }
   public static void StartDamageValuesVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddModifiers(ref FlatSpanBufferBuilder builder, VectorOffset modifiersOffset) { builder.AddOffset(6, modifiersOffset, 0); }
+  public static void AddModifiers(ref FlatSpanBufferBuilder builder, VectorOffset modifiersOffset) { builder.AddOffset(6, modifiersOffset); }
   public static VectorOffset CreateModifiersVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<float> data) { builder.StartVector(4, data.Length, 4); builder.AddSpan<float>(data); return builder.EndVector(); }
   public static VectorOffset CreateModifiersVector(ref FlatSpanBufferBuilder builder, scoped Span<float> data) { return CreateModifiersVectorBlock(ref builder, data); }
   public static void StartModifiersVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddTransform(ref FlatSpanBufferBuilder builder, Offset<ComprehensiveTest.StackBuffer.Transform> transformOffset) { builder.AddStruct(7, transformOffset, 0); }
-  public static void AddHitPoints(ref FlatSpanBufferBuilder builder, VectorOffset hitPointsOffset) { builder.AddOffset(8, hitPointsOffset, 0); }
+  public static void AddHitPoints(ref FlatSpanBufferBuilder builder, VectorOffset hitPointsOffset) { builder.AddOffset(8, hitPointsOffset); }
   public static void StartHitPointsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(12, numElems, 4); }
   public static void AddRarity(ref FlatSpanBufferBuilder builder, ComprehensiveTest.Color rarity) { builder.Add<sbyte>(9, (sbyte)rarity, 0); }
-  public static void AddValidColors(ref FlatSpanBufferBuilder builder, VectorOffset validColorsOffset) { builder.AddOffset(10, validColorsOffset, 0); }
+  public static void AddValidColors(ref FlatSpanBufferBuilder builder, VectorOffset validColorsOffset) { builder.AddOffset(10, validColorsOffset); }
   public static VectorOffset CreateValidColorsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<ComprehensiveTest.Color> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<ComprehensiveTest.Color>(data); return builder.EndVector(); }
   public static VectorOffset CreateValidColorsVector(ref FlatSpanBufferBuilder builder, scoped Span<ComprehensiveTest.Color> data) { return CreateValidColorsVectorBlock(ref builder, data); }
   public static void StartValidColorsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
   public static void AddWeaponTypeType(ref FlatSpanBufferBuilder builder, ComprehensiveTest.Equipment weaponTypeType) { builder.Add<byte>(11, (byte)weaponTypeType, 0); }
-  public static void AddWeaponType(ref FlatSpanBufferBuilder builder, int weaponTypeOffset) { builder.AddOffset(12, weaponTypeOffset, 0); }
+  public static void AddWeaponType(ref FlatSpanBufferBuilder builder, int weaponTypeOffset) { builder.AddOffset(12, weaponTypeOffset); }
   public static void AddWeaponEquipmentType(ref FlatSpanBufferBuilder builder, ComprehensiveTest.Equipment weaponEquipmentType) { builder.Add<byte>(13, (byte)weaponEquipmentType, 0); }
-  public static void AddWeaponEquipment(ref FlatSpanBufferBuilder builder, int weaponEquipmentOffset) { builder.AddOffset(14, weaponEquipmentOffset, 0); }
-  public static void AddCompatibleTypesType(ref FlatSpanBufferBuilder builder, VectorOffset compatibleTypesTypeOffset) { builder.AddOffset(15, compatibleTypesTypeOffset, 0); }
+  public static void AddWeaponEquipment(ref FlatSpanBufferBuilder builder, int weaponEquipmentOffset) { builder.AddOffset(14, weaponEquipmentOffset); }
+  public static void AddCompatibleTypesType(ref FlatSpanBufferBuilder builder, VectorOffset compatibleTypesTypeOffset) { builder.AddOffset(15, compatibleTypesTypeOffset); }
   public static VectorOffset CreateCompatibleTypesTypeVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<ComprehensiveTest.Equipment> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<ComprehensiveTest.Equipment>(data); return builder.EndVector(); }
   public static VectorOffset CreateCompatibleTypesTypeVector(ref FlatSpanBufferBuilder builder, scoped Span<ComprehensiveTest.Equipment> data) { return CreateCompatibleTypesTypeVectorBlock(ref builder, data); }
   public static void StartCompatibleTypesTypeVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddCompatibleTypes(ref FlatSpanBufferBuilder builder, VectorOffset compatibleTypesOffset) { builder.AddOffset(16, compatibleTypesOffset, 0); }
+  public static void AddCompatibleTypes(ref FlatSpanBufferBuilder builder, VectorOffset compatibleTypesOffset) { builder.AddOffset(16, compatibleTypesOffset); }
   public static VectorOffset CreateCompatibleTypesVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan(data); return builder.EndVector(); }
   public static VectorOffset CreateCompatibleTypesVector(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { return CreateCompatibleTypesVectorBlock(ref builder, data); }
   public static void StartCompatibleTypesVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddCompatibleItemsType(ref FlatSpanBufferBuilder builder, VectorOffset compatibleItemsTypeOffset) { builder.AddOffset(17, compatibleItemsTypeOffset, 0); }
+  public static void AddCompatibleItemsType(ref FlatSpanBufferBuilder builder, VectorOffset compatibleItemsTypeOffset) { builder.AddOffset(17, compatibleItemsTypeOffset); }
   public static VectorOffset CreateCompatibleItemsTypeVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<ComprehensiveTest.Equipment> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<ComprehensiveTest.Equipment>(data); return builder.EndVector(); }
   public static VectorOffset CreateCompatibleItemsTypeVector(ref FlatSpanBufferBuilder builder, scoped Span<ComprehensiveTest.Equipment> data) { return CreateCompatibleItemsTypeVectorBlock(ref builder, data); }
   public static void StartCompatibleItemsTypeVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
-  public static void AddCompatibleItems(ref FlatSpanBufferBuilder builder, VectorOffset compatibleItemsOffset) { builder.AddOffset(18, compatibleItemsOffset, 0); }
+  public static void AddCompatibleItems(ref FlatSpanBufferBuilder builder, VectorOffset compatibleItemsOffset) { builder.AddOffset(18, compatibleItemsOffset); }
   public static VectorOffset CreateCompatibleItemsVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { builder.StartVector(4, data.Length, 4); builder.AddOffsetSpan(data); return builder.EndVector(); }
   public static VectorOffset CreateCompatibleItemsVector(ref FlatSpanBufferBuilder builder, scoped Span<int> data) { return CreateCompatibleItemsVectorBlock(ref builder, data); }
   public static void StartCompatibleItemsVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddMetadata(ref FlatSpanBufferBuilder builder, VectorOffset metadataOffset) { builder.AddOffset(19, metadataOffset, 0); }
+  public static void AddMetadata(ref FlatSpanBufferBuilder builder, VectorOffset metadataOffset) { builder.AddOffset(19, metadataOffset); }
   public static VectorOffset CreateMetadataVectorBlock(ref FlatSpanBufferBuilder builder, scoped Span<byte> data) { builder.StartVector(1, data.Length, 1); builder.AddSpan<byte>(data); return builder.EndVector(); }
   public static VectorOffset CreateMetadataVector(ref FlatSpanBufferBuilder builder, scoped Span<byte> data) { return CreateMetadataVectorBlock(ref builder, data); }
   public static void StartMetadataVector(ref FlatSpanBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }

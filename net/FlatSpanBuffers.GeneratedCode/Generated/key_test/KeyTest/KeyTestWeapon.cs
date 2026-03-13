@@ -41,7 +41,7 @@ public struct KeyTestWeapon : IFlatbufferObject
 
   public static void StartKeyTestWeapon(FlatBufferBuilder builder) { builder.StartTable(3); }
   public static void AddId(FlatBufferBuilder builder, int id) { builder.Add<int>(0, id, 0); }
-  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
   public static void AddDamage(FlatBufferBuilder builder, int damage) { builder.Add<int>(2, damage, 0); }
   public static Offset<KeyTest.KeyTestWeapon> EndKeyTestWeapon(FlatBufferBuilder builder) {
     int o = builder.EndTable();

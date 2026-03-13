@@ -33,7 +33,7 @@ public ref struct TableA : IFlatbufferSpanObject
   }
 
   public static void StartTableA(ref FlatSpanBufferBuilder builder) { builder.StartTable(1); }
-  public static void AddB(ref FlatSpanBufferBuilder builder, Offset<MyGame.OtherNameSpace.StackBuffer.TableB> bOffset) { builder.AddOffset(0, bOffset, 0); }
+  public static void AddB(ref FlatSpanBufferBuilder builder, Offset<MyGame.OtherNameSpace.StackBuffer.TableB> bOffset) { builder.AddOffset(0, bOffset); }
   public static Offset<MyGame.OtherNameSpace.StackBuffer.TableA> EndTableA(ref FlatSpanBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<MyGame.OtherNameSpace.StackBuffer.TableA>(o);

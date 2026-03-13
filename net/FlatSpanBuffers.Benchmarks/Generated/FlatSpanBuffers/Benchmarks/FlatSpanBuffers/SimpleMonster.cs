@@ -63,7 +63,7 @@ public struct SimpleMonster : IFlatbufferObject
   }
 
   public static void StartSimpleMonster(FlatBufferBuilder builder) { builder.StartTable(8); }
-  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(0, nameOffset); }
   public static void AddHp(FlatBufferBuilder builder, short hp) { builder.Add<short>(1, hp, 100); }
   public static void AddMana(FlatBufferBuilder builder, short mana) { builder.Add<short>(2, mana, 150); }
   public static void AddColor(FlatBufferBuilder builder, byte color) { builder.Add<byte>(3, color, 2); }

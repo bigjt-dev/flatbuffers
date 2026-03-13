@@ -43,7 +43,7 @@ public ref struct Stat : IFlatbufferSpanObject
   }
 
   public static void StartStat(ref FlatSpanBufferBuilder builder) { builder.StartTable(3); }
-  public static void AddId(ref FlatSpanBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset, 0); }
+  public static void AddId(ref FlatSpanBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset); }
   public static void AddVal(ref FlatSpanBufferBuilder builder, long val) { builder.Add<long>(1, val, 0); }
   public static void AddCount(ref FlatSpanBufferBuilder builder, ushort count) { builder.Add<ushort>(2, count, 0); }
   public static Offset<MyGame.Example.StackBuffer.Stat> EndStat(ref FlatSpanBufferBuilder builder) {

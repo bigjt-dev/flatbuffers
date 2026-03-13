@@ -43,7 +43,7 @@ public struct Stat : IFlatbufferObject
   }
 
   public static void StartStat(FlatBufferBuilder builder) { builder.StartTable(3); }
-  public static void AddId(FlatBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset, 0); }
+  public static void AddId(FlatBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset); }
   public static void AddVal(FlatBufferBuilder builder, long val) { builder.Add<long>(1, val, 0); }
   public static void AddCount(FlatBufferBuilder builder, ushort count) { builder.Add<ushort>(2, count, 0); }
   public static Offset<MyGame.Example.Stat> EndStat(FlatBufferBuilder builder) {

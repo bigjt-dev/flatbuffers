@@ -34,7 +34,7 @@ public ref struct FooBar : IFlatbufferSpanObject
 
   public static void StartFooBar(ref FlatSpanBufferBuilder builder) { builder.StartTable(4); }
   public static void AddSibling(ref FlatSpanBufferBuilder builder, Offset<Benchmarks.FlatSpanBuffers.StackBuffer.Bar> siblingOffset) { builder.AddStruct(0, siblingOffset, 0); }
-  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset, 0); }
+  public static void AddName(ref FlatSpanBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset); }
   public static void AddRating(ref FlatSpanBufferBuilder builder, double rating) { builder.Add<double>(2, rating, 0.0); }
   public static void AddPostfix(ref FlatSpanBufferBuilder builder, byte postfix) { builder.Add<byte>(3, postfix, 0); }
   public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBar> EndFooBar(ref FlatSpanBufferBuilder builder) {
