@@ -16,29 +16,55 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Exporters;
+using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Toolchains.NativeAot;
 
 namespace FlatSpanBuffers.Benchmarks;
 
 public static class Program
 {
+    private static IConfig BuildConfig(bool includeAot)
+    {
+        if (!includeAot)
+            return DefaultConfig.Instance;
+
+        // NativeAOT job targeting Ryzen 7 7800X3D. TODO: Revisit IlcInstructionSet for CI.
+        return DefaultConfig.Instance
+            .AddJob(Job.Default
+                .WithId("AOT")
+                .WithToolchain(
+                    NativeAotToolchain.CreateBuilder()
+                        .UseNuGet("10.0.4")
+                        .IlcInstructionSet("base,sse4.2,avx,avx2,avx512,aes")
+                        .ToToolchain()
+                ));
+    }
+
     public static void Main(string[] args)
     {
+        bool includeAot = args.Contains("--aot", StringComparer.OrdinalIgnoreCase);
+        var config = BuildConfig(includeAot);
+
         List<Summary> results =
         [
-            //BenchmarkRunner.Run<SimpleMonsterBenchmarks>(),
-            BenchmarkRunner.Run<DecodeBenchmarks>(),
-            BenchmarkRunner.Run<DecodeObjectApiBenchmarks>(),
-            BenchmarkRunner.Run<EncodeBenchmarks>(),
-            BenchmarkRunner.Run<EncodeObjectApiBenchmarks>(),
-            BenchmarkRunner.Run<VerifyBenchmarks>(),
-            BenchmarkRunner.Run<FlatSharpLazyDecodeComparison>(),
-            BenchmarkRunner.Run<FlatSharpGreedyDecodeComparison>(),
-            BenchmarkRunner.Run<FlatSharpEncodeComparison>(),
+            //BenchmarkRunner.Run<SimpleMonsterBenchmarks>(config),
+            BenchmarkRunner.Run<DecodeBenchmarks>(config),
+            BenchmarkRunner.Run<DecodeObjectApiBenchmarks>(config),
+            BenchmarkRunner.Run<EncodeBenchmarks>(config),
+            BenchmarkRunner.Run<EncodeObjectApiBenchmarks>(config),
+            BenchmarkRunner.Run<VerifyBenchmarks>(config),
+
+            BenchmarkRunner.Run<FlatSharpEncode>(config),
+            BenchmarkRunner.Run<FlatSharpDecodeLazy>(config),
+            BenchmarkRunner.Run<FlatSharpDecodeGreedy>(config),
+            BenchmarkRunner.Run<FlatSharpSortedVectorStringKey>(config),
+            BenchmarkRunner.Run<FlatSharpSortedVectorIntKey>(config),
         ];
 
         if (results.Count == 0)

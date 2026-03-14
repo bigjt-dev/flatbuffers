@@ -56,4 +56,21 @@ table VectorContainer {
   strings:[string];
 }
 
+// Sorted vector benchmark types, mirroring FlatSharp's SortedVectorBenchmarks.
+table SortedStringItem {
+  key:string (key);
+}
+
+table SortedIntItem {
+  key:int (key);
+}
+
+table SortedStringContainer {
+  items:[SortedStringItem];
+}
+
+table SortedIntContainer {
+  items:[SortedIntItem];
+}
+
 root_type FooBarContainer;

@@ -33,7 +33,7 @@ IFlatbufferSpanObject uses `ref struct` and accepts `Span<T>` arguments for more
 | **Nullables** | `RefStructNullable<T>` provides `.HasValue` / `.Value` for optional ref struct fields since `Nullable<T>` cannot wrap a `ref struct`. |
 | **Memory-mapped files** | `ByteSpanBuffer` can wrap a `Span<byte>` derived from a `MemoryMappedViewAccessor`, enabling zero-copy reads of FlatBuffers data directly from memory-mapped files. |
 | **JSON** | Migrated from `Newtonsoft.Json` to `System.Text.Json`. |
-| **Object API** | `Pack` / `UnPack` pre-size collections and reuse objects to reduce allocations. |
+| **Object API** | `Pack` / `UnPack` `Pack` / `UnPack` pre-size collections and reuse objects to reduce allocations. `IFlatBufferObjectT` supports object pooling by providing a Reset function. |
 | **Target** | .NET 10. |
 
 ## Benchmarks
@@ -44,29 +44,34 @@ See [Benchmarks.md](net/FlatSpanBuffers.Benchmarks/Benchmarks.md) for the comple
 
 ### vs Google.FlatBuffers
 
-Measured on AMD Ryzen 7 7800X3D, .NET 10.0.3.
+Measured on AMD Ryzen 7 7800X3D, .NET 10.0.4.
 
-| Scenario | Improvement |
-|----------|-------------|
-| Decode | ~3.7x |
-| Encode | ~2.1x |
-| Decode (Object API) | ~2.5x |
-| Encode (Object API) | ~1.8x |
-| Verify | ~2.5x |
+| Scenario | JIT (.NET 10.0) | NativeAOT 10.0 |
+|----------|-----------------|----------------|
+| Decode | ~3.7x | ~1.8x |
+| Encode | ~2.2x | ~2.6x |
+| Decode (Object API) | ~2.6x | ~1.6x |
+| Encode (Object API) | ~1.8x | ~1.9x |
+| Verify | ~2.7x | ~3.2x |
 
 ### vs FlatSharp
 
-[FlatSharp](https://github.com/jamescourtney/FlatSharp) is a popular .NET FlatBuffers library that uses pre-compiled serializers (source-generated code, AOT-friendly) with a different performance profile.
+[FlatSharp](https://github.com/jamescourtney/FlatSharp) is a popular .NET FlatBuffers library that uses pre-compiled serializers (source-generated code, AOT-friendly) with a different performance profile. FlatSharp adds custom attributes to the schema to support the source generated code.
 
-FlatSpanBuffers is on par with FlatSharp, with the exception of the Object API's Encoding/Pack() function. In benchmarks results, there is a ~35ns gap.
+Ported FlatSharp Benchmarks into this benchmark's project for comparison.
 
-| Scenario | Notes |
-|----------|-----------|
-| Lazy Decode | FlatSpanBuffers ~3.7x faster, zero allocation |
-| Greedy Decode (vs ObjectApi UnPack()) | ~Equal performance, FlatSpanBuffers less memory use |
-| Encode (vs FlatSpanBuilder) | FlatSpanBuffers ~9% faster |
-| Encode (vs ObjectApi Pack()) | FlatSharp ~25% faster |
+FlatSpanBuffers outperforms FlatSharp on decoding and sorted vector lookups. FlatSharp far outperforms the ObjectApi.
+FlatSharp's AOT encode performance is impressive.
 
+| Scenario | JIT (.NET 10.0) | NativeAOT 10.0 |
+|----------|-----------------|----------------|
+| Lazy Decode | ~3.2x faster | ~1.7x faster |
+| Greedy Decode | ~5.4x faster | ~2.6x faster |
+| Greedy Decode (Object API) | ~equal | ~1.4x slower |
+| Encode | ~10% slower | ~26% slower |
+| Encode (Object API) | ~55% slower | ~73% slower |
+| Sorted Int Lookup | ~3.7x faster | ~7.3x faster |
+| Sorted String Lookup | ~1.7x faster | ~2.4x faster |
 
 ---
 

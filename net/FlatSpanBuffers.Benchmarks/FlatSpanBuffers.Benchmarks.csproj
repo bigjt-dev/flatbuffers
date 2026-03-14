@@ -11,6 +11,11 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.0" />
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="10.0.4" />
+    <PackageReference Include="FlatSharp.Compiler" Version="7.9.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="FlatSharp.Runtime" Version="7.9.0" />
   </ItemGroup>
 
@@ -19,9 +24,16 @@
   </ItemGroup>
   
   <ItemGroup>
+    <!-- Copy all fbs schema files to output for reference. -->
     <Content Include="fbs\*.fbs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- Wire FlatSharp.Compiler to regenerate C# from the FlatSharp schema at build time.
+         Skipped during NativeAOT builds. -->
+    <FlatSharpSchema Include="fbs\benchmark_flatsharp.fbs" Condition="'$(RuntimeIdentifier)' == ''" />
+    <!-- Exclude the hand-maintained generated file during normal builds; FlatSharp.Compiler writes
+         fresh code into obj/. Skipped during NativeAOT builds. -->
+    <Compile Remove="Generated\FlatSharp\*.cs" Condition="'$(RuntimeIdentifier)' == ''" />
   </ItemGroup>
 
 </Project>

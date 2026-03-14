@@ -2,6 +2,7 @@
 // Same data structures, same wire format, different serializer.
 
 attribute "fs_serializer";
+attribute "fs_vector";
 
 namespace Benchmarks.FlatSharp;
 
@@ -33,6 +34,25 @@ table FooBarContainer (fs_serializer:"Lazy") {
   initialized:bool;
   fruit:Fruit;
   location:string;
+}
+
+// Sorted vector benchmark types, mirroring the structure in benchmark.fbs.
+// IIndexedVector maps to a standard FlatBuffers sorted vector on the wire,
+// so encoded data is interchangeable with Google.FlatBuffers and FlatSpanBuffers.
+table SortedStringItem {
+  key:string (key);
+}
+
+table SortedIntItem {
+  key:int (key);
+}
+
+table SortedStringContainer (fs_serializer:"Lazy") {
+  items:[SortedStringItem] (fs_vector:"IIndexedVector");
+}
+
+table SortedIntContainer (fs_serializer:"Lazy") {
+  items:[SortedIntItem] (fs_vector:"IIndexedVector");
 }
 
 root_type FooBarContainer;
