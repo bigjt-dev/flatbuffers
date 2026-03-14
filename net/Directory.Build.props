@@ -2,7 +2,7 @@
 
   <!-- Centralized version management for all FlatSpanBuffers .NET projects -->
   <PropertyGroup>
-    <FlatSpanBuffersVersion>1.0.0</FlatSpanBuffersVersion>
+    <FlatSpanBuffersVersion>1.1.0</FlatSpanBuffersVersion>
     <Version>$(FlatSpanBuffersVersion)</Version>
     <AssemblyVersion>$(FlatSpanBuffersVersion)</AssemblyVersion>
     <FileVersion>$(FlatSpanBuffersVersion)</FileVersion>

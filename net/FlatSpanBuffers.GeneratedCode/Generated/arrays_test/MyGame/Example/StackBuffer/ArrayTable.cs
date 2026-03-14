@@ -17,7 +17,7 @@ public ref struct ArrayTable : IFlatbufferSpanObject, IRootTable
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static ArrayTable GetRootAsArrayTable(ByteSpanBuffer _bb) { return GetRootAsArrayTable(_bb, new ArrayTable()); }
   public static ArrayTable GetRootAsArrayTable(ByteSpanBuffer _bb, ArrayTable obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool ArrayTableBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "ARRT"); }

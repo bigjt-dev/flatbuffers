@@ -17,10 +17,11 @@
 """
 Bump the FlatSpanBuffers version across all required files.
 
-Updates the version in all 3 locations that must stay in sync:
-  1. include/flatbuffers/base.h        (C++ preprocessor defines)
-  2. net/FlatSpanBuffers/FlatBufferConstants.cs  (C# runtime method name)
-  3. net/Directory.Build.props          (.NET assembly/package version)
+Updates the version in all 4 locations that must stay in sync:
+  1. include/flatbuffers/base.h              (C++ preprocessor defines)
+  2. include/flatbuffers/reflection_generated.h  (C++ static_assert version)
+  3. net/FlatSpanBuffers/FlatBufferConstants.cs  (C# runtime method name)
+  4. net/Directory.Build.props               (.NET assembly/package version)
 
 Usage:
   python3 scripts/bump_version.py 1.2.3
@@ -38,6 +39,7 @@ ROOT = Path(__file__).parent.parent.resolve()
 
 # --- File paths relative to repo root ---
 BASE_H = ROOT / "include" / "flatbuffers" / "base.h"
+REFLECTION_GENERATED_H = ROOT / "include" / "flatbuffers" / "reflection_generated.h"
 CONSTANTS_CS = ROOT / "net" / "FlatSpanBuffers" / "FlatBufferConstants.cs"
 DIR_BUILD_PROPS = ROOT / "net" / "Directory.Build.props"
 
@@ -51,6 +53,19 @@ RE_BASE_MINOR = re.compile(
 )
 RE_BASE_REVISION = re.compile(
     r"(#define\s+FLATSPANBUFFERS_VERSION_REVISION\s+)\d+"
+)
+
+# reflection_generated.h: static_assert(FLATSPANBUFFERS_VERSION_MAJOR == 1 &&
+#               FLATSPANBUFFERS_VERSION_MINOR == 0 &&
+#               FLATSPANBUFFERS_VERSION_REVISION == 0, ...)
+RE_REFLECT_MAJOR = re.compile(
+    r"(FLATSPANBUFFERS_VERSION_MAJOR\s*==\s*)\d+"
+)
+RE_REFLECT_MINOR = re.compile(
+    r"(FLATSPANBUFFERS_VERSION_MINOR\s*==\s*)\d+"
+)
+RE_REFLECT_REVISION = re.compile(
+    r"(FLATSPANBUFFERS_VERSION_REVISION\s*==\s*)\d+"
 )
 
 # FlatBufferConstants.cs: public static void FLATSPANBUFFERS_1_0_0() {}
@@ -105,7 +120,7 @@ def bump(major, minor, revision, dry_run=False):
     files_changed = 0
 
     # 1. base.h
-    print(f"  [1/3] {BASE_H.relative_to(ROOT)}")
+    print(f"  [1/4] {BASE_H.relative_to(ROOT)}")
     changed = update_file(BASE_H, [
         (RE_BASE_MAJOR, rf"\g<1>{major}"),
         (RE_BASE_MINOR, rf"\g<1>{minor}"),
@@ -114,16 +129,26 @@ def bump(major, minor, revision, dry_run=False):
     if changed:
         files_changed += 1
 
-    # 2. FlatBufferConstants.cs
-    print(f"  [2/3] {CONSTANTS_CS.relative_to(ROOT)}")
+    # 2. reflection_generated.h
+    print(f"  [2/4] {REFLECTION_GENERATED_H.relative_to(ROOT)}")
+    changed = update_file(REFLECTION_GENERATED_H, [
+        (RE_REFLECT_MAJOR, rf"\g<1>{major}"),
+        (RE_REFLECT_MINOR, rf"\g<1>{minor}"),
+        (RE_REFLECT_REVISION, rf"\g<1>{revision}"),
+    ], dry_run)
+    if changed:
+        files_changed += 1
+
+    # 3. FlatBufferConstants.cs
+    print(f"  [3/4] {CONSTANTS_CS.relative_to(ROOT)}")
     changed = update_file(CONSTANTS_CS, [
         (RE_CS_METHOD, rf"\g<1>{version_underscore}\2"),
     ], dry_run)
     if changed:
         files_changed += 1
 
-    # 3. Directory.Build.props
-    print(f"  [3/3] {DIR_BUILD_PROPS.relative_to(ROOT)}")
+    # 4. Directory.Build.props
+    print(f"  [4/4] {DIR_BUILD_PROPS.relative_to(ROOT)}")
     changed = update_file(DIR_BUILD_PROPS, [
         (RE_PROPS_VERSION, rf"\g<1>{version_str}\2"),
     ], dry_run)
@@ -169,10 +194,6 @@ def main():
 
     new_major, new_minor, new_revision = parse_version(args.version)
     new_version = f"{new_major}.{new_minor}.{new_revision}"
-
-    if new_version == current:
-        print(f"Version is already {current}. Nothing to do.")
-        return
 
     mode = "[DRY RUN] " if args.dry_run else ""
     print(f"{mode}Bumping FlatSpanBuffers version: {current} -> {new_version}")

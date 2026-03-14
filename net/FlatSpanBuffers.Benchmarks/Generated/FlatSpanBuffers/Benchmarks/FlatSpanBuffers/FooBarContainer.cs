@@ -17,7 +17,7 @@ public struct FooBarContainer : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static FooBarContainer GetRootAsFooBarContainer(ByteBuffer _bb) { return GetRootAsFooBarContainer(_bb, new FooBarContainer()); }
   public static FooBarContainer GetRootAsFooBarContainer(ByteBuffer _bb, FooBarContainer obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool VerifyFooBarContainer(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("", false, Benchmarks.FlatSpanBuffers.FooBarContainerVerify.Verify); }

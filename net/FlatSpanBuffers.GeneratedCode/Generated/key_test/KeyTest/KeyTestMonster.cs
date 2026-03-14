@@ -17,7 +17,7 @@ public struct KeyTestMonster : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteBuffer _bb) { return GetRootAsKeyTestMonster(_bb, new KeyTestMonster()); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteBuffer _bb, KeyTestMonster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool VerifyKeyTestMonster(ByteBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("", false, KeyTest.KeyTestMonsterVerify.Verify); }

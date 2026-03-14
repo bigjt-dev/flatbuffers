@@ -141,7 +141,7 @@
 
 // FlatSpanBuffers version - used by the C++ compiler and the C# runtime.
 #define FLATSPANBUFFERS_VERSION_MAJOR 1
-#define FLATSPANBUFFERS_VERSION_MINOR 0
+#define FLATSPANBUFFERS_VERSION_MINOR 1
 #define FLATSPANBUFFERS_VERSION_REVISION 0
 
 #define FLATBUFFERS_STRING_EXPAND(X) #X

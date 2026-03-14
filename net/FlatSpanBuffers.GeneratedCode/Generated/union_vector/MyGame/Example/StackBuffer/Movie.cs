@@ -17,7 +17,7 @@ public ref struct Movie : IFlatbufferSpanObject, IRootTable
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static Movie GetRootAsMovie(ByteSpanBuffer _bb) { return GetRootAsMovie(_bb, new Movie()); }
   public static Movie GetRootAsMovie(ByteSpanBuffer _bb, Movie obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool MovieBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "MOVI"); }

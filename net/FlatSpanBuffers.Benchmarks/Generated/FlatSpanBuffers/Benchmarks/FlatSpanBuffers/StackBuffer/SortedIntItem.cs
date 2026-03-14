@@ -17,7 +17,7 @@ public ref struct SortedIntItem : IFlatbufferSpanObject
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static SortedIntItem GetRootAsSortedIntItem(ByteSpanBuffer _bb) { return GetRootAsSortedIntItem(_bb, new SortedIntItem()); }
   public static SortedIntItem GetRootAsSortedIntItem(ByteSpanBuffer _bb, SortedIntItem obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }

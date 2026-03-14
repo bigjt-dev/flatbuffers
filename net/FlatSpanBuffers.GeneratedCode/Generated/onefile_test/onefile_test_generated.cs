@@ -216,7 +216,7 @@ public struct TextMessage : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static TextMessage GetRootAsTextMessage(ByteBuffer _bb) { return GetRootAsTextMessage(_bb, new TextMessage()); }
   public static TextMessage GetRootAsTextMessage(ByteBuffer _bb, TextMessage obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool TextMessageBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "OFTT"); }
@@ -338,7 +338,7 @@ public struct BinaryMessage : IFlatbufferObject
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static BinaryMessage GetRootAsBinaryMessage(ByteBuffer _bb) { return GetRootAsBinaryMessage(_bb, new BinaryMessage()); }
   public static BinaryMessage GetRootAsBinaryMessage(ByteBuffer _bb, BinaryMessage obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
@@ -443,7 +443,7 @@ public struct Envelope : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static Envelope GetRootAsEnvelope(ByteBuffer _bb) { return GetRootAsEnvelope(_bb, new Envelope()); }
   public static Envelope GetRootAsEnvelope(ByteBuffer _bb, Envelope obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool EnvelopeBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "OFTT"); }

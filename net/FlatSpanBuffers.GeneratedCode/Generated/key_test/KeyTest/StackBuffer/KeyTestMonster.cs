@@ -17,7 +17,7 @@ public ref struct KeyTestMonster : IFlatbufferSpanObject, IRootTable
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteSpanBuffer _bb) { return GetRootAsKeyTestMonster(_bb, new KeyTestMonster()); }
   public static KeyTestMonster GetRootAsKeyTestMonster(ByteSpanBuffer _bb, KeyTestMonster obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool VerifyKeyTestMonster(ByteSpanBuffer _bb) {Verifier verifier = new Verifier(_bb); return verifier.VerifyBuffer("", false, KeyTest.KeyTestMonsterVerify.Verify); }

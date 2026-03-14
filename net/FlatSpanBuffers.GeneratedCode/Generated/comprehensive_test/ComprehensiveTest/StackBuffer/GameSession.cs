@@ -17,7 +17,7 @@ public ref struct GameSession : IFlatbufferSpanObject, IRootTable
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static GameSession GetRootAsGameSession(ByteSpanBuffer _bb) { return GetRootAsGameSession(_bb, new GameSession()); }
   public static GameSession GetRootAsGameSession(ByteSpanBuffer _bb, GameSession obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool GameSessionBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "TEST"); }

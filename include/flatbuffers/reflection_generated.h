@@ -9,7 +9,7 @@
 // Ensure the included flatbuffers.h is the same version as when this file was
 // generated, otherwise it may not be compatible.
 static_assert(FLATSPANBUFFERS_VERSION_MAJOR == 1 &&
-              FLATSPANBUFFERS_VERSION_MINOR == 0 &&
+              FLATSPANBUFFERS_VERSION_MINOR == 1 &&
               FLATSPANBUFFERS_VERSION_REVISION == 0,
              "Non-compatible FlatSpanBuffers version included");
 

@@ -17,7 +17,7 @@ public ref struct VectorContainer : IFlatbufferSpanObject
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static VectorContainer GetRootAsVectorContainer(ByteSpanBuffer _bb) { return GetRootAsVectorContainer(_bb, new VectorContainer()); }
   public static VectorContainer GetRootAsVectorContainer(ByteSpanBuffer _bb, VectorContainer obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }

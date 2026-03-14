@@ -17,7 +17,7 @@ public struct ScalarStuff : IFlatbufferObject, IRootTable
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static ScalarStuff GetRootAsScalarStuff(ByteBuffer _bb) { return GetRootAsScalarStuff(_bb, new ScalarStuff()); }
   public static ScalarStuff GetRootAsScalarStuff(ByteBuffer _bb, ScalarStuff obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool ScalarStuffBufferHasIdentifier(ByteBuffer _bb) { return Table.__has_identifier(_bb, "NULL"); }

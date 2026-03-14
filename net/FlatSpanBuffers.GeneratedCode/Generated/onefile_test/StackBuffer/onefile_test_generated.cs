@@ -113,7 +113,7 @@ public ref struct TextMessage : IFlatbufferSpanObject, IRootTable
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static TextMessage GetRootAsTextMessage(ByteSpanBuffer _bb) { return GetRootAsTextMessage(_bb, new TextMessage()); }
   public static TextMessage GetRootAsTextMessage(ByteSpanBuffer _bb, TextMessage obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool TextMessageBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "OFTT"); }
@@ -181,7 +181,7 @@ public ref struct BinaryMessage : IFlatbufferSpanObject
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static BinaryMessage GetRootAsBinaryMessage(ByteSpanBuffer _bb) { return GetRootAsBinaryMessage(_bb, new BinaryMessage()); }
   public static BinaryMessage GetRootAsBinaryMessage(ByteSpanBuffer _bb, BinaryMessage obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new TableSpan(_i, _bb); }
@@ -254,7 +254,7 @@ public ref struct Envelope : IFlatbufferSpanObject, IRootTable
 {
   private TableSpan __p;
   public ByteSpanBuffer ByteBuffer { get { return __p.bb; } }
-  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_0_0(); }
+  public static void ValidateVersion() { FlatBufferConstants.FLATSPANBUFFERS_1_1_0(); }
   public static Envelope GetRootAsEnvelope(ByteSpanBuffer _bb) { return GetRootAsEnvelope(_bb, new Envelope()); }
   public static Envelope GetRootAsEnvelope(ByteSpanBuffer _bb, Envelope obj) { return (obj.__assign(_bb.Get<int>(_bb.Position) + _bb.Position, _bb)); }
   public static bool EnvelopeBufferHasIdentifier(ByteSpanBuffer _bb) { return TableSpan.__has_identifier(_bb, "OFTT"); }

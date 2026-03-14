@@ -36,6 +36,6 @@ namespace FlatSpanBuffers
         /// match the version the code was generated with, the method name
         /// won't exist and compilation will fail with a clear error.
         /// </summary>
-        public static void FLATSPANBUFFERS_1_0_0() {}
+        public static void FLATSPANBUFFERS_1_1_0() {}
     }
 }
