@@ -20,10 +20,11 @@ public ref struct BookReader : IFlatbufferSpanObject
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new StructSpan(_i, _bb); }
   public BookReader __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 4;
   public int BooksRead { get { return __p.bb.Get<int>(__p.bb_pos + 0); } }
 
   public static Offset<MyGame.Example.StackBuffer.BookReader> CreateBookReader(ref FlatSpanBufferBuilder builder, int BooksRead) {
-    builder.Prep(4, 4);
+    builder.Prep(4, TotalByteLength);
     builder.Put<int>(BooksRead);
     return new Offset<MyGame.Example.StackBuffer.BookReader>(builder.Offset);
   }
@@ -37,15 +38,6 @@ public ref struct BookReader : IFlatbufferSpanObject
   }
   public static Offset<MyGame.Example.StackBuffer.BookReader> Pack(ref FlatSpanBufferBuilder builder, BookReaderT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StackBuffer.BookReader>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(ref builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.StackBuffer.BookReader> Pack(ref FlatSpanBufferBuilder builder, BookReaderT _o, scoped Span<int> lengthyVectorSpace) {

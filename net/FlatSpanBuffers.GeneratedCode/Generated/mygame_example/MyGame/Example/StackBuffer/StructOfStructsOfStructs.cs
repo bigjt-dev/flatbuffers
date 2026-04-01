@@ -20,19 +20,16 @@ public ref struct StructOfStructsOfStructs : IFlatbufferSpanObject
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new StructSpan(_i, _bb); }
   public StructOfStructsOfStructs __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 20;
   public MyGame.Example.StackBuffer.StructOfStructs A { get { return (new MyGame.Example.StackBuffer.StructOfStructs()).__assign(__p.bb_pos + 0, __p.bb); } }
 
   public static Offset<MyGame.Example.StackBuffer.StructOfStructsOfStructs> CreateStructOfStructsOfStructs(ref FlatSpanBufferBuilder builder, uint a_a_Id, uint a_a_Distance, short a_b_A, sbyte a_b_B, uint a_c_Id, uint a_c_Distance) {
-    builder.Prep(4, 20);
-    builder.Prep(4, 20);
-    builder.Prep(4, 8);
+    builder.Prep(4, TotalByteLength);
     builder.Put<uint>(a_c_Distance);
     builder.Put<uint>(a_c_Id);
-    builder.Prep(2, 4);
     builder.Pad(1);
     builder.Put<sbyte>(a_b_B);
     builder.Put<short>(a_b_A);
-    builder.Prep(4, 8);
     builder.Put<uint>(a_a_Distance);
     builder.Put<uint>(a_a_Id);
     return new Offset<MyGame.Example.StackBuffer.StructOfStructsOfStructs>(builder.Offset);
@@ -48,15 +45,6 @@ public ref struct StructOfStructsOfStructs : IFlatbufferSpanObject
   }
   public static Offset<MyGame.Example.StackBuffer.StructOfStructsOfStructs> Pack(ref FlatSpanBufferBuilder builder, StructOfStructsOfStructsT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StackBuffer.StructOfStructsOfStructs>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(ref builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.StackBuffer.StructOfStructsOfStructs> Pack(ref FlatSpanBufferBuilder builder, StructOfStructsOfStructsT _o, scoped Span<int> lengthyVectorSpace) {

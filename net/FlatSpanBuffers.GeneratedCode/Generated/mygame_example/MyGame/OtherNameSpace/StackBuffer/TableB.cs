@@ -54,7 +54,7 @@ public ref struct TableB : IFlatbufferSpanObject
   public static Offset<MyGame.OtherNameSpace.StackBuffer.TableB> Pack(ref FlatSpanBufferBuilder builder, TableBT _o) {
     if (_o == null) return default(Offset<MyGame.OtherNameSpace.StackBuffer.TableB>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));

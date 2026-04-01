@@ -49,15 +49,6 @@ public struct TestSimpleTableWithEnum : IFlatbufferObject
   }
   public static Offset<MyGame.Example.TestSimpleTableWithEnum> Pack(FlatBufferBuilder builder, TestSimpleTableWithEnumT _o) {
     if (_o == null) return default(Offset<MyGame.Example.TestSimpleTableWithEnum>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.TestSimpleTableWithEnum> Pack(FlatBufferBuilder builder, TestSimpleTableWithEnumT _o, Span<int> lengthyVectorSpace) {

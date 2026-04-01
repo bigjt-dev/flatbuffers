@@ -87,7 +87,7 @@ public struct GameState : IFlatbufferObject, IRootTable
   public static Offset<JsonTest.GameState> Pack(FlatBufferBuilder builder, GameStateT _o) {
     if (_o == null) return default(Offset<JsonTest.GameState>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
@@ -103,7 +103,7 @@ public struct GameState : IFlatbufferObject, IRootTable
     var _players = default(VectorOffset);
     if (_o.Players != null) {
       var _players_len = _o.Players.Count;
-      Span<int> _players_buf = _players_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_players_len] : lengthyVectorSpace[.._players_len];
+      Span<int> _players_buf = _players_len <= 256 ? stackalloc int[_players_len] : lengthyVectorSpace[.._players_len];
       for (var _j = 0; _j < _players_len; ++_j) { _players_buf[_j] = JsonTest.Player.Pack(builder, _o.Players[_j], lengthyVectorSpace).Value; }
       builder.StartVector(4, _players_len, 4);
       builder.AddOffsetSpan(_players_buf);

@@ -20,6 +20,7 @@ public struct Vec3 : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public Vec3 __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 32;
   public float X { get { return __p.bb.Get<float>(__p.bb_pos + 0); } }
   public void MutateX(float x) { __p.bb.Put<float>(__p.bb_pos + 0, x); }
   public float Y { get { return __p.bb.Get<float>(__p.bb_pos + 4); } }
@@ -33,9 +34,8 @@ public struct Vec3 : IFlatbufferObject
   public MyGame.Example.Test Test3 { get { return (new MyGame.Example.Test()).__assign(__p.bb_pos + 26, __p.bb); } }
 
   public static Offset<MyGame.Example.Vec3> CreateVec3(FlatBufferBuilder builder, float X, float Y, float Z, double Test1, MyGame.Example.Color Test2, short test3_A, sbyte test3_B) {
-    builder.Prep(8, 32);
+    builder.Prep(8, TotalByteLength);
     builder.Pad(2);
-    builder.Prep(2, 4);
     builder.Pad(1);
     builder.Put<sbyte>(test3_B);
     builder.Put<short>(test3_A);
@@ -64,15 +64,6 @@ public struct Vec3 : IFlatbufferObject
   }
   public static Offset<MyGame.Example.Vec3> Pack(FlatBufferBuilder builder, Vec3T _o) {
     if (_o == null) return default(Offset<MyGame.Example.Vec3>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.Vec3> Pack(FlatBufferBuilder builder, Vec3T _o, Span<int> lengthyVectorSpace) {

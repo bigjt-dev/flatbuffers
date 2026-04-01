@@ -810,6 +810,11 @@ struct IDLOptions {
   /******************************* Python gRPC ********************************/
   bool grpc_python_typed_handlers;
 
+  // Stackalloc byte limit for generated CSharp SpanBufs Object API Pack
+  // methods. Controls how many bytes may be stackalloc'd for intermediates and
+  // and offset vectors.
+  int cs_spanbuf_objapi_stackalloc_limit_bytes;
+
   IDLOptions()
       : gen_jvmstatic(false),
         use_flexbuffers(false),
@@ -885,7 +890,8 @@ struct IDLOptions {
         grpc_filename_suffix(".fb"),
         grpc_use_system_headers(true),
         grpc_callback_api(false),
-        grpc_python_typed_handlers(false) {}
+        grpc_python_typed_handlers(false),
+        cs_spanbuf_objapi_stackalloc_limit_bytes(1024) {}
 };
 
 // This encapsulates where the parser is in the current source file.

@@ -38,15 +38,6 @@ public ref struct Monster : IFlatbufferSpanObject
   }
   public static Offset<MyGame.Example2.StackBuffer.Monster> Pack(ref FlatSpanBufferBuilder builder, MonsterT _o) {
     if (_o == null) return default(Offset<MyGame.Example2.StackBuffer.Monster>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(ref builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example2.StackBuffer.Monster> Pack(ref FlatSpanBufferBuilder builder, MonsterT _o, scoped Span<int> lengthyVectorSpace) {

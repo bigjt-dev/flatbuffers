@@ -97,6 +97,13 @@ const static FlatCOption flatc_options[] = {
     {"", "gen-onefile", "",
      "Generate a single output file for C#. Implies --no-include."},
     {"", "gen-object-api", "", "Generate an additional object-based API."},
+    {"", "object-api-stackalloc-limit", "BYTES",
+     "Stackalloc byte limit for the CSharp SpanBufs Object API Pack methods. "
+     "The value is read as bytes and controls how many bytes may be "
+     "stackalloc'd "
+     "for fixed struct array span intermediates and offset vectors. "
+     "Valid range: 1..1048576 (1 MB). Default is 1024 (requires "
+     "--gen-object-api)."},
     {"", "gen-compare", "", "Generate operator== for object-based API types."},
     {"", "gen-all", "",
      "Generate not just code for the current schema files, but for all files "
@@ -345,6 +352,15 @@ FlatCOptions FlatCompiler::ParseFromCommandLineArguments(int argc,
         opts.mutable_buffer = true;
       } else if (arg == "--gen-object-api") {
         opts.generate_object_based_api = true;
+      } else if (arg == "--object-api-stackalloc-limit") {
+        if (++argi >= argc) Error("missing value following: " + arg, true);
+        const int val = atoi(argv[argi]);
+        if (val <= 0 || val > 1048576)
+          Error(
+              "stackalloc-limit must be between 1 and "
+              "1048576 bytes (1 MB)",
+              true);
+        opts.cs_spanbuf_objapi_stackalloc_limit_bytes = val;
       } else if (arg == "--gen-compare") {
         opts.gen_compare = true;
       } else if (arg == "--gen-all") {

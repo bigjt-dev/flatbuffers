@@ -73,6 +73,13 @@ flatc(
 )
 
 flatc(
+    CS_SPANBUF_OPTS,
+    prefix=flatspanbuffers_gen + "/multidim_arrays_test",
+    schema=flatspanbuffers_fbs + "/multidim_arrays_test.fbs",
+    cwd=root_path,
+)
+
+flatc(
     CS_SPANBUF_OPTS + ["--cs-gen-json-serializer"],
     prefix=flatspanbuffers_gen + "/json_test",
     schema=flatspanbuffers_fbs + "/json_test.fbs",

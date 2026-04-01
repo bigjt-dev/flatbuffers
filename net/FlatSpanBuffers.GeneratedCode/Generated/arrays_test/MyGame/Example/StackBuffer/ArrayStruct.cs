@@ -20,43 +20,34 @@ public ref struct ArrayStruct : IFlatbufferSpanObject
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new StructSpan(_i, _bb); }
   public ArrayStruct __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 160;
   public float A { get { return __p.bb.Get<float>(__p.bb_pos + 0); } }
   public int B(int j) { return __p.bb.Get<int>(__p.bb_pos + 4 + j * 4); }
   public const int BLength = 15;
-  public ReadOnlySpan<int> GetBBytes() { return __p.bb.GetReadOnlySpan<int>(__p.bb_pos + 4, 15); }
+  public ReadOnlySpan<int> GetBBytes() { return __p.bb.GetReadOnlySpan<int>(__p.bb_pos + 4, BLength); }
   public sbyte C { get { return __p.bb.Get<sbyte>(__p.bb_pos + 64); } }
   public MyGame.Example.StackBuffer.NestedStruct D(int j) { return (new MyGame.Example.StackBuffer.NestedStruct()).__assign(__p.bb_pos + 72 + j * 32, __p.bb); }
+  public const int DLength = 2;
   public int E { get { return __p.bb.Get<int>(__p.bb_pos + 136); } }
   public long F(int j) { return __p.bb.Get<long>(__p.bb_pos + 144 + j * 8); }
   public const int FLength = 2;
-  public ReadOnlySpan<long> GetFBytes() { return __p.bb.GetReadOnlySpan<long>(__p.bb_pos + 144, 2); }
+  public ReadOnlySpan<long> GetFBytes() { return __p.bb.GetReadOnlySpan<long>(__p.bb_pos + 144, FLength); }
 
-  public static Offset<MyGame.Example.StackBuffer.ArrayStruct> CreateArrayStruct(ref FlatSpanBufferBuilder builder, float A, int[] B, sbyte C, int[,] d_A, MyGame.Example.TestEnum[] d_B, MyGame.Example.TestEnum[,] d_C, long[,] d_D, int E, long[] F) {
-    builder.Prep(8, 160);
-    for (int _idx0 = 2; _idx0 > 0; _idx0--) {
-      builder.Put<long>(F[_idx0-1]);
-    }
+  public static Offset<MyGame.Example.StackBuffer.ArrayStruct> CreateArrayStruct(ref FlatSpanBufferBuilder builder, float A, scoped ReadOnlySpan<int> B, sbyte C, scoped ReadOnlySpan<int> d_A, scoped ReadOnlySpan<MyGame.Example.TestEnum> d_B, scoped ReadOnlySpan<MyGame.Example.TestEnum> d_C, scoped ReadOnlySpan<long> d_D, int E, scoped ReadOnlySpan<long> F) {
+    builder.Prep(8, TotalByteLength);
+    builder.Put<long>(F);
     builder.Pad(4);
     builder.Put<int>(E);
-    for (int _idx0 = 2; _idx0 > 0; _idx0--) {
-      builder.Prep(8, 32);
-      for (int _idx1 = 2; _idx1 > 0; _idx1--) {
-        builder.Put<long>(d_D[_idx0-1,_idx1-1]);
-      }
+    for (int _idx0 = DLength; _idx0 > 0; _idx0--) {
+      builder.Put<long>(d_D.Slice((_idx0-1) * NestedStruct.DLength, NestedStruct.DLength));
       builder.Pad(5);
-      for (int _idx1 = 2; _idx1 > 0; _idx1--) {
-        builder.Put<sbyte>((sbyte)d_C[_idx0-1,_idx1-1]);
-      }
-      builder.Put<sbyte>((sbyte)d_B[_idx0-1]);
-      for (int _idx1 = 2; _idx1 > 0; _idx1--) {
-        builder.Put<int>(d_A[_idx0-1,_idx1-1]);
-      }
+      builder.Put<MyGame.Example.TestEnum>(d_C.Slice((_idx0-1) * NestedStruct.CLength, NestedStruct.CLength));
+      builder.Put<sbyte>((sbyte)d_B[(_idx0-1)]);
+      builder.Put<int>(d_A.Slice((_idx0-1) * NestedStruct.ALength, NestedStruct.ALength));
     }
     builder.Pad(7);
     builder.Put<sbyte>(C);
-    for (int _idx0 = 15; _idx0 > 0; _idx0--) {
-      builder.Put<int>(B[_idx0-1]);
-    }
+    builder.Put<int>(B);
     builder.Put<float>(A);
     return new Offset<MyGame.Example.StackBuffer.ArrayStruct>(builder.Offset);
   }
@@ -67,39 +58,30 @@ public ref struct ArrayStruct : IFlatbufferSpanObject
   }
   public void UnPackTo(ArrayStructT _o) {
     _o.A = this.A;
-    _o.B = new int[15];
-    for (var _j = 0; _j < 15; ++_j) { _o.B[_j] = this.B(_j); }
+    if (_o.B == null || _o.B.Length != BLength) _o.B = new int[BLength];
+    this.GetBBytes().CopyTo(_o.B);
     _o.C = this.C;
-    _o.D = new MyGame.Example.NestedStructT[2];
-    for (var _j = 0; _j < 2; ++_j) { _o.D[_j] = this.D(_j).UnPack(); }
+    if (_o.D == null || _o.D.Length != DLength) _o.D = new MyGame.Example.NestedStructT[DLength];
+    for (var _j = 0; _j < DLength; ++_j) { if (_o.D[_j] != null) { this.D(_j).UnPackTo(_o.D[_j]); } else { _o.D[_j] = this.D(_j).UnPack(); } }
     _o.E = this.E;
-    _o.F = new long[2];
-    for (var _j = 0; _j < 2; ++_j) { _o.F[_j] = this.F(_j); }
+    if (_o.F == null || _o.F.Length != FLength) _o.F = new long[FLength];
+    this.GetFBytes().CopyTo(_o.F);
   }
   public static Offset<MyGame.Example.StackBuffer.ArrayStruct> Pack(ref FlatSpanBufferBuilder builder, ArrayStructT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StackBuffer.ArrayStruct>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(ref builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.StackBuffer.ArrayStruct> Pack(ref FlatSpanBufferBuilder builder, ArrayStructT _o, scoped Span<int> lengthyVectorSpace) {
     if (_o == null) return default(Offset<MyGame.Example.StackBuffer.ArrayStruct>);
     var _b = _o.B;
-    var _d_a = new int[2,2];
-    for (var idx0 = 0; idx0 < 2; ++idx0) {for (var idx1 = 0; idx1 < 2; ++idx1) {_d_a[idx0,idx1] = _o.D[idx0].A[idx1];}}
-    var _d_b = new MyGame.Example.TestEnum[2];
-    for (var idx0 = 0; idx0 < 2; ++idx0) {_d_b[idx0] = _o.D[idx0].B;}
-    var _d_c = new MyGame.Example.TestEnum[2,2];
-    for (var idx0 = 0; idx0 < 2; ++idx0) {for (var idx1 = 0; idx1 < 2; ++idx1) {_d_c[idx0,idx1] = _o.D[idx0].C[idx1];}}
-    var _d_d = new long[2,2];
-    for (var idx0 = 0; idx0 < 2; ++idx0) {for (var idx1 = 0; idx1 < 2; ++idx1) {_d_d[idx0,idx1] = _o.D[idx0].D[idx1];}}
+    Span<int> _d_a = stackalloc int[DLength * NestedStruct.ALength];
+    for (var idx0 = 0; idx0 < DLength; ++idx0) {_o.D[idx0].A.AsSpan().CopyTo(_d_a.Slice(idx0 * NestedStruct.ALength, NestedStruct.ALength));}
+    Span<MyGame.Example.TestEnum> _d_b = stackalloc MyGame.Example.TestEnum[DLength];
+    for (var idx0 = 0; idx0 < DLength; ++idx0) {_d_b[idx0] = _o.D[idx0].B;}
+    Span<MyGame.Example.TestEnum> _d_c = stackalloc MyGame.Example.TestEnum[DLength * NestedStruct.CLength];
+    for (var idx0 = 0; idx0 < DLength; ++idx0) {_o.D[idx0].C.AsSpan().CopyTo(_d_c.Slice(idx0 * NestedStruct.CLength, NestedStruct.CLength));}
+    Span<long> _d_d = stackalloc long[DLength * NestedStruct.DLength];
+    for (var idx0 = 0; idx0 < DLength; ++idx0) {_o.D[idx0].D.AsSpan().CopyTo(_d_d.Slice(idx0 * NestedStruct.DLength, NestedStruct.DLength));}
     var _f = _o.F;
     return CreateArrayStruct(
       ref builder,

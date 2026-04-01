@@ -1,0 +1,80 @@
+namespace MyGame.Example;
+
+// Row types used by the matrix structs below.
+struct SmallRow {
+  values:[double:4];
+}
+
+struct BigRow {
+  values:[double:256];
+}
+
+struct FloatRow {
+  values:[float:400];
+}
+
+struct ByteRow {
+  values:[ubyte:2048];
+}
+
+struct BigMatrix {
+  rows:[BigRow:3];
+}
+
+struct SameTypeMatrix {
+  rows1:[BigRow:3];
+  rows2:[BigRow:3];
+}
+
+struct MixedMatrix {
+  small_rows:[SmallRow:3];
+  big_rows:[BigRow:3];
+  big_rows2:[BigRow:3];
+  float_rows:[FloatRow:3];
+  byte_rows:[ByteRow:3];
+}
+
+table BigMatrixTable {
+  data:BigMatrix;
+}
+
+table SameTypeMatrixTable {
+  data:SameTypeMatrix;
+}
+
+table MixedMatrixTable {
+  data:MixedMatrix;
+}
+
+table BigMatrixWithTags {
+  data:BigMatrix;
+  tags:[string];
+}
+
+struct Depth3Leaf {
+  vals:[int:4];
+}
+
+struct Depth3Mid {
+  rows:[Depth3Leaf:3];
+}
+
+struct Depth3Outer {
+  mats:[Depth3Mid:2];
+}
+
+struct Depth4Wrap {
+  cubes:[Depth3Outer:5];
+}
+
+table Depth3Table {
+  a:Depth3Outer;
+}
+
+table Depth4Table {
+  a:Depth4Wrap;
+}
+
+root_type MixedMatrixTable;
+file_identifier "MDIM";
+file_extension "mdim";

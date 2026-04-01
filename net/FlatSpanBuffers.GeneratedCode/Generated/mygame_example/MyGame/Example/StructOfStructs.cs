@@ -20,20 +20,18 @@ public struct StructOfStructs : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public StructOfStructs __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 20;
   public MyGame.Example.Ability A { get { return (new MyGame.Example.Ability()).__assign(__p.bb_pos + 0, __p.bb); } }
   public MyGame.Example.Test B { get { return (new MyGame.Example.Test()).__assign(__p.bb_pos + 8, __p.bb); } }
   public MyGame.Example.Ability C { get { return (new MyGame.Example.Ability()).__assign(__p.bb_pos + 12, __p.bb); } }
 
   public static Offset<MyGame.Example.StructOfStructs> CreateStructOfStructs(FlatBufferBuilder builder, uint a_Id, uint a_Distance, short b_A, sbyte b_B, uint c_Id, uint c_Distance) {
-    builder.Prep(4, 20);
-    builder.Prep(4, 8);
+    builder.Prep(4, TotalByteLength);
     builder.Put<uint>(c_Distance);
     builder.Put<uint>(c_Id);
-    builder.Prep(2, 4);
     builder.Pad(1);
     builder.Put<sbyte>(b_B);
     builder.Put<short>(b_A);
-    builder.Prep(4, 8);
     builder.Put<uint>(a_Distance);
     builder.Put<uint>(a_Id);
     return new Offset<MyGame.Example.StructOfStructs>(builder.Offset);
@@ -53,15 +51,6 @@ public struct StructOfStructs : IFlatbufferObject
   }
   public static Offset<MyGame.Example.StructOfStructs> Pack(FlatBufferBuilder builder, StructOfStructsT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StructOfStructs>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.StructOfStructs> Pack(FlatBufferBuilder builder, StructOfStructsT _o, Span<int> lengthyVectorSpace) {

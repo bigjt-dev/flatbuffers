@@ -274,7 +274,7 @@ public struct Player : IFlatbufferObject
   public static Offset<ComprehensiveTest.Player> Pack(FlatBufferBuilder builder, PlayerT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.Player>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
@@ -290,14 +290,14 @@ public struct Player : IFlatbufferObject
     var _inventory_type = default(VectorOffset);
     if (_o.Inventory != null) {
       var _inventory_type_len = _o.Inventory.Count;
-      Span<ComprehensiveTest.Equipment> __inventory_type = _inventory_type_len <= 4096 ? stackalloc ComprehensiveTest.Equipment[_inventory_type_len] : new ComprehensiveTest.Equipment[_inventory_type_len];
+      Span<ComprehensiveTest.Equipment> __inventory_type = _inventory_type_len <= 1024 ? stackalloc ComprehensiveTest.Equipment[_inventory_type_len] : new ComprehensiveTest.Equipment[_inventory_type_len];
       for (var _j = 0; _j < _inventory_type_len; ++_j) { __inventory_type[_j] = _o.Inventory[_j].Type; }
       _inventory_type = Player.CreateInventoryTypeVectorBlock(builder, __inventory_type);
     }
     var _inventory = default(VectorOffset);
     if (_o.Inventory != null) {
       var _inventory_len = _o.Inventory.Count;
-      Span<int> _inventory_buf = _inventory_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_inventory_len] : lengthyVectorSpace[.._inventory_len];
+      Span<int> _inventory_buf = _inventory_len <= 256 ? stackalloc int[_inventory_len] : lengthyVectorSpace[.._inventory_len];
       for (var _j = 0; _j < _inventory_len; ++_j) { _inventory_buf[_j] = ComprehensiveTest.EquipmentUnion.Pack(builder,  _o.Inventory[_j]); }
       builder.StartVector(4, _inventory_len, 4);
       builder.AddOffsetSpan(_inventory_buf);
@@ -306,7 +306,7 @@ public struct Player : IFlatbufferObject
     var _skills = default(VectorOffset);
     if (_o.Skills != null) {
       var _skills_len = _o.Skills.Count;
-      Span<int> _skills_buf = _skills_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_skills_len] : lengthyVectorSpace[.._skills_len];
+      Span<int> _skills_buf = _skills_len <= 256 ? stackalloc int[_skills_len] : lengthyVectorSpace[.._skills_len];
       for (var _j = 0; _j < _skills_len; ++_j) { _skills_buf[_j] = builder.CreateString(_o.Skills[_j]).Value; }
       builder.StartVector(4, _skills_len, 4);
       builder.AddOffsetSpan(_skills_buf);

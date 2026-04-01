@@ -20,11 +20,12 @@ public ref struct Unused : IFlatbufferSpanObject
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new StructSpan(_i, _bb); }
   public Unused __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 4;
   public int A { get { return __p.bb.Get<int>(__p.bb_pos + 0); } }
   public void MutateA(int a) { __p.bb.Put<int>(__p.bb_pos + 0, a); }
 
   public static Offset<MyGame.OtherNameSpace.StackBuffer.Unused> CreateUnused(ref FlatSpanBufferBuilder builder, int A) {
-    builder.Prep(4, 4);
+    builder.Prep(4, TotalByteLength);
     builder.Put<int>(A);
     return new Offset<MyGame.OtherNameSpace.StackBuffer.Unused>(builder.Offset);
   }
@@ -38,15 +39,6 @@ public ref struct Unused : IFlatbufferSpanObject
   }
   public static Offset<MyGame.OtherNameSpace.StackBuffer.Unused> Pack(ref FlatSpanBufferBuilder builder, UnusedT _o) {
     if (_o == null) return default(Offset<MyGame.OtherNameSpace.StackBuffer.Unused>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(ref builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.OtherNameSpace.StackBuffer.Unused> Pack(ref FlatSpanBufferBuilder builder, UnusedT _o, scoped Span<int> lengthyVectorSpace) {

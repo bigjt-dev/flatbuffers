@@ -20,15 +20,14 @@ public struct FixedStats : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public FixedStats __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 16;
   public int Values(int j) { return __p.bb.Get<int>(__p.bb_pos + 0 + j * 4); }
   public const int ValuesLength = 4;
-  public ReadOnlySpan<int> GetValuesBytes() { return __p.bb.GetReadOnlySpan<int>(__p.bb_pos + 0, 4); }
+  public ReadOnlySpan<int> GetValuesBytes() { return __p.bb.GetReadOnlySpan<int>(__p.bb_pos + 0, ValuesLength); }
 
-  public static Offset<ComprehensiveTest.FixedStats> CreateFixedStats(FlatBufferBuilder builder, int[] Values) {
-    builder.Prep(4, 16);
-    for (int _idx0 = 4; _idx0 > 0; _idx0--) {
-      builder.Put<int>(Values[_idx0-1]);
-    }
+  public static Offset<ComprehensiveTest.FixedStats> CreateFixedStats(FlatBufferBuilder builder, scoped ReadOnlySpan<int> Values) {
+    builder.Prep(4, TotalByteLength);
+    builder.Put<int>(Values);
     return new Offset<ComprehensiveTest.FixedStats>(builder.Offset);
   }
   public FixedStatsT UnPack() {
@@ -37,20 +36,11 @@ public struct FixedStats : IFlatbufferObject
     return _o;
   }
   public void UnPackTo(FixedStatsT _o) {
-    _o.Values = new int[4];
-    for (var _j = 0; _j < 4; ++_j) { _o.Values[_j] = this.Values(_j); }
+    if (_o.Values == null || _o.Values.Length != ValuesLength) _o.Values = new int[ValuesLength];
+    this.GetValuesBytes().CopyTo(_o.Values);
   }
   public static Offset<ComprehensiveTest.FixedStats> Pack(FlatBufferBuilder builder, FixedStatsT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.FixedStats>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<ComprehensiveTest.FixedStats> Pack(FlatBufferBuilder builder, FixedStatsT _o, Span<int> lengthyVectorSpace) {

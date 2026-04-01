@@ -52,7 +52,70 @@ enum class GenerationMode {
 class CSharpSpanBufsGenerator : public BaseGenerator {
   struct FieldArrayLength {
     std::string name;
-    int length;
+    size_t length;
+    std::string name_with_namespace;
+    std::string length_const;
+  };
+
+  // Describes a fixed-struct array field whose flattened span is too large for
+  // stackalloc.
+  struct FixedArrayFieldData {
+    std::string var_name;
+    std::string elem_type;
+    int elem_size;
+    int flat_count;
+    std::string size_expr;
+
+    // function local offset and length var names to output
+    // See: FixedArrayFields::Finalize.
+    std::string offset_var;
+    std::string len_var;
+    std::string len_expr;
+  };
+
+  struct FixedArrayFields {
+    std::vector<FixedArrayFieldData> fields;
+    std::map<std::string, int> type_freq;
+    int dominant_freq = 0;
+
+    // Dominant type is the most frequent elem_type.
+    // Tracking to optimize buffer casting.
+    std::string dominant_elem_type;
+    bool all_fields_same_type = true;
+
+    // Total element count expression for ArrayPool::Rent()
+    std::string total_size_expr;
+
+    bool empty() const { return fields.empty(); }
+
+    void push_back(const FixedArrayFieldData &param) {
+      int freq = ++type_freq[param.elem_type];
+      if (dominant_elem_type.empty() || freq > dominant_freq) {
+        dominant_elem_type = param.elem_type;
+        dominant_freq = freq;
+      }
+      all_fields_same_type = (type_freq.size() == 1);
+      fields.push_back(param);
+    }
+
+    void Finalize() {
+      if (fields.empty()) return;
+
+      for (size_t i = 0; i < fields.size(); ++i) {
+        auto &p = fields[i];
+        p.offset_var = (i == 0) ? "0" : p.var_name + "_offset";
+        p.len_var = p.var_name + "_len";
+        p.len_expr = (p.elem_type == dominant_elem_type)
+                         ? p.size_expr
+                         : p.size_expr + " * sizeof(" + p.elem_type +
+                               ") / sizeof(" + dominant_elem_type + ")";
+      }
+
+      for (size_t i = 0; i < fields.size(); ++i) {
+        if (i > 0) total_size_expr += " + ";
+        total_size_expr += fields[i].len_var;
+      }
+    }
   };
 
   GenerationMode gen_mode_;
@@ -174,10 +237,10 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         if (parser_.opts.one_file) {
           one_file_code += enumcode;
         } else {
-          bool needs_includes = parser_.opts.generate_object_based_api &&
-            enum_def.is_union;
+          bool needs_includes =
+              parser_.opts.generate_object_based_api && enum_def.is_union;
           if (!SaveType(enum_def.name, *enum_def.defined_namespace, enumcode,
-                  needs_includes, parser_.opts))
+                        needs_includes, parser_.opts))
             return false;
         }
       }
@@ -255,6 +318,13 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     return gen_mode_ == GenerationMode::SpanBuffer ? "scoped " : "";
   }
 
+  // Returns the stackalloc byte limit as size_t for comparisons and arithmetic
+  // with sizeof() / SizeOf() without requiring scattered static_casts.
+  size_t StackAllocLimitBytes() const {
+    return static_cast<size_t>(
+        parser_.opts.cs_spanbuf_objapi_stackalloc_limit_bytes);
+  }
+
   std::string TableBaseTypeName() const {
     return gen_mode_ == GenerationMode::SpanBuffer ? "TableSpan" : "Table";
   }
@@ -286,6 +356,42 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       return Name(def);
     }
     return ns + "." + Name(def);
+  }
+
+  FieldArrayLength MakeFieldArrayLength(const FieldDef &field,
+                                        const std::string &owner) const {
+    const auto is_array = IsArray(field.value.type);
+    const size_t elem_count = is_array ? field.value.type.fixed_length : 0;
+    std::string length_const =
+        (elem_count > 0)
+            ? EscapeKeyword(ConvertCase(field.name, Case::kUpperCamel)) +
+                  "Length"
+            : "";
+
+    return {field.name, elem_count, owner, length_const};
+  }
+
+  // Returns a fixed-length constant with a namespace relative to output_struct.
+  std::string FieldLengthConst(const FieldArrayLength &fal,
+                               const StructDef &output_struct) const {
+    const std::string self_qname = BaseNamespacedName(output_struct);
+    if (fal.name_with_namespace == self_qname) {
+      return fal.length_const;
+    }
+
+    // Walk both strings together to find the longest common prefix at a
+    // dot-segment boundary to produce the shortest valid relative reference.
+    const std::string &other = fal.name_with_namespace;
+    size_t common_end = 0;
+    for (size_t i = 0; i < self_qname.size() && i < other.size(); ++i) {
+      if (self_qname[i] != other[i]) break;
+      if (other[i] == '.') common_end = i;
+    }
+
+    if (common_end > 0) {
+      return other.substr(common_end + 1) + "." + fal.length_const;
+    }
+    return other + "." + fal.length_const;
   }
 
   // Returns the fully qualified namespaced name for a struct definition
@@ -704,14 +810,10 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
                       array_cnt);
       } else {
         code += ", ";
-        code += GenTypeBasic(type);
-        if (field.IsScalarOptional()) {
-          code += "?";
-        }
-        if (array_cnt > 0) {
-          code += "[";
-          for (size_t i = 1; i < array_cnt; i++) code += ",";
-          code += "]";
+        if (array_cnt >= 1) {
+          code += "scoped ReadOnlySpan<" + GenTypeBasic(type) + ">";
+        } else {
+          code += GenTypeBasic(type);
         }
         code += " ";
         code += nameprefix;
@@ -723,14 +825,23 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
   // Recusively generate struct construction statements of the form:
   // builder.putType(name);
   // and insert manual padding.
+
+  // outer_dims are fixed_length values for each array dimension.
+  // is_root flags a single 'Prep' call for fixed length structs.
   void GenStructBody(const StructDef &struct_def, std::string *code_ptr,
                      const char *nameprefix, size_t index = 0,
-                     bool in_array = false) const {
+                     bool in_array = false, std::vector<int> outer_dims = {},
+                     bool is_root = true,
+                     const StructDef *output_struct = nullptr) const {
+    const StructDef &out =
+        (output_struct != nullptr) ? *output_struct : struct_def;
     std::string &code = *code_ptr;
     std::string indent((index + 1) * 2, ' ');
-    code += indent + "  builder.Prep(";
-    code += NumToString(struct_def.minalign) + ", ";
-    code += NumToString(struct_def.bytesize) + ");\n";
+    if (is_root) {
+      code += indent + "  builder.Prep(";
+      code += NumToString(struct_def.minalign) + ", ";
+      code += "TotalByteLength);\n";
+    }
     for (auto it = struct_def.fields.vec.rbegin();
          it != struct_def.fields.vec.rend(); ++it) {
       auto &field = **it;
@@ -742,40 +853,77 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       if (IsStruct(field_type)) {
         GenStructBody(*field_type.struct_def, code_ptr,
                       (nameprefix + (field.name + "_")).c_str(), index,
-                      in_array);
+                      in_array, outer_dims, false, &out);
       } else {
         const auto &type =
             IsArray(field_type) ? field_type.VectorType() : field_type;
         const auto index_var = "_idx" + NumToString(index);
-        if (IsArray(field_type)) {
+        // For IsArray + non-struct scalars, always Slice+Put
+        const bool use_span_put = IsArray(field_type) && !IsStruct(type);
+        if (IsArray(field_type) && !use_span_put) {
+          auto tmp_bound =
+              MakeFieldArrayLength(field, BaseNamespacedName(struct_def));
           code += indent + "  for (int " + index_var + " = ";
-          code += NumToString(field_type.fixed_length);
+          code += FieldLengthConst(tmp_bound, out);
           code += "; " + index_var + " > 0; " + index_var + "--) {\n";
           in_array = true;
         }
         if (IsStruct(type)) {
+          auto next_outer = outer_dims;
+          next_outer.push_back(static_cast<int>(field_type.fixed_length));
           GenStructBody(*field_type.struct_def, code_ptr,
                         (nameprefix + (field.name + "_")).c_str(), index + 1,
-                        in_array);
+                        in_array, next_outer, false, &out);
+        } else if (use_span_put) {
+          // Compute the slice into the param.
+          auto argname = nameprefix + Name(field);
+          int inner_len = static_cast<int>(field_type.fixed_length);
+          auto tmp_inner =
+              MakeFieldArrayLength(field, BaseNamespacedName(struct_def));
+          auto inner_const = FieldLengthConst(tmp_inner, out);
+          code += indent + "  builder.Put<" + GenTypeBasic(type) + ">(";
+          code += argname;
+          if (index > 0) {
+            // Build the flat offset constant expression.
+            // outer_dims[0..index-1]
+            std::string offset_expr;
+            for (size_t d = 0; d < static_cast<size_t>(index); d++) {
+              int stride = inner_len;
+              for (size_t s = d + 1; s < static_cast<size_t>(index); s++)
+                stride *= outer_dims[s];
+              if (!offset_expr.empty()) offset_expr += " + ";
+              if (d + 1 == static_cast<size_t>(index)) {
+                offset_expr +=
+                    "(_idx" + NumToString(d) + "-1) * " + inner_const;
+              } else {
+                offset_expr +=
+                    "(_idx" + NumToString(d) + "-1) * " + NumToString(stride);
+              }
+            }
+            code += ".Slice(" + offset_expr + ", " + inner_const + ")";
+          }
+          code += ");\n";
         } else {
-          code += IsArray(field_type) ? "  " : "";
+          // Plain scalar field (not itself an array).
           code += indent + "  builder.Put";
           code += GenMethod(type) + "(";
           code += SourceCast(type);
-          auto argname = nameprefix + Name(field);
-          code += argname;
-          size_t array_cnt = index + (IsArray(field_type) ? 1 : 0);
-          if (array_cnt > 0) {
-            code += "[";
-            for (size_t i = 0; in_array && i < array_cnt; i++) {
-              code += "_idx" + NumToString(i) + "-1";
-              if (i != (array_cnt - 1)) code += ",";
+          code += nameprefix + Name(field);
+          if (index > 0) {
+            std::string idx_expr;
+            for (size_t d = 0; d < static_cast<size_t>(index); d++) {
+              int stride = 1;
+              for (size_t s = d + 1; s < static_cast<size_t>(index); s++)
+                stride *= outer_dims[s];
+              if (!idx_expr.empty()) idx_expr += " + ";
+              idx_expr += "(_idx" + NumToString(d) + "-1)";
+              if (stride > 1) idx_expr += " * " + NumToString(stride);
             }
-            code += "]";
+            code += "[" + idx_expr + "]";
           }
           code += ");\n";
         }
-        if (IsArray(field_type)) {
+        if (IsArray(field_type) && !use_span_put) {
           code += indent + "  }\n";
         }
       }
@@ -1128,6 +1276,10 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     code += "  public " + struct_def.name + " __assign(int _i, " +
             BufferTypeName() + " _bb) ";
     code += "{ __init(_i, _bb); return this; }\n\n";
+    if (struct_def.fixed) {
+      code += "  public const int TotalByteLength = " +
+              NumToString(struct_def.bytesize) + ";\n";
+    }
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       auto &field = **it;
@@ -1723,6 +1875,19 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         }
       }
 
+      // Generate Length constant for struct-typed fixed arrays in structs.
+      if (IsArray(field.value.type) && struct_def.fixed &&
+          field.value.type.VectorType().base_type == BASE_TYPE_STRUCT) {
+        auto camel_name = Name(field);
+        if (camel_name == struct_def.name) {
+          camel_name += "_";
+        }
+        code += "  public const int " + camel_name;
+        code += "Length = ";
+        code += NumToString(field.value.type.fixed_length);
+        code += ";\n";
+      }
+
       // Generate Length property and ByteBuffer accessor for arrays in structs.
       if (IsArray(field.value.type) && struct_def.fixed &&
           IsScalar(field.value.type.VectorType().base_type)) {
@@ -1730,10 +1895,11 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         if (camel_name == struct_def.name) {
           camel_name += "_";
         }
+        const auto length_name = camel_name + "Length";
 
         // Generate Length constant
-        code += "  public const int " + camel_name;
-        code += "Length = ";
+        code += "  public const int " + length_name;
+        code += " = ";
         code += NumToString(field.value.type.fixed_length);
         code += ";\n";
 
@@ -1747,7 +1913,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
           code += "__p.bb.ToReadOnlySpan(__p.bb_pos + ";
           code += NumToString(field.value.offset);
           code += ", ";
-          code += NumToString(field.value.type.fixed_length);
+          code += length_name;
           code += ")";
         } else {
           // For other types, we need to cast the byte span
@@ -1756,7 +1922,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
           code += ">(__p.bb_pos + ";
           code += NumToString(field.value.offset);
           code += ", ";
-          code += NumToString(field.value.type.fixed_length);
+          code += length_name;
           code += ")";
         }
         code += "; }\n";
@@ -1771,7 +1937,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
             code += "__p.bb.ToSpan(__p.bb_pos + ";
             code += NumToString(field.value.offset);
             code += ", ";
-            code += NumToString(field.value.type.fixed_length);
+            code += length_name;
             code += ")";
           } else {
             code +=
@@ -1779,7 +1945,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
             code += ">(__p.bb_pos + ";
             code += NumToString(field.value.offset);
             code += ", ";
-            code += NumToString(field.value.type.fixed_length);
+            code += length_name;
             code += ")";
           }
           code += "; } }\n";
@@ -2619,16 +2785,36 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         }
         case BASE_TYPE_ARRAY: {
           auto type_name = GenTypeGet_ObjectAPI(field.value.type, opts);
-          auto length_str = NumToString(field.value.type.fixed_length);
-          auto unpack_method = field.value.type.struct_def == nullptr ? ""
-                               : field.value.type.struct_def->fixed
-                                   ? ".UnPack()"
-                                   : "?.UnPack()";
-          code += start + "new " + type_name.substr(0, type_name.length() - 1) +
-                  length_str + "];\n";
-          code += "    for (var _j = 0; _j < " + length_str + "; ++_j) { _o." +
-                  camel_name + "[_j] = this." + camel_name + "(_j)" +
-                  unpack_method + "; }\n";
+          auto length_str = camel_name + "Length";
+          auto array_new_expr = "new " +
+                                type_name.substr(0, type_name.length() - 1) +
+                                length_str + "]";
+          // Reuse existing array if already the right length.
+          code += "    if (_o." + camel_name + " == null || _o." + camel_name +
+                  ".Length != " + length_str + ") _o." + camel_name + " = " +
+                  array_new_expr + ";\n";
+          if (field.value.type.struct_def == nullptr &&
+              IsScalar(field.value.type.VectorType().base_type)) {
+            code += "    this.Get" + camel_name + "Bytes().CopyTo(_o." +
+                    camel_name + ");\n";
+          } else if (field.value.type.struct_def == nullptr) {
+            // Non-blittable scalar (bool, etc.): overwrite elements in place.
+            code += "    for (var _j = 0; _j < " + length_str +
+                    "; ++_j) { _o." + camel_name + "[_j] = this." + camel_name +
+                    "(_j); }\n";
+          } else if (field.value.type.struct_def->fixed) {
+            // Fixed struct element: reuse existing element object via UnPackTo.
+            code += "    for (var _j = 0; _j < " + length_str + "; ++_j) { ";
+            code += "if (_o." + camel_name + "[_j] != null) { this." +
+                    camel_name + "(_j).UnPackTo(_o." + camel_name +
+                    "[_j]); } else { _o." + camel_name + "[_j] = this." +
+                    camel_name + "(_j).UnPack(); } }\n";
+          } else {
+            // Non-fixed struct/table (nullable access).
+            code += "    for (var _j = 0; _j < " + length_str +
+                    "; ++_j) { _o." + camel_name + "[_j] = this." + camel_name +
+                    "(_j)?.UnPack(); }\n";
+          }
           break;
         }
         case BASE_TYPE_VECTOR:
@@ -2805,36 +2991,100 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     }
     code += "  }\n";
     // Pack()
+    const FixedArrayFields large_params =
+        GetLargeFixedStructArrays_ObjectAPI(struct_def);
+    const bool needsFixedArrayPool = struct_def.fixed && !large_params.empty();
+    const bool needsVectorArrayPool =
+        NeedsVectorArrayPool_ObjectAPI(struct_def);
     code += "  public static " + GenOffsetType(struct_def) + " Pack(" +
             BuilderParam() + ", " + struct_name + " _o) {\n";
     code += "    if (_o == null) return default(" + GenOffsetType(struct_def) +
             ");\n";
-    code += "    var _maxVecLen = _o.GetMaxVectorLength();\n";
-    code +=
-        "    if (_maxVecLen > "
-        "ObjectApiUtil."
-        "MaxOffsetsStackallocLength) {\n";
-    code +=
-        "      var _pooledArr = "
-        "ArrayPool<int>.Shared.Rent(_maxVecLen);\n";
-    code += "      try {\n";
-    code += "        return Pack(" + BuilderArg() +
-            ", _o, _pooledArr.AsSpan(0, _maxVecLen));\n";
-    code += "      } finally {\n";
-    code +=
-        "        "
-        "ArrayPool<int>.Shared.Return(_pooledArr);\n";
-    code += "      }\n";
-    code += "    }\n";
-    code += "    return Pack(" + BuilderArg() + ", _o, Span<int>.Empty);\n";
-    code += "  }\n";
-    // Overload to Pack, adds lengthyVectorSpace as alternative to the
-    // stackallocs if the vector exceeds the stackalloc threshold.
-    code += "  public static " + GenOffsetType(struct_def) + " Pack(" +
-            BuilderParam() + ", " + struct_name + " _o, " + ScopedPrefix() +
-            "Span<int> lengthyVectorSpace) {\n";
-    code += "    if (_o == null) return default(" + GenOffsetType(struct_def) +
-            ");\n";
+    if (needsFixedArrayPool) {
+      // Allocate a single block from the array pool for all large fields.
+      // Layout const lengths and offsets into the rented block.
+      for (const auto &p : large_params.fields) {
+        code += "    const int " + p.len_var + " = " + p.len_expr + ";\n";
+      }
+      if (large_params.fields.size() > 1) {
+        const auto &first = large_params.fields[0];
+        const auto &second = large_params.fields[1];
+        code += "    const int " + second.offset_var + " = " + first.len_var +
+                ";\n";
+        for (size_t i = 2; i < large_params.fields.size(); ++i) {
+          const auto &p = large_params.fields[i];
+          const auto &prev = large_params.fields[i - 1];
+          code += "    const int " + p.offset_var + " = " + prev.offset_var +
+                  " + " + prev.len_var + ";\n";
+        }
+      }
+      code += "    var _pooledArr = ArrayPool<" +
+              large_params.dominant_elem_type + ">.Shared.Rent(" +
+              large_params.total_size_expr + ");\n";
+      code += "    try {\n";
+      code += "      return Pack(" + BuilderArg() + ", _o";
+      for (const auto &p : large_params.fields) {
+        if (p.elem_type == large_params.dominant_elem_type) {
+          code += ",\n        _pooledArr.AsSpan(" + p.offset_var + ", " +
+                  p.len_var + ")";
+        } else {
+          code += ",\n        MemoryMarshal.Cast<" +
+                  large_params.dominant_elem_type + ", " + p.elem_type +
+                  ">(_pooledArr.AsSpan(" + p.offset_var + ", " + p.len_var +
+                  ")).Slice(0, " + p.size_expr + ")";
+        }
+      }
+      code += ");\n";
+      code += "    } finally {\n";
+      code += "      ArrayPool<" + large_params.dominant_elem_type +
+              ">.Shared.Return(_pooledArr);\n";
+      code += "    }\n";
+      code += "  }\n";
+      code += "  public static " + GenOffsetType(struct_def) + " Pack(" +
+              BuilderParam() + ", " + struct_name + " _o";
+      for (const auto &p : large_params.fields) {
+        code +=
+            ", " + ScopedPrefix() + "Span<" + p.elem_type + "> " + p.var_name;
+      }
+      code += ") {\n";
+      code += "    if (_o == null) return default(" +
+              GenOffsetType(struct_def) + ");\n";
+    } else if (needsVectorArrayPool) {
+      code += "    var _maxVecLen = _o.GetMaxVectorLength();\n";
+      const auto max_offsets = StackAllocLimitBytes() / sizeof(int);
+      code += "    if (_maxVecLen > " + NumToString(max_offsets) + ") {\n";
+      code +=
+          "      var _pooledArr = "
+          "ArrayPool<int>.Shared.Rent(_maxVecLen);\n";
+      code += "      try {\n";
+      code += "        return Pack(" + BuilderArg() +
+              ", _o, _pooledArr.AsSpan(0, _maxVecLen));\n";
+      code += "      } finally {\n";
+      code +=
+          "        "
+          "ArrayPool<int>.Shared.Return(_pooledArr);\n";
+      code += "      }\n";
+      code += "    }\n";
+      code += "    return Pack(" + BuilderArg() + ", _o, Span<int>.Empty);\n";
+      code += "  }\n";
+      // Overload to Pack, adds lengthyVectorSpace as alternative to the
+      // stackallocs if the vector exceeds the stackalloc threshold.
+      code += "  public static " + GenOffsetType(struct_def) + " Pack(" +
+              BuilderParam() + ", " + struct_name + " _o, " + ScopedPrefix() +
+              "Span<int> lengthyVectorSpace) {\n";
+      code += "    if (_o == null) return default(" +
+              GenOffsetType(struct_def) + ");\n";
+    } else {
+      // No vectors, don't include pool code.
+      code += "    return Pack(" + BuilderArg() + ", _o, Span<int>.Empty);\n";
+      code += "  }\n";
+      code += "  public static " + GenOffsetType(struct_def) + " Pack(" +
+              BuilderParam() + ", " + struct_name + " _o, " + ScopedPrefix() +
+              "Span<int> lengthyVectorSpace) {\n";
+      code += "    if (_o == null) return default(" +
+              GenOffsetType(struct_def) + ");\n";
+    }
+
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       auto &field = **it;
@@ -2855,14 +3105,11 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
                     BuilderArg() + ", _o." + camel_name +
                     ", lengthyVectorSpace);\n";
           } else if (struct_def.fixed && struct_has_create) {
-            std::vector<FieldArrayLength> array_lengths;
-            FieldArrayLength tmp_array_length = {
-                field.name,
-                field.value.type.fixed_length,
-            };
-            array_lengths.push_back(tmp_array_length);
+            std::vector<FieldArrayLength> nested_fields;
+            nested_fields.push_back(
+                MakeFieldArrayLength(field, BaseNamespacedName(struct_def)));
             GenStructPackDecl_ObjectAPI(*field.value.type.struct_def, code_ptr,
-                                        array_lengths);
+                                        nested_fields, struct_def);
           }
           break;
         }
@@ -2933,12 +3180,13 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
                     (field.value.type.element == BASE_TYPE_UNION);
                 std::string value_suffix = is_union_element ? "" : ".Value";
                 std::string buf_name = "_" + field.name + "_buf";
+                const auto max_stack_offsets =
+                    StackAllocLimitBytes() / sizeof(int);
                 code += "      Span<int> " + buf_name + " = _" + field.name +
-                        "_len <= "
-                        "ObjectApiUtil.MaxOffsetsStackallocLength"
-                        " ? stackalloc int[_" +
-                        field.name + "_len] : lengthyVectorSpace[.._" +
-                        field.name + "_len];\n";
+                        "_len <= " + NumToString(max_stack_offsets) +
+                        " ? stackalloc int[_" + field.name +
+                        "_len] : lengthyVectorSpace[.._" + field.name +
+                        "_len];\n";
                 code += "      for (var _j = 0; _j < _" + field.name +
                         "_len; ++_j) { " + buf_name + "[_j] = " + to_array +
                         value_suffix + "; }\n";
@@ -2949,9 +3197,11 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
               } else {
                 // UTYPE (byte-backed enum scalars): per-site stackalloc.
                 code += "      Span<" + array_type + "> " + array_name +
-                        " = _" + field.name + "_len <= 4096 ? stackalloc " +
-                        array_type + "[_" + field.name + "_len] : new " +
-                        array_type + "[_" + field.name + "_len];\n";
+                        " = _" + field.name +
+                        "_len <= " + NumToString(StackAllocLimitBytes()) +
+                        " ? stackalloc " + array_type + "[_" + field.name +
+                        "_len] : new " + array_type + "[_" + field.name +
+                        "_len];\n";
                 code += "      for (var _j = 0; _j < _" + field.name +
                         "_len; ++_j) { ";
                 code += array_name + "[_j] = " + to_array + "; }\n";
@@ -2986,14 +3236,11 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         }
         case BASE_TYPE_ARRAY: {
           if (field.value.type.struct_def != nullptr) {
-            std::vector<FieldArrayLength> array_lengths;
-            FieldArrayLength tmp_array_length = {
-                field.name,
-                field.value.type.fixed_length,
-            };
-            array_lengths.push_back(tmp_array_length);
+            std::vector<FieldArrayLength> nested_fields;
+            nested_fields.push_back(
+                MakeFieldArrayLength(field, BaseNamespacedName(struct_def)));
             GenStructPackDecl_ObjectAPI(*field.value.type.struct_def, code_ptr,
-                                        array_lengths);
+                                        nested_fields, struct_def);
           } else {
             code += "    var _" + field.name + " = _o." + camel_name + ";\n";
           }
@@ -3031,9 +3278,9 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         switch (field.value.type.base_type) {
           case BASE_TYPE_STRUCT: {
             if (struct_def.fixed) {
-              GenStructPackCall_ObjectAPI(*field.value.type.struct_def,
-                                          code_ptr,
-                                          "      _" + field.name + "_");
+              GenStructPackCall_ObjectAPI(
+                  *field.value.type.struct_def, code_ptr,
+                  "      _" + field.name + "_", large_params);
             } else {
               code += ",\n";
               if (field.value.type.struct_def->fixed) {
@@ -3050,9 +3297,9 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
           }
           case BASE_TYPE_ARRAY: {
             if (field.value.type.struct_def != nullptr) {
-              GenStructPackCall_ObjectAPI(*field.value.type.struct_def,
-                                          code_ptr,
-                                          "      _" + field.name + "_");
+              GenStructPackCall_ObjectAPI(
+                  *field.value.type.struct_def, code_ptr,
+                  "      _" + field.name + "_", large_params);
             } else {
               code += ",\n";
               code += "      _" + field.name;
@@ -3128,9 +3375,120 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
     code += "  }\n";
   }
 
-  void GenStructPackDecl_ObjectAPI(
-      const StructDef &struct_def, std::string *code_ptr,
-      std::vector<FieldArrayLength> &array_lengths) const {
+  // Returns true if any field can cause GetMaxVectorLength() to return a
+  // non-zero value. Only vectors with offset elements apply.
+
+  bool NeedsVectorArrayPool_ObjectAPI(const StructDef &struct_def) const {
+    if (struct_def.fixed) return false;
+
+    for (auto itp = struct_def.fields.vec.begin();
+         itp != struct_def.fields.vec.end(); ++itp) {
+      auto &fp = **itp;
+      if (fp.deprecated) continue;
+      auto bt = fp.value.type.base_type;
+      if (bt == BASE_TYPE_VECTOR) {
+        auto elem = fp.value.type.element;
+        if (elem == BASE_TYPE_STRING || elem == BASE_TYPE_UNION ||
+            (elem == BASE_TYPE_STRUCT && fp.value.type.struct_def &&
+             !fp.value.type.struct_def->fixed)) {
+          return true;
+        }
+      }
+      if (bt == BASE_TYPE_STRUCT && fp.value.type.struct_def &&
+          !fp.value.type.struct_def->fixed) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Get all array parameters for fixed structs whose nested
+  // struct-array byte length exceed the stackalloc threshold.
+  FixedArrayFields GetLargeFixedStructArrays_ObjectAPI(
+      const StructDef &struct_def) const {
+    FixedArrayFields large_params;
+    if (!struct_def.fixed) return large_params;
+
+    for (auto itp = struct_def.fields.vec.begin();
+         itp != struct_def.fields.vec.end(); ++itp) {
+      auto &fp = **itp;
+      if (fp.deprecated) continue;
+      bool is_array_struct = (fp.value.type.base_type == BASE_TYPE_ARRAY &&
+                              fp.value.type.struct_def != nullptr);
+      bool is_inline_struct = (fp.value.type.base_type == BASE_TYPE_STRUCT &&
+                               fp.value.type.struct_def != nullptr &&
+                               fp.value.type.struct_def->fixed);
+      if (is_array_struct || is_inline_struct) {
+        std::vector<FieldArrayLength> nested_fields;
+        nested_fields.push_back(
+            MakeFieldArrayLength(fp, BaseNamespacedName(struct_def)));
+        AccumulateLargeStructArrays_ObjectAPI(
+            *fp.value.type.struct_def, nested_fields, large_params, struct_def);
+      }
+    }
+    large_params.Finalize();
+    return large_params;
+  }
+
+  // Recurse to traverse and accumulate the large, fixed fields whos byte size
+  // exceeds the stackalloc threshold.
+  void AccumulateLargeStructArrays_ObjectAPI(
+      const StructDef &struct_def, std::vector<FieldArrayLength> &nested_fields,
+      FixedArrayFields &result, const StructDef &output_struct) const {
+    for (auto it = struct_def.fields.vec.begin();
+         it != struct_def.fields.vec.end(); ++it) {
+      auto &field = **it;
+      if (field.deprecated) continue;
+      auto is_array = IsArray(field.value.type);
+      const auto &field_type =
+          is_array ? field.value.type.VectorType() : field.value.type;
+
+      auto fal = MakeFieldArrayLength(field, BaseNamespacedName(struct_def));
+      nested_fields.push_back(fal);
+
+      if (field_type.struct_def != nullptr) {
+        AccumulateLargeStructArrays_ObjectAPI(
+            *field_type.struct_def, nested_fields, result, output_struct);
+      } else {
+        size_t flat_count = 1;
+        size_t array_dim_count = 0;
+        std::string size_expr;
+        for (size_t i = 0; i < nested_fields.size(); ++i) {
+          if (nested_fields[i].length == 0) continue;
+          flat_count *= nested_fields[i].length;
+          if (array_dim_count > 0) size_expr += " * ";
+          size_expr += FieldLengthConst(nested_fields[i], output_struct);
+          array_dim_count++;
+        }
+        if (array_dim_count > 0) {
+          size_t byte_size = flat_count * SizeOf(field_type.base_type);
+
+          if (byte_size > StackAllocLimitBytes()) {
+            std::string var_name;
+            for (size_t i = 0; i < nested_fields.size(); ++i)
+              var_name += "_" + nested_fields[i].name;
+            auto elem_type = GenTypeBasic(field_type);
+            FixedArrayFieldData fafd = {
+                var_name,
+                elem_type,
+                static_cast<int>(SizeOf(field_type.base_type)),
+                static_cast<int>(flat_count),
+                size_expr,
+                "",
+                "",
+                ""};
+            result.push_back(fafd);
+          }
+        }
+      }
+      nested_fields.pop_back();
+    }
+  }
+
+  void GenStructPackDecl_ObjectAPI(const StructDef &struct_def,
+                                   std::string *code_ptr,
+                                   std::vector<FieldArrayLength> &array_lengths,
+                                   const StructDef &output_struct) const {
     auto &code = *code_ptr;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -3138,14 +3496,12 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       auto is_array = IsArray(field.value.type);
       const auto &field_type =
           is_array ? field.value.type.VectorType() : field.value.type;
-      FieldArrayLength tmp_array_length = {
-          field.name,
-          field_type.fixed_length,
-      };
+      auto tmp_array_length =
+          MakeFieldArrayLength(field, BaseNamespacedName(struct_def));
       array_lengths.push_back(tmp_array_length);
       if (field_type.struct_def != nullptr) {
         GenStructPackDecl_ObjectAPI(*field_type.struct_def, code_ptr,
-                                    array_lengths);
+                                    array_lengths, output_struct);
       } else {
         std::vector<FieldArrayLength> array_only_lengths;
         for (size_t i = 0; i < array_lengths.size(); ++i) {
@@ -3157,44 +3513,84 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
         for (size_t i = 0; i < array_lengths.size(); ++i) {
           name += "_" + array_lengths[i].name;
         }
-        code += "    var " + name + " = ";
-        if (array_only_lengths.size() > 0) {
-          code += "new " + GenTypeBasic(field_type) + "[";
-          for (size_t i = 0; i < array_only_lengths.size(); ++i) {
-            if (i != 0) {
-              code += ",";
-            }
-            code += NumToString(array_only_lengths[i].length);
+        // 1D fixed array span
+        if (array_only_lengths.size() == 1) {
+          auto elem_type = GenTypeBasic(field_type);
+          auto dim0 = array_only_lengths[0].length;
+          size_t byte_size_1d = dim0 * SizeOf(field_type.base_type);
+          const auto dim0_const =
+              FieldLengthConst(array_only_lengths[0], output_struct);
+          if (byte_size_1d <= StackAllocLimitBytes()) {
+            code += "    Span<" + elem_type + "> " + name + " = stackalloc " +
+                    elem_type + "[" + dim0_const + "];\n";
           }
-          code += "];\n";
           code += "    ";
-          // initialize array
-          for (size_t i = 0; i < array_only_lengths.size(); ++i) {
-            auto idx = "idx" + NumToString(i);
-            code += "for (var " + idx + " = 0; " + idx + " < " +
-                    NumToString(array_only_lengths[i].length) + "; ++" + idx +
-                    ") {";
-          }
-          for (size_t i = 0; i < array_only_lengths.size(); ++i) {
-            auto idx = "idx" + NumToString(i);
-            if (i == 0) {
-              code += name + "[" + idx;
-            } else {
-              code += "," + idx;
-            }
-          }
-          code += "] = _o";
+          code += "for (var idx0 = 0; idx0 < " + dim0_const + "; ++idx0) {";
+          code += name + "[idx0] = _o";
           for (size_t i = 0, j = 0; i < array_lengths.size(); ++i) {
             code += "." + ConvertCase(array_lengths[i].name, Case::kUpperCamel);
-            if (array_lengths[i].length <= 0) continue;
+            if (array_lengths[i].length == 0) continue;
             code += "[idx" + NumToString(j++) + "]";
           }
-          code += ";";
-          for (size_t i = 0; i < array_only_lengths.size(); ++i) {
-            code += "}";
+          code += ";}";
+        }
+        // N-Dim flattened Span<T>
+        else if (array_only_lengths.size() >= 2) {
+          auto ndim = array_only_lengths.size();
+          auto elem_type = GenTypeBasic(field_type);
+          size_t flat_size = 1;
+          for (size_t i = 0; i < ndim; ++i)
+            flat_size *= array_only_lengths[i].length;
+          size_t byte_size_nd = flat_size * SizeOf(field_type.base_type);
+          if (byte_size_nd <= StackAllocLimitBytes()) {
+            std::string flat_size_expr;
+            for (size_t i = 0; i < ndim; ++i) {
+              if (!flat_size_expr.empty()) flat_size_expr += " * ";
+              flat_size_expr +=
+                  FieldLengthConst(array_only_lengths[i], output_struct);
+            }
+            code += "    Span<" + elem_type + "> " + name + " = stackalloc " +
+                    elem_type + "[" + flat_size_expr + "];\n";
           }
-        } else {
+          // Use Span CopyTo for innermost outer for-loops
+          size_t inner_len = array_only_lengths[ndim - 1].length;
+          auto inner_len_const =
+              FieldLengthConst(array_only_lengths[ndim - 1], output_struct);
+          code += "    ";
+          for (size_t i = 0; i < ndim - 1; ++i) {
+            auto idx = "idx" + NumToString(i);
+            code += "for (var " + idx + " = 0; " + idx + " < " +
+                    FieldLengthConst(array_only_lengths[i], output_struct) +
+                    "; ++" + idx + ") {";
+          }
           code += "_o";
+          // using array_lengths to output the non-array fields
+          // enabling use of CopyTo on the field name.
+          for (size_t i = 0, j = 0; i < array_lengths.size(); ++i) {
+            code += "." + ConvertCase(array_lengths[i].name, Case::kUpperCamel);
+            if (array_lengths[i].length == 0) continue;
+            if (j < ndim - 1) code += "[idx" + NumToString(j) + "]";
+            ++j;
+          }
+          // Compute the flat offset of the innermost row
+          std::string flat_offset;
+          for (size_t i = 0; i < ndim - 1; ++i) {
+            size_t stride = inner_len;
+            for (size_t s = i + 1; s < ndim - 1; ++s)
+              stride *= array_only_lengths[s].length;
+            if (!flat_offset.empty()) flat_offset += " + ";
+            if (i == ndim - 2) {
+              flat_offset += "idx" + NumToString(i) + " * " + inner_len_const;
+            } else {
+              flat_offset +=
+                  "idx" + NumToString(i) + " * " + NumToString(stride);
+            }
+          }
+          code += ".AsSpan().CopyTo(" + name + ".Slice(" + flat_offset + ", " +
+                  inner_len_const + "));";
+          for (size_t i = 0; i < ndim - 1; ++i) code += "}";
+        } else {
+          code += "    var " + name + " = _o";
           for (size_t i = 0; i < array_lengths.size(); ++i) {
             code += "." + ConvertCase(array_lengths[i].name, Case::kUpperCamel);
           }
@@ -3207,8 +3603,8 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
   }
 
   void GenStructPackCall_ObjectAPI(const StructDef &struct_def,
-                                   std::string *code_ptr,
-                                   std::string prefix) const {
+                                   std::string *code_ptr, std::string prefix,
+                                   const FixedArrayFields &large_params) const {
     auto &code = *code_ptr;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -3216,7 +3612,7 @@ class CSharpSpanBufsGenerator : public BaseGenerator {
       const auto &field_type = field.value.type;
       if (field_type.struct_def != nullptr) {
         GenStructPackCall_ObjectAPI(*field_type.struct_def, code_ptr,
-                                    prefix + field.name + "_");
+                                    prefix + field.name + "_", large_params);
       } else {
         code += ",\n";
         code += prefix + field.name;

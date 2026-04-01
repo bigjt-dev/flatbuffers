@@ -20,11 +20,12 @@ public struct Vec2 : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public Vec2 __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 8;
   public float X { get { return __p.bb.Get<float>(__p.bb_pos + 0); } }
   public float Y { get { return __p.bb.Get<float>(__p.bb_pos + 4); } }
 
   public static Offset<JsonTest.Vec2> CreateVec2(FlatBufferBuilder builder, float X, float Y) {
-    builder.Prep(4, 8);
+    builder.Prep(4, TotalByteLength);
     builder.Put<float>(Y);
     builder.Put<float>(X);
     return new Offset<JsonTest.Vec2>(builder.Offset);
@@ -40,15 +41,6 @@ public struct Vec2 : IFlatbufferObject
   }
   public static Offset<JsonTest.Vec2> Pack(FlatBufferBuilder builder, Vec2T _o) {
     if (_o == null) return default(Offset<JsonTest.Vec2>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<JsonTest.Vec2> Pack(FlatBufferBuilder builder, Vec2T _o, Span<int> lengthyVectorSpace) {

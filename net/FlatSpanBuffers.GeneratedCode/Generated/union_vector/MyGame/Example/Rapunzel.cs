@@ -20,10 +20,11 @@ public struct Rapunzel : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public Rapunzel __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 4;
   public int HairLength { get { return __p.bb.Get<int>(__p.bb_pos + 0); } }
 
   public static Offset<MyGame.Example.Rapunzel> CreateRapunzel(FlatBufferBuilder builder, int HairLength) {
-    builder.Prep(4, 4);
+    builder.Prep(4, TotalByteLength);
     builder.Put<int>(HairLength);
     return new Offset<MyGame.Example.Rapunzel>(builder.Offset);
   }
@@ -37,15 +38,6 @@ public struct Rapunzel : IFlatbufferObject
   }
   public static Offset<MyGame.Example.Rapunzel> Pack(FlatBufferBuilder builder, RapunzelT _o) {
     if (_o == null) return default(Offset<MyGame.Example.Rapunzel>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.Rapunzel> Pack(FlatBufferBuilder builder, RapunzelT _o, Span<int> lengthyVectorSpace) {

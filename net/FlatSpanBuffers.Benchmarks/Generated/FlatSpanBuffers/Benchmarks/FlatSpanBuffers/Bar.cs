@@ -20,6 +20,7 @@ public struct Bar : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public Bar __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 32;
   public Benchmarks.FlatSpanBuffers.Foo Parent { get { return (new Benchmarks.FlatSpanBuffers.Foo()).__assign(__p.bb_pos + 0, __p.bb); } }
   public int Time { get { return __p.bb.Get<int>(__p.bb_pos + 16); } }
   public void MutateTime(int time) { __p.bb.Put<int>(__p.bb_pos + 16, time); }
@@ -29,12 +30,11 @@ public struct Bar : IFlatbufferObject
   public void MutateSize(ushort size) { __p.bb.Put<ushort>(__p.bb_pos + 24, size); }
 
   public static Offset<Benchmarks.FlatSpanBuffers.Bar> CreateBar(FlatBufferBuilder builder, ulong parent_Id, short parent_Count, sbyte parent_Prefix, uint parent_Length, int Time, float Ratio, ushort Size) {
-    builder.Prep(8, 32);
+    builder.Prep(8, TotalByteLength);
     builder.Pad(6);
     builder.Put<ushort>(Size);
     builder.Put<float>(Ratio);
     builder.Put<int>(Time);
-    builder.Prep(8, 16);
     builder.Put<uint>(parent_Length);
     builder.Pad(1);
     builder.Put<sbyte>(parent_Prefix);
@@ -56,15 +56,6 @@ public struct Bar : IFlatbufferObject
   }
   public static Offset<Benchmarks.FlatSpanBuffers.Bar> Pack(FlatBufferBuilder builder, BarT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.Bar>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<Benchmarks.FlatSpanBuffers.Bar> Pack(FlatBufferBuilder builder, BarT _o, Span<int> lengthyVectorSpace) {

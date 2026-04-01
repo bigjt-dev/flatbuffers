@@ -54,7 +54,7 @@ public struct TableB : IFlatbufferObject
   public static Offset<MyGame.OtherNameSpace.TableB> Pack(FlatBufferBuilder builder, TableBT _o) {
     if (_o == null) return default(Offset<MyGame.OtherNameSpace.TableB>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));

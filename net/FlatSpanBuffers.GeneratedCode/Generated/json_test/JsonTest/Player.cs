@@ -205,7 +205,7 @@ public struct Player : IFlatbufferObject
   public static Offset<JsonTest.Player> Pack(FlatBufferBuilder builder, PlayerT _o) {
     if (_o == null) return default(Offset<JsonTest.Player>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
@@ -221,7 +221,7 @@ public struct Player : IFlatbufferObject
     var _inventory = default(VectorOffset);
     if (_o.Inventory != null) {
       var _inventory_len = _o.Inventory.Count;
-      Span<int> _inventory_buf = _inventory_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_inventory_len] : lengthyVectorSpace[.._inventory_len];
+      Span<int> _inventory_buf = _inventory_len <= 256 ? stackalloc int[_inventory_len] : lengthyVectorSpace[.._inventory_len];
       for (var _j = 0; _j < _inventory_len; ++_j) { _inventory_buf[_j] = JsonTest.Item.Pack(builder, _o.Inventory[_j], lengthyVectorSpace).Value; }
       builder.StartVector(4, _inventory_len, 4);
       builder.AddOffsetSpan(_inventory_buf);
@@ -232,7 +232,7 @@ public struct Player : IFlatbufferObject
     var _tags = default(VectorOffset);
     if (_o.Tags != null) {
       var _tags_len = _o.Tags.Count;
-      Span<int> _tags_buf = _tags_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_tags_len] : lengthyVectorSpace[.._tags_len];
+      Span<int> _tags_buf = _tags_len <= 256 ? stackalloc int[_tags_len] : lengthyVectorSpace[.._tags_len];
       for (var _j = 0; _j < _tags_len; ++_j) { _tags_buf[_j] = builder.CreateString(_o.Tags[_j]).Value; }
       builder.StartVector(4, _tags_len, 4);
       builder.AddOffsetSpan(_tags_buf);

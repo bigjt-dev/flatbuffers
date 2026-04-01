@@ -20,13 +20,14 @@ public ref struct Ability : IFlatbufferSpanObject
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new StructSpan(_i, _bb); }
   public Ability __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 8;
   public uint Id { get { return __p.bb.Get<uint>(__p.bb_pos + 0); } }
   public void MutateId(uint id) { __p.bb.Put<uint>(__p.bb_pos + 0, id); }
   public uint Distance { get { return __p.bb.Get<uint>(__p.bb_pos + 4); } }
   public void MutateDistance(uint distance) { __p.bb.Put<uint>(__p.bb_pos + 4, distance); }
 
   public static Offset<MyGame.Example.StackBuffer.Ability> CreateAbility(ref FlatSpanBufferBuilder builder, uint Id, uint Distance) {
-    builder.Prep(4, 8);
+    builder.Prep(4, TotalByteLength);
     builder.Put<uint>(Distance);
     builder.Put<uint>(Id);
     return new Offset<MyGame.Example.StackBuffer.Ability>(builder.Offset);
@@ -42,15 +43,6 @@ public ref struct Ability : IFlatbufferSpanObject
   }
   public static Offset<MyGame.Example.StackBuffer.Ability> Pack(ref FlatSpanBufferBuilder builder, AbilityT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StackBuffer.Ability>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(ref builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.StackBuffer.Ability> Pack(ref FlatSpanBufferBuilder builder, AbilityT _o, scoped Span<int> lengthyVectorSpace) {

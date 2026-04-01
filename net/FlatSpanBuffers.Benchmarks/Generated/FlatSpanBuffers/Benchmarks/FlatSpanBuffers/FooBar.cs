@@ -72,15 +72,6 @@ public struct FooBar : IFlatbufferObject
   }
   public static Offset<Benchmarks.FlatSpanBuffers.FooBar> Pack(FlatBufferBuilder builder, FooBarT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.FooBar>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<Benchmarks.FlatSpanBuffers.FooBar> Pack(FlatBufferBuilder builder, FooBarT _o, Span<int> lengthyVectorSpace) {

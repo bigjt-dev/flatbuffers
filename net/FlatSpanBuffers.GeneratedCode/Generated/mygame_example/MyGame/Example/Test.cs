@@ -20,13 +20,14 @@ public struct Test : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public Test __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 4;
   public short A { get { return __p.bb.Get<short>(__p.bb_pos + 0); } }
   public void MutateA(short a) { __p.bb.Put<short>(__p.bb_pos + 0, a); }
   public sbyte B { get { return __p.bb.Get<sbyte>(__p.bb_pos + 2); } }
   public void MutateB(sbyte b) { __p.bb.Put<sbyte>(__p.bb_pos + 2, b); }
 
   public static Offset<MyGame.Example.Test> CreateTest(FlatBufferBuilder builder, short A, sbyte B) {
-    builder.Prep(2, 4);
+    builder.Prep(2, TotalByteLength);
     builder.Pad(1);
     builder.Put<sbyte>(B);
     builder.Put<short>(A);
@@ -43,15 +44,6 @@ public struct Test : IFlatbufferObject
   }
   public static Offset<MyGame.Example.Test> Pack(FlatBufferBuilder builder, TestT _o) {
     if (_o == null) return default(Offset<MyGame.Example.Test>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.Test> Pack(FlatBufferBuilder builder, TestT _o, Span<int> lengthyVectorSpace) {

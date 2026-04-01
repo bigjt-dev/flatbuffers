@@ -198,7 +198,7 @@ public struct Movie : IFlatbufferObject, IRootTable
   public static Offset<MyGame.Example.Movie> Pack(FlatBufferBuilder builder, MovieT _o) {
     if (_o == null) return default(Offset<MyGame.Example.Movie>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
@@ -215,14 +215,14 @@ public struct Movie : IFlatbufferObject, IRootTable
     var _characters_type = default(VectorOffset);
     if (_o.Characters != null) {
       var _characters_type_len = _o.Characters.Count;
-      Span<MyGame.Example.Character> __characters_type = _characters_type_len <= 4096 ? stackalloc MyGame.Example.Character[_characters_type_len] : new MyGame.Example.Character[_characters_type_len];
+      Span<MyGame.Example.Character> __characters_type = _characters_type_len <= 1024 ? stackalloc MyGame.Example.Character[_characters_type_len] : new MyGame.Example.Character[_characters_type_len];
       for (var _j = 0; _j < _characters_type_len; ++_j) { __characters_type[_j] = _o.Characters[_j].Type; }
       _characters_type = Movie.CreateCharactersTypeVectorBlock(builder, __characters_type);
     }
     var _characters = default(VectorOffset);
     if (_o.Characters != null) {
       var _characters_len = _o.Characters.Count;
-      Span<int> _characters_buf = _characters_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_characters_len] : lengthyVectorSpace[.._characters_len];
+      Span<int> _characters_buf = _characters_len <= 256 ? stackalloc int[_characters_len] : lengthyVectorSpace[.._characters_len];
       for (var _j = 0; _j < _characters_len; ++_j) { _characters_buf[_j] = MyGame.Example.CharacterUnion.Pack(builder,  _o.Characters[_j]); }
       builder.StartVector(4, _characters_len, 4);
       builder.AddOffsetSpan(_characters_buf);

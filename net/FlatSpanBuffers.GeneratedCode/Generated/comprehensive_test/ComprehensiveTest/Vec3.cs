@@ -20,12 +20,13 @@ public struct Vec3 : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public Vec3 __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 12;
   public float X { get { return __p.bb.Get<float>(__p.bb_pos + 0); } }
   public float Y { get { return __p.bb.Get<float>(__p.bb_pos + 4); } }
   public float Z { get { return __p.bb.Get<float>(__p.bb_pos + 8); } }
 
   public static Offset<ComprehensiveTest.Vec3> CreateVec3(FlatBufferBuilder builder, float X, float Y, float Z) {
-    builder.Prep(4, 12);
+    builder.Prep(4, TotalByteLength);
     builder.Put<float>(Z);
     builder.Put<float>(Y);
     builder.Put<float>(X);
@@ -43,15 +44,6 @@ public struct Vec3 : IFlatbufferObject
   }
   public static Offset<ComprehensiveTest.Vec3> Pack(FlatBufferBuilder builder, Vec3T _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.Vec3>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<ComprehensiveTest.Vec3> Pack(FlatBufferBuilder builder, Vec3T _o, Span<int> lengthyVectorSpace) {

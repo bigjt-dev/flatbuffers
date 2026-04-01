@@ -20,13 +20,14 @@ public struct Color : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public Color __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 4;
   public byte R { get { return __p.bb.Get<byte>(__p.bb_pos + 0); } }
   public byte G { get { return __p.bb.Get<byte>(__p.bb_pos + 1); } }
   public byte B { get { return __p.bb.Get<byte>(__p.bb_pos + 2); } }
   public byte A { get { return __p.bb.Get<byte>(__p.bb_pos + 3); } }
 
   public static Offset<JsonTest.Color> CreateColor(FlatBufferBuilder builder, byte R, byte G, byte B, byte A) {
-    builder.Prep(1, 4);
+    builder.Prep(1, TotalByteLength);
     builder.Put<byte>(A);
     builder.Put<byte>(B);
     builder.Put<byte>(G);
@@ -46,15 +47,6 @@ public struct Color : IFlatbufferObject
   }
   public static Offset<JsonTest.Color> Pack(FlatBufferBuilder builder, ColorT _o) {
     if (_o == null) return default(Offset<JsonTest.Color>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<JsonTest.Color> Pack(FlatBufferBuilder builder, ColorT _o, Span<int> lengthyVectorSpace) {

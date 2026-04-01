@@ -54,15 +54,6 @@ public ref struct Weapon : IFlatbufferSpanObject
   }
   public static Offset<JsonTest.StackBuffer.Weapon> Pack(ref FlatSpanBufferBuilder builder, WeaponT _o) {
     if (_o == null) return default(Offset<JsonTest.StackBuffer.Weapon>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(ref builder, _o, Span<int>.Empty);
   }
   public static Offset<JsonTest.StackBuffer.Weapon> Pack(ref FlatSpanBufferBuilder builder, WeaponT _o, scoped Span<int> lengthyVectorSpace) {

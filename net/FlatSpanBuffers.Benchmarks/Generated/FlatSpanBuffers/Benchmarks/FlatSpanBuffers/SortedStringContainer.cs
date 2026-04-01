@@ -66,7 +66,7 @@ public struct SortedStringContainer : IFlatbufferObject
   public static Offset<Benchmarks.FlatSpanBuffers.SortedStringContainer> Pack(FlatBufferBuilder builder, SortedStringContainerT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.SortedStringContainer>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
@@ -81,7 +81,7 @@ public struct SortedStringContainer : IFlatbufferObject
     var _items = default(VectorOffset);
     if (_o.Items != null) {
       var _items_len = _o.Items.Count;
-      Span<int> _items_buf = _items_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_items_len] : lengthyVectorSpace[.._items_len];
+      Span<int> _items_buf = _items_len <= 256 ? stackalloc int[_items_len] : lengthyVectorSpace[.._items_len];
       for (var _j = 0; _j < _items_len; ++_j) { _items_buf[_j] = Benchmarks.FlatSpanBuffers.SortedStringItem.Pack(builder, _o.Items[_j], lengthyVectorSpace).Value; }
       builder.StartVector(4, _items_len, 4);
       builder.AddOffsetSpan(_items_buf);

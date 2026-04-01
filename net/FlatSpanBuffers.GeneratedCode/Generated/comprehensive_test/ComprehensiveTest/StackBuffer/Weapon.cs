@@ -390,7 +390,7 @@ public ref struct Weapon : IFlatbufferSpanObject
   public static Offset<ComprehensiveTest.StackBuffer.Weapon> Pack(ref FlatSpanBufferBuilder builder, WeaponT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.Weapon>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
@@ -406,7 +406,7 @@ public ref struct Weapon : IFlatbufferSpanObject
     var _tags = default(VectorOffset);
     if (_o.Tags != null) {
       var _tags_len = _o.Tags.Count;
-      Span<int> _tags_buf = _tags_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_tags_len] : lengthyVectorSpace[.._tags_len];
+      Span<int> _tags_buf = _tags_len <= 256 ? stackalloc int[_tags_len] : lengthyVectorSpace[.._tags_len];
       for (var _j = 0; _j < _tags_len; ++_j) { _tags_buf[_j] = builder.CreateString(_o.Tags[_j]).Value; }
       builder.StartVector(4, _tags_len, 4);
       builder.AddOffsetSpan(_tags_buf);
@@ -437,14 +437,14 @@ public ref struct Weapon : IFlatbufferSpanObject
     var _compatible_types_type = default(VectorOffset);
     if (_o.CompatibleTypes != null) {
       var _compatible_types_type_len = _o.CompatibleTypes.Count;
-      Span<ComprehensiveTest.Equipment> __compatible_types_type = _compatible_types_type_len <= 4096 ? stackalloc ComprehensiveTest.Equipment[_compatible_types_type_len] : new ComprehensiveTest.Equipment[_compatible_types_type_len];
+      Span<ComprehensiveTest.Equipment> __compatible_types_type = _compatible_types_type_len <= 1024 ? stackalloc ComprehensiveTest.Equipment[_compatible_types_type_len] : new ComprehensiveTest.Equipment[_compatible_types_type_len];
       for (var _j = 0; _j < _compatible_types_type_len; ++_j) { __compatible_types_type[_j] = _o.CompatibleTypes[_j].Type; }
       _compatible_types_type = Weapon.CreateCompatibleTypesTypeVectorBlock(ref builder, __compatible_types_type);
     }
     var _compatible_types = default(VectorOffset);
     if (_o.CompatibleTypes != null) {
       var _compatible_types_len = _o.CompatibleTypes.Count;
-      Span<int> _compatible_types_buf = _compatible_types_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_compatible_types_len] : lengthyVectorSpace[.._compatible_types_len];
+      Span<int> _compatible_types_buf = _compatible_types_len <= 256 ? stackalloc int[_compatible_types_len] : lengthyVectorSpace[.._compatible_types_len];
       for (var _j = 0; _j < _compatible_types_len; ++_j) { _compatible_types_buf[_j] = ComprehensiveTest.EquipmentUnion.Pack(ref builder,  _o.CompatibleTypes[_j]); }
       builder.StartVector(4, _compatible_types_len, 4);
       builder.AddOffsetSpan(_compatible_types_buf);
@@ -453,14 +453,14 @@ public ref struct Weapon : IFlatbufferSpanObject
     var _compatible_items_type = default(VectorOffset);
     if (_o.CompatibleItems != null) {
       var _compatible_items_type_len = _o.CompatibleItems.Count;
-      Span<ComprehensiveTest.Equipment> __compatible_items_type = _compatible_items_type_len <= 4096 ? stackalloc ComprehensiveTest.Equipment[_compatible_items_type_len] : new ComprehensiveTest.Equipment[_compatible_items_type_len];
+      Span<ComprehensiveTest.Equipment> __compatible_items_type = _compatible_items_type_len <= 1024 ? stackalloc ComprehensiveTest.Equipment[_compatible_items_type_len] : new ComprehensiveTest.Equipment[_compatible_items_type_len];
       for (var _j = 0; _j < _compatible_items_type_len; ++_j) { __compatible_items_type[_j] = _o.CompatibleItems[_j].Type; }
       _compatible_items_type = Weapon.CreateCompatibleItemsTypeVectorBlock(ref builder, __compatible_items_type);
     }
     var _compatible_items = default(VectorOffset);
     if (_o.CompatibleItems != null) {
       var _compatible_items_len = _o.CompatibleItems.Count;
-      Span<int> _compatible_items_buf = _compatible_items_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_compatible_items_len] : lengthyVectorSpace[.._compatible_items_len];
+      Span<int> _compatible_items_buf = _compatible_items_len <= 256 ? stackalloc int[_compatible_items_len] : lengthyVectorSpace[.._compatible_items_len];
       for (var _j = 0; _j < _compatible_items_len; ++_j) { _compatible_items_buf[_j] = ComprehensiveTest.EquipmentUnion.Pack(ref builder,  _o.CompatibleItems[_j]); }
       builder.StartVector(4, _compatible_items_len, 4);
       builder.AddOffsetSpan(_compatible_items_buf);

@@ -161,7 +161,7 @@ public ref struct VectorContainer : IFlatbufferSpanObject
   public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.VectorContainer> Pack(ref FlatSpanBufferBuilder builder, VectorContainerT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.VectorContainer>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
@@ -200,7 +200,7 @@ public ref struct VectorContainer : IFlatbufferSpanObject
     var _strings = default(VectorOffset);
     if (_o.Strings != null) {
       var _strings_len = _o.Strings.Count;
-      Span<int> _strings_buf = _strings_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_strings_len] : lengthyVectorSpace[.._strings_len];
+      Span<int> _strings_buf = _strings_len <= 256 ? stackalloc int[_strings_len] : lengthyVectorSpace[.._strings_len];
       for (var _j = 0; _j < _strings_len; ++_j) { _strings_buf[_j] = builder.CreateString(_o.Strings[_j]).Value; }
       builder.StartVector(4, _strings_len, 4);
       builder.AddOffsetSpan(_strings_buf);

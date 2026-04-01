@@ -827,7 +827,7 @@ public struct Monster : IFlatbufferObject, IRootTable
   public static Offset<MyGame.Example.Monster> Pack(FlatBufferBuilder builder, MonsterT _o) {
     if (_o == null) return default(Offset<MyGame.Example.Monster>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
@@ -855,7 +855,7 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _testarrayofstring = default(VectorOffset);
     if (_o.Testarrayofstring != null) {
       var _testarrayofstring_len = _o.Testarrayofstring.Count;
-      Span<int> _testarrayofstring_buf = _testarrayofstring_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_testarrayofstring_len] : lengthyVectorSpace[.._testarrayofstring_len];
+      Span<int> _testarrayofstring_buf = _testarrayofstring_len <= 256 ? stackalloc int[_testarrayofstring_len] : lengthyVectorSpace[.._testarrayofstring_len];
       for (var _j = 0; _j < _testarrayofstring_len; ++_j) { _testarrayofstring_buf[_j] = builder.CreateString(_o.Testarrayofstring[_j]).Value; }
       builder.StartVector(4, _testarrayofstring_len, 4);
       builder.AddOffsetSpan(_testarrayofstring_buf);
@@ -864,7 +864,7 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _testarrayoftables = default(VectorOffset);
     if (_o.Testarrayoftables != null) {
       var _testarrayoftables_len = _o.Testarrayoftables.Count;
-      Span<int> _testarrayoftables_buf = _testarrayoftables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_testarrayoftables_len] : lengthyVectorSpace[.._testarrayoftables_len];
+      Span<int> _testarrayoftables_buf = _testarrayoftables_len <= 256 ? stackalloc int[_testarrayoftables_len] : lengthyVectorSpace[.._testarrayoftables_len];
       for (var _j = 0; _j < _testarrayoftables_len; ++_j) { _testarrayoftables_buf[_j] = MyGame.Example.Monster.Pack(builder, _o.Testarrayoftables[_j], lengthyVectorSpace).Value; }
       builder.StartVector(4, _testarrayoftables_len, 4);
       builder.AddOffsetSpan(_testarrayoftables_buf);
@@ -883,7 +883,7 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _testarrayofstring2 = default(VectorOffset);
     if (_o.Testarrayofstring2 != null) {
       var _testarrayofstring2_len = _o.Testarrayofstring2.Count;
-      Span<int> _testarrayofstring2_buf = _testarrayofstring2_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_testarrayofstring2_len] : lengthyVectorSpace[.._testarrayofstring2_len];
+      Span<int> _testarrayofstring2_buf = _testarrayofstring2_len <= 256 ? stackalloc int[_testarrayofstring2_len] : lengthyVectorSpace[.._testarrayofstring2_len];
       for (var _j = 0; _j < _testarrayofstring2_len; ++_j) { _testarrayofstring2_buf[_j] = builder.CreateString(_o.Testarrayofstring2[_j]).Value; }
       builder.StartVector(4, _testarrayofstring2_len, 4);
       builder.AddOffsetSpan(_testarrayofstring2_buf);
@@ -917,7 +917,7 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _vector_of_referrables = default(VectorOffset);
     if (_o.VectorOfReferrables != null) {
       var _vector_of_referrables_len = _o.VectorOfReferrables.Count;
-      Span<int> _vector_of_referrables_buf = _vector_of_referrables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_vector_of_referrables_len] : lengthyVectorSpace[.._vector_of_referrables_len];
+      Span<int> _vector_of_referrables_buf = _vector_of_referrables_len <= 256 ? stackalloc int[_vector_of_referrables_len] : lengthyVectorSpace[.._vector_of_referrables_len];
       for (var _j = 0; _j < _vector_of_referrables_len; ++_j) { _vector_of_referrables_buf[_j] = MyGame.Example.Referrable.Pack(builder, _o.VectorOfReferrables[_j], lengthyVectorSpace).Value; }
       builder.StartVector(4, _vector_of_referrables_len, 4);
       builder.AddOffsetSpan(_vector_of_referrables_buf);
@@ -930,7 +930,7 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _vector_of_strong_referrables = default(VectorOffset);
     if (_o.VectorOfStrongReferrables != null) {
       var _vector_of_strong_referrables_len = _o.VectorOfStrongReferrables.Count;
-      Span<int> _vector_of_strong_referrables_buf = _vector_of_strong_referrables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_vector_of_strong_referrables_len] : lengthyVectorSpace[.._vector_of_strong_referrables_len];
+      Span<int> _vector_of_strong_referrables_buf = _vector_of_strong_referrables_len <= 256 ? stackalloc int[_vector_of_strong_referrables_len] : lengthyVectorSpace[.._vector_of_strong_referrables_len];
       for (var _j = 0; _j < _vector_of_strong_referrables_len; ++_j) { _vector_of_strong_referrables_buf[_j] = MyGame.Example.Referrable.Pack(builder, _o.VectorOfStrongReferrables[_j], lengthyVectorSpace).Value; }
       builder.StartVector(4, _vector_of_strong_referrables_len, 4);
       builder.AddOffsetSpan(_vector_of_strong_referrables_buf);
@@ -959,7 +959,7 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _scalar_key_sorted_tables = default(VectorOffset);
     if (_o.ScalarKeySortedTables != null) {
       var _scalar_key_sorted_tables_len = _o.ScalarKeySortedTables.Count;
-      Span<int> _scalar_key_sorted_tables_buf = _scalar_key_sorted_tables_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_scalar_key_sorted_tables_len] : lengthyVectorSpace[.._scalar_key_sorted_tables_len];
+      Span<int> _scalar_key_sorted_tables_buf = _scalar_key_sorted_tables_len <= 256 ? stackalloc int[_scalar_key_sorted_tables_len] : lengthyVectorSpace[.._scalar_key_sorted_tables_len];
       for (var _j = 0; _j < _scalar_key_sorted_tables_len; ++_j) { _scalar_key_sorted_tables_buf[_j] = MyGame.Example.Stat.Pack(builder, _o.ScalarKeySortedTables[_j], lengthyVectorSpace).Value; }
       builder.StartVector(4, _scalar_key_sorted_tables_len, 4);
       builder.AddOffsetSpan(_scalar_key_sorted_tables_buf);

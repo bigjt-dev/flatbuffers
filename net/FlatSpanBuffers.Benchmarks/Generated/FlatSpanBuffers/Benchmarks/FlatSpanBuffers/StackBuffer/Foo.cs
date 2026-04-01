@@ -20,6 +20,7 @@ public ref struct Foo : IFlatbufferSpanObject
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new StructSpan(_i, _bb); }
   public Foo __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 16;
   public ulong Id { get { return __p.bb.Get<ulong>(__p.bb_pos + 0); } }
   public void MutateId(ulong id) { __p.bb.Put<ulong>(__p.bb_pos + 0, id); }
   public short Count { get { return __p.bb.Get<short>(__p.bb_pos + 8); } }
@@ -30,7 +31,7 @@ public ref struct Foo : IFlatbufferSpanObject
   public void MutateLength(uint length) { __p.bb.Put<uint>(__p.bb_pos + 12, length); }
 
   public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.Foo> CreateFoo(ref FlatSpanBufferBuilder builder, ulong Id, short Count, sbyte Prefix, uint Length) {
-    builder.Prep(8, 16);
+    builder.Prep(8, TotalByteLength);
     builder.Put<uint>(Length);
     builder.Pad(1);
     builder.Put<sbyte>(Prefix);
@@ -51,15 +52,6 @@ public ref struct Foo : IFlatbufferSpanObject
   }
   public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.Foo> Pack(ref FlatSpanBufferBuilder builder, FooT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.Foo>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(ref builder, _o, Span<int>.Empty);
   }
   public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.Foo> Pack(ref FlatSpanBufferBuilder builder, FooT _o, scoped Span<int> lengthyVectorSpace) {

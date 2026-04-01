@@ -20,21 +20,19 @@ public ref struct Transform : IFlatbufferSpanObject
   public void __init(int _i, ByteSpanBuffer _bb) { __p = new StructSpan(_i, _bb); }
   public Transform __assign(int _i, ByteSpanBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 36;
   public ComprehensiveTest.StackBuffer.Vec3 Position { get { return (new ComprehensiveTest.StackBuffer.Vec3()).__assign(__p.bb_pos + 0, __p.bb); } }
   public ComprehensiveTest.StackBuffer.Vec3 Rotation { get { return (new ComprehensiveTest.StackBuffer.Vec3()).__assign(__p.bb_pos + 12, __p.bb); } }
   public ComprehensiveTest.StackBuffer.Vec3 Scale { get { return (new ComprehensiveTest.StackBuffer.Vec3()).__assign(__p.bb_pos + 24, __p.bb); } }
 
   public static Offset<ComprehensiveTest.StackBuffer.Transform> CreateTransform(ref FlatSpanBufferBuilder builder, float position_X, float position_Y, float position_Z, float rotation_X, float rotation_Y, float rotation_Z, float scale_X, float scale_Y, float scale_Z) {
-    builder.Prep(4, 36);
-    builder.Prep(4, 12);
+    builder.Prep(4, TotalByteLength);
     builder.Put<float>(scale_Z);
     builder.Put<float>(scale_Y);
     builder.Put<float>(scale_X);
-    builder.Prep(4, 12);
     builder.Put<float>(rotation_Z);
     builder.Put<float>(rotation_Y);
     builder.Put<float>(rotation_X);
-    builder.Prep(4, 12);
     builder.Put<float>(position_Z);
     builder.Put<float>(position_Y);
     builder.Put<float>(position_X);
@@ -55,15 +53,6 @@ public ref struct Transform : IFlatbufferSpanObject
   }
   public static Offset<ComprehensiveTest.StackBuffer.Transform> Pack(ref FlatSpanBufferBuilder builder, TransformT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.StackBuffer.Transform>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(ref builder, _o, Span<int>.Empty);
   }
   public static Offset<ComprehensiveTest.StackBuffer.Transform> Pack(ref FlatSpanBufferBuilder builder, TransformT _o, scoped Span<int> lengthyVectorSpace) {

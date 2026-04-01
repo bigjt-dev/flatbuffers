@@ -72,15 +72,6 @@ public ref struct Stat : IFlatbufferSpanObject
   }
   public static Offset<MyGame.Example.StackBuffer.Stat> Pack(ref FlatSpanBufferBuilder builder, StatT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StackBuffer.Stat>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(ref builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.StackBuffer.Stat> Pack(ref FlatSpanBufferBuilder builder, StatT _o, scoped Span<int> lengthyVectorSpace) {

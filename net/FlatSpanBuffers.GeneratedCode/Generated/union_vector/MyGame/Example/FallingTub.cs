@@ -20,10 +20,11 @@ public struct FallingTub : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public FallingTub __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 4;
   public int Weight { get { return __p.bb.Get<int>(__p.bb_pos + 0); } }
 
   public static Offset<MyGame.Example.FallingTub> CreateFallingTub(FlatBufferBuilder builder, int Weight) {
-    builder.Prep(4, 4);
+    builder.Prep(4, TotalByteLength);
     builder.Put<int>(Weight);
     return new Offset<MyGame.Example.FallingTub>(builder.Offset);
   }
@@ -37,15 +38,6 @@ public struct FallingTub : IFlatbufferObject
   }
   public static Offset<MyGame.Example.FallingTub> Pack(FlatBufferBuilder builder, FallingTubT _o) {
     if (_o == null) return default(Offset<MyGame.Example.FallingTub>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.FallingTub> Pack(FlatBufferBuilder builder, FallingTubT _o, Span<int> lengthyVectorSpace) {

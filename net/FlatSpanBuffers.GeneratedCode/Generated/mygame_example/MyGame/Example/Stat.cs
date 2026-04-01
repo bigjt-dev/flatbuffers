@@ -72,15 +72,6 @@ public struct Stat : IFlatbufferObject
   }
   public static Offset<MyGame.Example.Stat> Pack(FlatBufferBuilder builder, StatT _o) {
     if (_o == null) return default(Offset<MyGame.Example.Stat>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.Stat> Pack(FlatBufferBuilder builder, StatT _o, Span<int> lengthyVectorSpace) {

@@ -88,7 +88,7 @@ public ref struct FooBarContainer : IFlatbufferSpanObject, IRootTable
   public static Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBarContainer> Pack(ref FlatSpanBufferBuilder builder, FooBarContainerT _o) {
     if (_o == null) return default(Offset<Benchmarks.FlatSpanBuffers.StackBuffer.FooBarContainer>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(ref builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
@@ -103,7 +103,7 @@ public ref struct FooBarContainer : IFlatbufferSpanObject, IRootTable
     var _list = default(VectorOffset);
     if (_o.List != null) {
       var _list_len = _o.List.Count;
-      Span<int> _list_buf = _list_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_list_len] : lengthyVectorSpace[.._list_len];
+      Span<int> _list_buf = _list_len <= 256 ? stackalloc int[_list_len] : lengthyVectorSpace[.._list_len];
       for (var _j = 0; _j < _list_len; ++_j) { _list_buf[_j] = Benchmarks.FlatSpanBuffers.StackBuffer.FooBar.Pack(ref builder, _o.List[_j], lengthyVectorSpace).Value; }
       builder.StartVector(4, _list_len, 4);
       builder.AddOffsetSpan(_list_buf);

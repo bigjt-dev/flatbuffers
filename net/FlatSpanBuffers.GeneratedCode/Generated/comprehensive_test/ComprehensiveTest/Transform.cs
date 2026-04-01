@@ -20,21 +20,19 @@ public struct Transform : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public Transform __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 36;
   public ComprehensiveTest.Vec3 Position { get { return (new ComprehensiveTest.Vec3()).__assign(__p.bb_pos + 0, __p.bb); } }
   public ComprehensiveTest.Vec3 Rotation { get { return (new ComprehensiveTest.Vec3()).__assign(__p.bb_pos + 12, __p.bb); } }
   public ComprehensiveTest.Vec3 Scale { get { return (new ComprehensiveTest.Vec3()).__assign(__p.bb_pos + 24, __p.bb); } }
 
   public static Offset<ComprehensiveTest.Transform> CreateTransform(FlatBufferBuilder builder, float position_X, float position_Y, float position_Z, float rotation_X, float rotation_Y, float rotation_Z, float scale_X, float scale_Y, float scale_Z) {
-    builder.Prep(4, 36);
-    builder.Prep(4, 12);
+    builder.Prep(4, TotalByteLength);
     builder.Put<float>(scale_Z);
     builder.Put<float>(scale_Y);
     builder.Put<float>(scale_X);
-    builder.Prep(4, 12);
     builder.Put<float>(rotation_Z);
     builder.Put<float>(rotation_Y);
     builder.Put<float>(rotation_X);
-    builder.Prep(4, 12);
     builder.Put<float>(position_Z);
     builder.Put<float>(position_Y);
     builder.Put<float>(position_X);
@@ -55,15 +53,6 @@ public struct Transform : IFlatbufferObject
   }
   public static Offset<ComprehensiveTest.Transform> Pack(FlatBufferBuilder builder, TransformT _o) {
     if (_o == null) return default(Offset<ComprehensiveTest.Transform>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<ComprehensiveTest.Transform> Pack(FlatBufferBuilder builder, TransformT _o, Span<int> lengthyVectorSpace) {

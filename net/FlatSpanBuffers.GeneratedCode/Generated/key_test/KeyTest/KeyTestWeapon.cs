@@ -69,15 +69,6 @@ public struct KeyTestWeapon : IFlatbufferObject
   }
   public static Offset<KeyTest.KeyTestWeapon> Pack(FlatBufferBuilder builder, KeyTestWeaponT _o) {
     if (_o == null) return default(Offset<KeyTest.KeyTestWeapon>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<KeyTest.KeyTestWeapon> Pack(FlatBufferBuilder builder, KeyTestWeaponT _o, Span<int> lengthyVectorSpace) {

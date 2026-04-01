@@ -169,7 +169,7 @@ public struct Monster : IFlatbufferObject, IRootTable
   public static Offset<MonsterTest.Monster> Pack(FlatBufferBuilder builder, MonsterT _o) {
     if (_o == null) return default(Offset<MonsterTest.Monster>);
     var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
+    if (_maxVecLen > 256) {
       var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
       try {
         return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
@@ -189,7 +189,7 @@ public struct Monster : IFlatbufferObject, IRootTable
     var _weapons = default(VectorOffset);
     if (_o.Weapons != null) {
       var _weapons_len = _o.Weapons.Count;
-      Span<int> _weapons_buf = _weapons_len <= ObjectApiUtil.MaxOffsetsStackallocLength ? stackalloc int[_weapons_len] : lengthyVectorSpace[.._weapons_len];
+      Span<int> _weapons_buf = _weapons_len <= 256 ? stackalloc int[_weapons_len] : lengthyVectorSpace[.._weapons_len];
       for (var _j = 0; _j < _weapons_len; ++_j) { _weapons_buf[_j] = MonsterTest.Weapon.Pack(builder, _o.Weapons[_j], lengthyVectorSpace).Value; }
       builder.StartVector(4, _weapons_len, 4);
       builder.AddOffsetSpan(_weapons_buf);

@@ -20,19 +20,16 @@ public struct StructOfStructsOfStructs : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Struct(_i, _bb); }
   public StructOfStructsOfStructs __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public const int TotalByteLength = 20;
   public MyGame.Example.StructOfStructs A { get { return (new MyGame.Example.StructOfStructs()).__assign(__p.bb_pos + 0, __p.bb); } }
 
   public static Offset<MyGame.Example.StructOfStructsOfStructs> CreateStructOfStructsOfStructs(FlatBufferBuilder builder, uint a_a_Id, uint a_a_Distance, short a_b_A, sbyte a_b_B, uint a_c_Id, uint a_c_Distance) {
-    builder.Prep(4, 20);
-    builder.Prep(4, 20);
-    builder.Prep(4, 8);
+    builder.Prep(4, TotalByteLength);
     builder.Put<uint>(a_c_Distance);
     builder.Put<uint>(a_c_Id);
-    builder.Prep(2, 4);
     builder.Pad(1);
     builder.Put<sbyte>(a_b_B);
     builder.Put<short>(a_b_A);
-    builder.Prep(4, 8);
     builder.Put<uint>(a_a_Distance);
     builder.Put<uint>(a_a_Id);
     return new Offset<MyGame.Example.StructOfStructsOfStructs>(builder.Offset);
@@ -48,15 +45,6 @@ public struct StructOfStructsOfStructs : IFlatbufferObject
   }
   public static Offset<MyGame.Example.StructOfStructsOfStructs> Pack(FlatBufferBuilder builder, StructOfStructsOfStructsT _o) {
     if (_o == null) return default(Offset<MyGame.Example.StructOfStructsOfStructs>);
-    var _maxVecLen = _o.GetMaxVectorLength();
-    if (_maxVecLen > ObjectApiUtil.MaxOffsetsStackallocLength) {
-      var _pooledArr = ArrayPool<int>.Shared.Rent(_maxVecLen);
-      try {
-        return Pack(builder, _o, _pooledArr.AsSpan(0, _maxVecLen));
-      } finally {
-        ArrayPool<int>.Shared.Return(_pooledArr);
-      }
-    }
     return Pack(builder, _o, Span<int>.Empty);
   }
   public static Offset<MyGame.Example.StructOfStructsOfStructs> Pack(FlatBufferBuilder builder, StructOfStructsOfStructsT _o, Span<int> lengthyVectorSpace) {
