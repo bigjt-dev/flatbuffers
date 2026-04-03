@@ -597,5 +597,28 @@ namespace FlatSpanBuffers.Tests
             var result = MonsterTest.StackBuffer.Monster.VerifyMonster(byteSpanBuffer);
             Assert.IsFalse(result);
         }
+
+        // Test to cover issue found from Google FlatBuffers PR #8975 / issue #8937.
+        [FlatBuffersTestMethod]
+        public void Monster_VerifyWithLargeBoolVector_VtableOffsetDoesNotOverflow()
+        {
+            var testArrayOfBoolsData = new bool[ushort.MaxValue];
+            Array.Fill(testArrayOfBoolsData, true);
+
+            var builder = new FlatBufferBuilder(1024);
+
+            var nameOffset = builder.CreateString("Orc");
+            var testArrayOfBools = MyGame.Example.Monster.CreateTestarrayofboolsVector(builder, testArrayOfBoolsData);
+
+            MyGame.Example.Monster.StartMonster(builder);
+            MyGame.Example.Monster.AddName(builder, nameOffset);
+            MyGame.Example.Monster.AddTestarrayofbools(builder, testArrayOfBools);
+            var monsterOffset = MyGame.Example.Monster.EndMonster(builder);
+
+            MyGame.Example.Monster.FinishMonsterBuffer(builder, monsterOffset);
+
+            var verifier = new Verifier(builder.DataBuffer);
+            Assert.IsTrue(verifier.VerifyBuffer("", false, MyGame.Example.MonsterVerify.Verify));
+        }
     }
 }
